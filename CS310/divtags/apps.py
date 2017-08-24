@@ -4,5 +4,5 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 
 
-class DivtagConfig(AppConfig):
-    name = 'divtag'
+class DivtagsConfig(AppConfig):
+    name = 'divtags'
