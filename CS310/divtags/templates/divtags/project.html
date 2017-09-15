@@ -1,0 +1,81 @@
+{% extends "./base.html" %}
+{% block content %}
+
+<div id="toolbar" class="toolbar-left">
+	<nav class="vertical-top" style="margin-top: 100px;">
+		<ul>
+			<li><a href="#"><i class="icon-list side-panel-trigger"></i><span>Project Files</span></a></li>
+			<li><a href="#"><i class="icon-code side-panel-trigger"></i><span>Components</span></a></li>
+			<li><a href="#"><i class="icon-settings2"></i><span>Project Settings</span></a></li>
+		</ul>
+	</nav>
+</div>
+
+<div class="body-overlay"></div>
+
+	<div id="side-panel" class="dark">
+
+		<div id="side-panel-trigger-close" class="side-panel-trigger"><a href="#"><i class="icon-line-cross"></i></a></div>
+
+		<div class="side-panel-wrap">
+
+			<div class="widget clearfix">
+
+				<h4>Pages</h4>
+
+				<nav class="nav-tree nobottommargin">
+					<ul>
+						<li><a href="#"><i class="icon-bolt2"></i>Features</a>
+							<ul>
+								<li><a href="#">Sliders</a></li>
+								<li><a href="#">Widgets</a></li>
+								<li><a href="#">Events</a></li>
+								<li><a href="#">Headers</a></li>
+							</ul>
+						</li>
+						<li><a href="#"><i class="icon-briefcase"></i>Portfolio</a>
+							<ul>
+								<li><a href="#">Grid</a>
+									<ul>
+										<li><a href="#">3 Columns</a></li>
+										<li><a href="#">4 Columns</a></li>
+										<li><a href="#">5 Columns</a></li>
+									</ul>
+								</li>
+								<li><a href="#">Masonry</a></li>
+								<li><a href="#">Loading Styles</a></li>
+								<li><a href="#">Single</a></li>
+							</ul>
+						</li>
+						<li><a href="#"><i class="icon-file-text"></i>About</a>
+							<ul>
+								<li><a href="#">Company</a></li>
+								<li><a href="#">Team</a></li>
+								<li><a href="#">Services</a></li>
+								<li><a href="#">FAQs</a></li>
+							</ul>
+						</li>
+						<li><a href="#"><i class="icon-map-marker"></i>Contact</a></li>
+					</ul>
+				</nav>
+
+			</div>
+
+		</div>
+
+	</div>
+
+<div class="container">
+	<h1>{{project.name}}</h1>
+	<ul class="entry-meta clearfix">
+		<li><i class="icon-user"></i> {{ project.owner }}</li>
+		<li><i class="icon-stopwatch"></i> {{ project.lastedited }}</li>
+		<li><i class="icon-line2-users"></i> {% for contributor in project.contributors.all %}{{ contributor.username }}{% if forloop.counter < project.contributors.count %}, {% endif %}{% endfor %}</li>
+		<span><a href="#"><i class="icon-plus"></i> Add/Edit Contributers</a></span>
+	</ul>
+	<div class="clear"></div>
+	<p>{{project.desc}}</p>
+	
+	<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
+{% endblock %}

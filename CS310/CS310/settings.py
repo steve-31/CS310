@@ -63,6 +63,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'divtags.context_processors.userno_processor',
+                'divtags.context_processors.projectno_processor',
+                'divtags.context_processors.myprojects_processor',
             ],
         },
     },
@@ -119,3 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGIN_REDIRECT_URL = 'divtags:home'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # During development only

@@ -1,0 +1,278 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+	<title>&lt;div&gt; | {{title}}</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="author" content="SemiColonWeb" />
+
+	<!-- Stylesheets
+	============================================= -->
+	<link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
+	
+	
+	<link rel="stylesheet" href="{% static 'divtags/css/bootstrap.css' %}" type="text/css" />
+	<link rel="stylesheet" href="{% static 'divtags/css/style.css' %}" type="text/css" />
+	<link rel="stylesheet" href="{% static 'divtags/css/dark.css' %}" type="text/css" />
+	<link rel="stylesheet" href="{% static 'divtags/css/font-icons.css' %}" type="text/css" />
+	<link rel="stylesheet" href="{% static 'divtags/css/animate.css' %}" type="text/css" />
+	<link rel="stylesheet" href="{% static 'divtags/css/magnific-popup.css' %}" type="text/css" />
+
+	<link rel="stylesheet" href="{% static 'divtags/css/responsive.css' %}" type="text/css" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+	<!-- Document Title
+	============================================= -->
+	<title>Landing Page | Canvas</title>
+
+</head>
+
+<body class="stretched">
+
+	<!-- Document Wrapper
+	============================================= -->
+	<div id="wrapper" class="clearfix">
+
+		
+
+		<!-- Header
+		============================================= -->
+		<header id="header">
+
+			<div id="header-wrap">
+
+				<div class="container clearfix">
+
+					<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
+
+					<!-- Logo
+					============================================= -->
+					<div id="logo">
+						<a href="{% url 'divtags:home' %}" class="retina-logo"><img src="{% static 'divtags/img/logo.png' %}" alt="<div>"></a>
+					</div><!-- #logo end -->
+
+					<!-- Primary Navigation
+					============================================= -->
+					<nav id="primary-menu">
+
+						<ul class="one-page-menu">
+							<li class="current"><a href="{% url 'divtags:home' %}" data-href="#section-home"><div>Home</div></a></li>
+							<li><a href="{% url 'divtags:examples' %}" data-href="#section-examples"><div>Examples</div></a></li>
+							{% if request.user.is_authenticated %}
+								<li><a href="{% url 'divtags:myprojectlist' %}"><div>My Projects</div></a>
+									<ul>
+										{% for project in myprojects %}
+											<li><a href="{% url 'divtags:project' project.id %}" class="fixedText">{{ project.name }}</a></li>
+										{% endfor %}
+										<li><a href="{% url 'divtags:newproject' %}" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new project</a></li>
+									</ul>
+								</li>
+							{% endif %}
+							{% if request.user.is_staff %}
+							    <li><a href="{% url 'admin:index' %}" class="fixedText">Admin</a></li>
+							{% endif %}
+							{% if request.user.is_authenticated %}
+								<li><a href="{% url 'profile' %}" class="fixedText"><i class="icon-user"></i>&nbsp; {{ request.user.first_name }} {{ request.user.last_name }}</a>
+									<ul>
+										<li><a href="{% url 'profile' %}" class="fixedText">My Profile</a></li>
+										<li><a href="{% url 'logout' %}" class="fixedText">Logout</a></li>
+									</ul>
+								</li>
+							{% else %}
+								<li><a href="{% url 'register' %}"><div>Sign Up</div></a></li>
+								<li><a href="{% url 'login' %}"><div>Login</div></a></li>
+							{% endif %}
+						</ul>
+
+					</nav><!-- #primary-menu end -->
+
+				</div>
+
+			</div>
+
+		</header><!-- #header end -->
+		<!-- Content
+		============================================= -->
+		<section id="content">
+{% block content %}
+{% endblock %}
+		</section><!-- #content end -->
+		
+		<!-- Footer
+		============================================= -->
+		<footer id="footer" class="dark">
+
+			<div class="container">
+
+				<!-- Footer Widgets
+				============================================= -->
+				<div class="footer-widgets-wrap clearfix">
+
+						<div class="col_one_third">
+
+							<div class="widget clearfix">
+
+								<img src="{% static 'divtags/img/logo.png' %}" alt="" class="footer-logo">
+
+							</div>
+
+						</div>
+
+						<div class="col_one_third">
+							<div class="widget subscribe-widget clearfix">
+								<h5><strong>Subscribe</strong> to Our Newsletter to get Important News, Amazing Offers &amp; Inside Scoops:</h5>
+								<div class="widget-subscribe-form-result"></div>
+								<form id="widget-subscribe-form" action="include/subscribe.php" role="form" method="post" class="nobottommargin">
+									<div class="input-group divcenter">
+										<span class="input-group-addon"><i class="icon-email2"></i></span>
+										<input type="email" id="widget-subscribe-form-email" name="widget-subscribe-form-email" class="form-control required email" placeholder="Enter your Email">
+										<span class="input-group-btn">
+											<button class="btn btn-success" type="submit">Subscribe</button>
+										</span>
+									</div>
+								</form>
+							</div>
+							
+						</div>
+
+
+					<div class="col_one_third col_last">
+					
+						<div class="widget clearfix" style="margin-bottom: -20px;">
+
+								<div class="row">
+	
+									<div class="col-md-6 bottommargin-sm">
+										<div class="counter counter-small"><span data-from="0" data-to="{{ numberprojects }}" data-refresh-interval="1" data-speed="200" data-comma="true"></span></div>
+										<h5 class="nobottommargin">Total Projects</h5>
+									</div>
+	
+									<div class="col-md-6 bottommargin-sm">
+										<div class="counter counter-small"><span data-from="0" data-to="{{ numberusers }}" data-refresh-interval="1" data-speed="200" data-comma="true"></span></div>
+										<h5 class="nobottommargin">Users</h5>
+									</div>
+	
+								</div>
+	
+							</div>
+							
+
+						<div class="widget clearfix" style="margin-bottom: -20px;">
+
+							<div class="row">
+
+								<div class="col-md-6 clearfix bottommargin-sm">
+									<a href="#" class="social-icon si-dark si-colored si-facebook nobottommargin" style="margin-right: 10px;">
+										<i class="icon-facebook"></i>
+										<i class="icon-facebook"></i>
+									</a>
+									<a href="#"><small style="display: block; margin-top: 3px;"><strong>Like us</strong><br>on Facebook</small></a>
+								</div>
+								<div class="col-md-6 clearfix">
+									<a href="#" class="social-icon si-dark si-colored si-twitter nobottommargin" style="margin-right: 10px;">
+										<i class="icon-twitter"></i>
+										<i class="icon-twitter"></i>
+									</a>
+									<a href="#"><small style="display: block; margin-top: 3px;"><strong>Follow us</strong><br>on Twitter</small></a>
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div><!-- .footer-widgets-wrap end -->
+
+			</div>
+
+			<!-- Copyrights
+			============================================= -->
+			<div id="copyrights">
+
+				<div class="container clearfix">
+
+					<div class="col_half">
+						Copyrights &copy; 2017 All Rights Reserved by Divtags<br>
+						<div class="copyright-links"><a href="#">Terms of Use</a> / <a href="#">Privacy Policy</a></div>
+					</div>
+
+					<div class="col_half col_last tright">
+						<div class="fright clearfix">
+							<a href="#" class="social-icon si-small si-borderless si-facebook">
+								<i class="icon-facebook"></i>
+								<i class="icon-facebook"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless si-twitter">
+								<i class="icon-twitter"></i>
+								<i class="icon-twitter"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless si-gplus">
+								<i class="icon-gplus"></i>
+								<i class="icon-gplus"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless si-pinterest">
+								<i class="icon-pinterest"></i>
+								<i class="icon-pinterest"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless si-vimeo">
+								<i class="icon-vimeo"></i>
+								<i class="icon-vimeo"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless si-github">
+								<i class="icon-github"></i>
+								<i class="icon-github"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless si-yahoo">
+								<i class="icon-yahoo"></i>
+								<i class="icon-yahoo"></i>
+							</a>
+
+							<a href="#" class="social-icon si-small si-borderless si-linkedin">
+								<i class="icon-linkedin"></i>
+								<i class="icon-linkedin"></i>
+							</a>
+						</div>
+
+						<div class="clear"></div>
+
+						<i class="icon-envelope2"></i> info@canvas.com <span class="middot">&middot;</span> <i class="icon-headphones"></i> +91-11-6541-6369 <span class="middot">&middot;</span> <i class="icon-skype2"></i> CanvasOnSkype
+					</div>
+
+				</div>
+
+			</div><!-- #copyrights end -->
+
+		</footer><!-- #footer end -->
+
+	</div><!-- #wrapper end -->
+
+	<!-- Go To Top
+	============================================= -->
+	<div id="gotoTop" class="icon-angle-up"></div>
+
+	<!-- External JavaScripts
+	============================================= -->
+	<script type="text/javascript" src="{% static 'divtags/js/jquery.js' %}"></script>
+	<script type="text/javascript" src="{% static 'divtags/js/plugins.js' %}"></script>
+
+	<!-- Footer Scripts
+	============================================= -->
+	<script type="text/javascript" src="{% static 'divtags/js/functions.js' %}"></script>
+
+	<script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyDMxJ92oBkSnVNHFX3R8XhtYQPEgk1_IiI"></script>
+	<script type="text/javascript" src="{% static 'divtags/js/jquery.gmap.js' %}"></script>
+
+	
+	{% block scripts %}
+	{% endblock %}
+
+</body>
+</html>
