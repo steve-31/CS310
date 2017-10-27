@@ -4,8 +4,9 @@
 <html dir="ltr" lang="en-US">
 <head>
 	<title>&lt;div&gt; | {{title}}</title>
+	<link rel="shortcut icon" href="{% static 'divtags/img/favicon2.png' %}" type="image/x-icon">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<meta name="author" content="SemiColonWeb" />
+	<meta name="author" content="Stephen Lynn" />
 
 	<!-- Stylesheets
 	============================================= -->
@@ -21,22 +22,78 @@
 
 	<link rel="stylesheet" href="{% static 'divtags/css/responsive.css' %}" type="text/css" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	
+	<link href="{% static 'divtags/css/select2.min.css' %}" rel="stylesheet" />
 
 	<!-- Document Title
 	============================================= -->
-	<title>Landing Page | Canvas</title>
+	<title>Landing Page | divtags</title>
 
 </head>
 
-<body class="stretched">
+<body class="sticky-footer stretched">
 
 	<!-- Document Wrapper
 	============================================= -->
 	<div id="wrapper" class="clearfix">
+	
+	{% if title == "Project" %}
 
+		<!-- Project Header
+		============================================= -->
+		<header id="header" class="sticky-header">
+
+			<div id="header-wrap">
+
+				<div class="container clearfix">
+
+					<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
+
+					<!-- Logo
+					============================================= -->
+					<div id="logo">
+						<a href="{% url 'divtags:home' %}" class="retina-logo"><img src="{% static 'divtags/img/logo.png' %}" alt="<div>"></a>
+					</div><!-- #logo end -->
+
+					<!-- Primary Navigation
+					============================================= -->
+					<nav id="primary-menu">
+
+						<ul class="one-page-menu">
+							<li class="current"><a href="{% url 'divtags:myprojectlist' %}"><div>My Projects &nbsp;&nbsp;&nbsp; <i class="icon-caret-down" style="float:right;"></i></div></a>
+									<ul>
+										{% for project in myprojects %}
+											<li><a href="{% url 'divtags:project' project.id %}" class="fixedText">{{ project.name }}</a></li>
+										{% endfor %}
+										<li><a href="{% url 'divtags:newproject' %}" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new project</a></li>
+									</ul>
+								</li>
+							<li class="project-pages-dropdown"><a class="inactiveLink"><div>Page: &nbsp; {{current_page}} &nbsp;&nbsp;&nbsp; <i class="icon-caret-down" style="float:right;"></i></div></a>
+									<ul>
+										{% for file in projectdir %}
+											<li><a href="{% url 'divtags:project' project.id %}" class="fixedText">{{ file.name }}</a></li>
+										{% endfor %}
+										<li><a href="#" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new page</a></li>
+									</ul>
+								</li>
+							
+							
+							<li><a href="#" class="fixedText">Save</a></li>
+							<li><a href="#" class="fixedText header-deploy-link">Deploy</a></li>
+							<li id="settings-button"><a class="inactiveLink"><div><i class="icon-settings2"></i></div></a></li>
+						</ul>
+
+					</nav><!-- #primary-menu end -->
+
+				</div>	
+
+			</div>
+
+		</header><!-- #project header end -->
 		
+		{% else %}
 
-		<!-- Header
+		<!-- Main Header
 		============================================= -->
 		<header id="header">
 
@@ -60,7 +117,7 @@
 							<li class="current"><a href="{% url 'divtags:home' %}" data-href="#section-home"><div>Home</div></a></li>
 							<li><a href="{% url 'divtags:examples' %}" data-href="#section-examples"><div>Examples</div></a></li>
 							{% if request.user.is_authenticated %}
-								<li><a href="{% url 'divtags:myprojectlist' %}"><div>My Projects</div></a>
+								<li><a href="{% url 'divtags:myprojectlist' %}"><div>My Projects &nbsp;<i class="icon-caret-down" style="float:right;"></i></div></a>
 									<ul>
 										{% for project in myprojects %}
 											<li><a href="{% url 'divtags:project' project.id %}" class="fixedText">{{ project.name }}</a></li>
@@ -92,6 +149,9 @@
 			</div>
 
 		</header><!-- #header end -->
+		
+		{% endif %}
+		
 		<!-- Content
 		============================================= -->
 		<section id="content">
@@ -103,89 +163,7 @@
 		============================================= -->
 		<footer id="footer" class="dark">
 
-			<div class="container">
-
-				<!-- Footer Widgets
-				============================================= -->
-				<div class="footer-widgets-wrap clearfix">
-
-						<div class="col_one_third">
-
-							<div class="widget clearfix">
-
-								<img src="{% static 'divtags/img/logo.png' %}" alt="" class="footer-logo">
-
-							</div>
-
-						</div>
-
-						<div class="col_one_third">
-							<div class="widget subscribe-widget clearfix">
-								<h5><strong>Subscribe</strong> to Our Newsletter to get Important News, Amazing Offers &amp; Inside Scoops:</h5>
-								<div class="widget-subscribe-form-result"></div>
-								<form id="widget-subscribe-form" action="include/subscribe.php" role="form" method="post" class="nobottommargin">
-									<div class="input-group divcenter">
-										<span class="input-group-addon"><i class="icon-email2"></i></span>
-										<input type="email" id="widget-subscribe-form-email" name="widget-subscribe-form-email" class="form-control required email" placeholder="Enter your Email">
-										<span class="input-group-btn">
-											<button class="btn btn-success" type="submit">Subscribe</button>
-										</span>
-									</div>
-								</form>
-							</div>
-							
-						</div>
-
-
-					<div class="col_one_third col_last">
-					
-						<div class="widget clearfix" style="margin-bottom: -20px;">
-
-								<div class="row">
-	
-									<div class="col-md-6 bottommargin-sm">
-										<div class="counter counter-small"><span data-from="0" data-to="{{ numberprojects }}" data-refresh-interval="1" data-speed="200" data-comma="true"></span></div>
-										<h5 class="nobottommargin">Total Projects</h5>
-									</div>
-	
-									<div class="col-md-6 bottommargin-sm">
-										<div class="counter counter-small"><span data-from="0" data-to="{{ numberusers }}" data-refresh-interval="1" data-speed="200" data-comma="true"></span></div>
-										<h5 class="nobottommargin">Users</h5>
-									</div>
-	
-								</div>
-	
-							</div>
-							
-
-						<div class="widget clearfix" style="margin-bottom: -20px;">
-
-							<div class="row">
-
-								<div class="col-md-6 clearfix bottommargin-sm">
-									<a href="#" class="social-icon si-dark si-colored si-facebook nobottommargin" style="margin-right: 10px;">
-										<i class="icon-facebook"></i>
-										<i class="icon-facebook"></i>
-									</a>
-									<a href="#"><small style="display: block; margin-top: 3px;"><strong>Like us</strong><br>on Facebook</small></a>
-								</div>
-								<div class="col-md-6 clearfix">
-									<a href="#" class="social-icon si-dark si-colored si-twitter nobottommargin" style="margin-right: 10px;">
-										<i class="icon-twitter"></i>
-										<i class="icon-twitter"></i>
-									</a>
-									<a href="#"><small style="display: block; margin-top: 3px;"><strong>Follow us</strong><br>on Twitter</small></a>
-								</div>
-
-							</div>
-
-						</div>
-
-					</div>
-
-				</div><!-- .footer-widgets-wrap end -->
-
-			</div>
+			
 
 			<!-- Copyrights
 			============================================= -->
@@ -199,6 +177,16 @@
 					</div>
 
 					<div class="col_half col_last tright">
+						<div class="col-md-6 bottommargin-sm">
+							<div class="counter counter-small"><span data-from="0" data-to="{{ numberprojects }}" data-refresh-interval="1" data-speed="200" data-comma="true"></span></div>
+							<h5 class="nobottommargin">Projects Created</h5>
+						</div>
+
+						<div class="col-md-6 bottommargin-sm">
+							<div class="counter counter-small"><span data-from="0" data-to="{{ numberusers }}" data-refresh-interval="1" data-speed="200" data-comma="true"></span></div>
+							<h5 class="nobottommargin">Users So Far</h5>
+						</div>
+						
 						<div class="fright clearfix">
 							<a href="#" class="social-icon si-small si-borderless si-facebook">
 								<i class="icon-facebook"></i>
@@ -243,7 +231,7 @@
 
 						<div class="clear"></div>
 
-						<i class="icon-envelope2"></i> info@canvas.com <span class="middot">&middot;</span> <i class="icon-headphones"></i> +91-11-6541-6369 <span class="middot">&middot;</span> <i class="icon-skype2"></i> CanvasOnSkype
+						<i class="icon-envelope2"></i> info@divtags.com <span class="middot">&middot;</span> <i class="icon-headphones"></i> +91-11-6541-6369 <span class="middot">&middot;</span> <i class="icon-skype2"></i> divtagsOnSkype
 					</div>
 
 				</div>
@@ -269,6 +257,7 @@
 
 	<script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyDMxJ92oBkSnVNHFX3R8XhtYQPEgk1_IiI"></script>
 	<script type="text/javascript" src="{% static 'divtags/js/jquery.gmap.js' %}"></script>
+	<script type="text/javascript" src="{% static 'divtags/js/select2.min.js' %}"></script>
 
 	
 	{% block scripts %}

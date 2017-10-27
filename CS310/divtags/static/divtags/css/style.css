@@ -5,6 +5,21 @@
 .home-buttons {
 }
 
+.inactiveLink {
+   pointer-events: none;
+   cursor: pointer;
+}
+
+.header-deploy-link {
+	background-color: #1ABc9C;
+	color: #ffffff !important;
+}
+
+.header-deploy-link:hover {
+	background-color: rgba(10,74,61,0.4);
+}
+
+
 .errorlist li {
 	color: #000000;
 	list-style-type: none;
@@ -168,6 +183,187 @@ textarea form p input {
 #header, #footer {
 	z-index: 1000;
 }
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    padding-top: 100px;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 2px 16px;
+    /* background-color: #5cb85c; */
+    color: white;
+    border: 0px !important;
+}
+
+/* Modal Body */
+.modal-body {padding: 2px 16px;}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 2px 16px;
+    /* background-color: #5cb85c; */
+    color: white;
+    border: 0px !important;
+}
+
+/* Modal Content */
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top: -300px; opacity: 0} 
+    to {top: 0; opacity: 1}
+}
+
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+#projectTitleButton {
+	cursor: pointer;
+}
+
+#projectTitleButton:hover {
+	color: #000000;
+}
+
+#projectDescButton {
+	cursor: pointer;
+}
+
+#projectDescButton:hover {
+	color: #000000;
+}
+
+.project-tab {
+	display:none;
+	margin-top: 10px;
+}
+
+.project-active-tab {
+	display: block;
+}
+
+.project-content {
+	height: 1000px;
+}
+
+.draggable-element {
+	cursor: move;
+}
+
+.add-attribute-btn {
+	border-color: #008000;
+	border-radius: 50%;
+	color: #ffffff;
+	background-color: #008000;
+	margin-left: 20px;
+}
+
+.delete-attribute-btn {
+	border-color: #ff0000;
+	border-radius: 50%;
+	color: #ffffff;
+	background-color: #ff0000;
+	margin-left: 20px;
+}
+
+.object-attributes {
+	display: inline-block;
+	width: 300px;
+	margin-left: 20px; 
+	margin-bottom: 10px;
+}
+
+.object-attributes-name {
+	display: inline-block;
+	width: 300px;
+	margin-bottom: 10px;
+}
+
+.new-attribute {
+	display: inline;
+}
+
+#workflow-item {
+    width: 200px;
+    height: 80px;
+    padding: 10px 50px 10px 50px;
+    color: white;
+    position: relative;
+    background: #51a8ff;
+  }
+#workflow-item:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-left: 40px solid white;
+    border-top: 40px solid transparent;
+    border-bottom: 40px solid transparent;
+  }
+#workflow-item:before {
+    content: "";
+    position: absolute;
+    right: -40px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-left: 40px solid #51a8ff;
+    border-top: 40px solid transparent;
+    border-bottom: 40px solid transparent;
+  }
 
 /* ----------------------------------------------------------------
 	Basic
@@ -2761,7 +2957,7 @@ body.side-panel-left.side-push-panel.stretched #header.sticky-header .container 
 	width: 330px;
 	height: 100%;
 	overflow: auto;
-	padding: 50px 70px 50px 40px;
+	padding: 10px 70px 50px 40px;
 }
 
 body.device-touch #side-panel .side-panel-wrap { overflow-y: scroll; }

@@ -1,0 +1,63 @@
+{% load static %}
+
+<h1>Manage Your Objects</h1>
+
+<h3>Create A New Object</h3>
+
+<form action="#">
+	<div class="form-group">
+		<label for="obj_name">Name: </label>
+		<input type="text" class="form-control" id="obj_name" placeholder="Object Name" name="obj_name">
+    </div>
+    <div class="form-group">
+		<label for="obj_desc">Description: </label>
+		<input type="text" class="form-control" id="obj_desc" placeholder="Object Description" name="obj_desc">
+    </div>
+    <div class="form-group">
+		<label for="obj_attrib_name">Attributes: </label>
+		<div class="new-attribute" id="new-attribute1">
+			<br>
+			<input type="text" class="form-control object-attributes-name" id="obj_attrib_name" placeholder="Attribute Name" name="obj_attrib_name1">
+			<select class="form-control object-attributes" id="obj_attrib1">
+				<option value="" disabled selected>Please select an attribute type</option>
+				{% for type in attribute_types %}
+					<option value="{{type.pk}}">{{type.name}}</option>
+				{% endfor %}
+				{% for object in objects %}
+					<option value="{{object.pk}}">{{object.name}}</option>
+				{% endfor %}
+			</select>
+			
+		</div>
+		<button class="add-attribute-btn" id="add-attribute-btn"><i class="icon-plus"></i></button>
+    </div>
+    
+    <button type="submit" class="btn btn-default">Save</button>
+</form>
+
+<h3>Existing Objects</h3>
+
+<table class="table table-hover text-left">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Description</th>
+			<th>Attributes</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for object in objects %}
+			<tr>
+				<td>{{ object.name }}</td>
+				<td>{{ object.desc }}</td>
+				<td>
+					{% for attribute in object.attributes.all %}
+						{{ attribute.name }} <span style="padding-left: 30px;">{{ attribute.type.name }}</span><br>
+					{% endfor %}
+				</td>
+				<td><a href="#"><i class="icon-pencil"></i></a>&nbsp;<a href="#"><i class="icon-trashcan"></i></a></td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

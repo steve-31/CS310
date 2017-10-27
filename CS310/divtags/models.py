@@ -14,3 +14,21 @@ class Project(models.Model):
     contributors = models.ManyToManyField(User, related_name='contributers')
     lastedited = models.DateTimeField(default=timezone.now)
     ispublished = models.BooleanField(default=False)
+    
+class ProjectFile(models.Model):
+    name = models.CharField(max_length=40)
+    url = models.FileField()
+    
+class ProjectAttributeType(models.Model):
+    name = models.CharField(max_length=50)
+    
+class ProjectAttribute(models.Model):
+    name = models.CharField(max_length=50)
+    type = models.ForeignKey(ProjectAttributeType)
+    
+class ProjectObject(models.Model):
+    project = models.ForeignKey(Project)
+    name = models.CharField(max_length=50)
+    desc = models.CharField(max_length=150)
+    attributes = models.ManyToManyField(ProjectAttribute)
+    

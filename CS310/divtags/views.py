@@ -5,11 +5,15 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils import timezone
 from django.db.models import Q
+from itertools import chain
+from operator import attrgetter
+import os
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from .models import Project
+from .models import Project, ProjectObject, ProjectAttributeType
 from .forms import SignUpForm, NewProjectForm
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -69,6 +73,7 @@ def myprojectlist(request):
     
     return render(request, 'divtags/myprojects.html', context)
 
+@login_required
 def project(request, pid):
     
     current_user = request.user
@@ -80,13 +85,28 @@ def project(request, pid):
         return redirect('permissiondenied')
     
     project = Project.objects.get(pk=pid)
+    users = User.objects.all().order_by('username')
+    projectdir = ""
+    projectobj = ProjectObject.objects.filter(project = pid)
+    attribute_types = ProjectAttributeType.objects.all().order_by('name')
     
     context = {
         "title": "Project",
         "project": project,
+        "users": users,
+        "projectdir": projectdir,
+        "objects": projectobj,
+        "attribute_types": attribute_types,
+        "current_page": "Home",
     }
     
     return render(request, 'divtags/project.html', context)
+
+def changeprojectowner(request, pid):
+    owner = request.GET.get('owner-select')
+    project = Project.objects.filter(pk=pid)
+    project.owner_id = owner
+    project.save()
 
 def newproject(request):
     

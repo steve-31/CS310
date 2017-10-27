@@ -1,12 +1,15 @@
 {% extends "./base.html" %}
+{% load static %}
 {% block content %}
 
 <div id="toolbar" class="toolbar-left">
-	<nav class="vertical-top" style="margin-top: 100px;">
+	<nav class="vertical-top" style="margin-top: 60px;">
 		<ul>
-			<li><a href="#"><i class="icon-list side-panel-trigger"></i><span>Project Files</span></a></li>
-			<li><a href="#"><i class="icon-code side-panel-trigger"></i><span>Components</span></a></li>
-			<li><a href="#"><i class="icon-settings2"></i><span>Project Settings</span></a></li>
+			<li id="back-to-edit" style="display:none;"><a><i class="icon-caret-left"></i><span>Back to Edit</span></a></li>
+			<li id="components-button"><a><i class="icon-code side-panel-trigger"></i><span>Components</span></a></li>
+			<li id="object-button"><a><i class="icon-table"></i><span>Manage Objects</span></a></li>
+			<li id="workflow-button"><a><i class="icon-sitemap"></i><span>Workflow Editor</span></a></li>
+			<li id="settings-side-button"><a><i class="icon-settings2"></i><span>Project Settings</span></a></li>
 		</ul>
 	</nav>
 </div>
@@ -21,41 +24,22 @@
 
 			<div class="widget clearfix">
 
-				<h4>Pages</h4>
+				<h4>Components</h4>
 
 				<nav class="nav-tree nobottommargin">
 					<ul>
-						<li><a href="#"><i class="icon-bolt2"></i>Features</a>
-							<ul>
-								<li><a href="#">Sliders</a></li>
-								<li><a href="#">Widgets</a></li>
-								<li><a href="#">Events</a></li>
-								<li><a href="#">Headers</a></li>
-							</ul>
-						</li>
-						<li><a href="#"><i class="icon-briefcase"></i>Portfolio</a>
-							<ul>
-								<li><a href="#">Grid</a>
-									<ul>
-										<li><a href="#">3 Columns</a></li>
-										<li><a href="#">4 Columns</a></li>
-										<li><a href="#">5 Columns</a></li>
-									</ul>
-								</li>
-								<li><a href="#">Masonry</a></li>
-								<li><a href="#">Loading Styles</a></li>
-								<li><a href="#">Single</a></li>
-							</ul>
-						</li>
-						<li><a href="#"><i class="icon-file-text"></i>About</a>
-							<ul>
-								<li><a href="#">Company</a></li>
-								<li><a href="#">Team</a></li>
-								<li><a href="#">Services</a></li>
-								<li><a href="#">FAQs</a></li>
-							</ul>
-						</li>
-						<li><a href="#"><i class="icon-map-marker"></i>Contact</a></li>
+						<li><a href="#"><i class="icon-line-box"></i>&nbsp;Container</a></li>
+						<li><a href="#"><i class="icon-list-ul"></i>&nbsp;Bulleted List</a></li>
+						<li><a href="#"><i class="icon-list-ol"></i>&nbsp;Numbered List</a></li>
+						<li><a href="#"><i class="">h1</i>&nbsp;Heading</a></li>
+						<li><a href="#"><i class="">T </i>&nbsp;Paragraph</a></li>
+						<li><a href="#"><i class="icon-photo"></i>&nbsp;Image</a></li>
+						<li><a href="#"><i class="icon-form"></i>&nbsp;Form</a></li>
+						<li><a href="#"><i class="icon-reorder"></i>&nbsp;Menu</a></li>
+						<li><a href="#"><i class="icon-user"></i>&nbsp;User Login</a></li>
+						<li><a href="#"><i class="icon-facebook"></i>&nbsp;Social</a></li>
+						<li><a href="#"><i class="icon-table"></i>&nbsp;Object</a></li>
+						<li><a href="#"><i class="icon-plus"></i>&nbsp;Mathematics</a></li>
 					</ul>
 				</nav>
 
@@ -65,17 +49,32 @@
 
 	</div>
 
-<div class="container">
-	<h1>{{project.name}}</h1>
-	<ul class="entry-meta clearfix">
-		<li><i class="icon-user"></i> {{ project.owner }}</li>
-		<li><i class="icon-stopwatch"></i> {{ project.lastedited }}</li>
-		<li><i class="icon-line2-users"></i> {% for contributor in project.contributors.all %}{{ contributor.username }}{% if forloop.counter < project.contributors.count %}, {% endif %}{% endfor %}</li>
-		<span><a href="#"><i class="icon-plus"></i> Add/Edit Contributers</a></span>
-	</ul>
-	<div class="clear"></div>
-	<p>{{project.desc}}</p>
+	<div class="container project-tab" id="settings-tab" style="margin-left:60px;padding:0;width:100%;">
+		<div class="project-settings container">
+			{% include "./project-settings.html" %}
+		</div>
+	</div>
 	
-	<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-</div>
+	<div class="container project-tab project-active-tab" id="content-tab" style="margin:0;padding:0;width:100%;">
+		<div class="project-content container" style="width:100%;padding: 0 0 0 60px;margin:0;">
+			{% include "./project-content.html" %}
+		</div>
+	</div>
+	
+	<div class="container project-tab" id="object-tab">
+		<div class="project-settings container">
+			{% include "./project-object.html" %}
+		</div>
+	</div>
+	
+	<div class="container project-tab" id="workflow-tab">
+		<div class="project-settings container">
+			{% include "./project-workflow.html" %}
+		</div>
+	</div>
+	
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{% static 'divtags/js/project-scripts.js' %}"></script>
 {% endblock %}
