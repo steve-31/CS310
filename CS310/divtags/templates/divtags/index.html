@@ -1,0 +1,97 @@
+{% extends "./base.html" %}
+{% load static %}
+{% block content %}
+<div class="content-wrap">
+
+	<div class="container clearfix">
+		<div class="jumbotron row">
+			{% if user.is_authenticated %}
+				<div class="col-sm-6 home-head">
+					<h1>Welcome to <strong>&lt;div&gt;</strong> {{ request.user.first_name }}</h1>
+				</div>
+				<div class="col-sm-6">
+					<a href="{% url 'divtags:examples' %}" class="button button-3d button-red button-xlarge bottommargin"><i class="icon-star3"></i>See Examples of Projects</a>
+					{% if myprojects.count > 0 %}
+						<a href="{% url 'divtags:myprojectlist' %}" class="button button-3d button-teal button-xlarge nobottommargin"><i class="icon-plus"></i>View my Projects</a>
+					{% else %}
+						<a href="{% url 'divtags:newproject' %}" class="button button-3d button-teal button-xlarge nobottommargin"><i class="icon-plus"></i>Start My Own Project</a>
+					{% endif %}
+				</div>
+			{% else %}
+				<div class="col-sm-6 home-head">
+					<h1>Welcome to <strong>&lt;div&gt;</strong></h1>
+					<h3>Create your own website using our simple drag and drop tool</h3>
+				</div>
+				<div class="col-sm-6 home-buttons">
+					<h2>Login, or if you haven't visited before, Sign Up!</h2>
+					<form method="post" action=".">{% csrf_token %}
+						<input type="text" class="form-control" name="username" placeholder="Username"/>
+						<input type="password" class="form-control" name="password" placeholder="Password"/>
+						<p><a href="{% url 'password_reset' %}">Forgot Password</a></p>
+						<a href="{% url 'register' %}" class="button button-3d button-red button-xlarge nobottommargin"><i class="icon-star3"></i>Register</a>
+						<button type="submit" class="button button-3d button-teal button-xlarge nobottommargin"><i class="icon-user2"></i>Login</button>
+					</form>
+				</div>
+			{% endif %}
+		</div>
+		
+		<div class="clear"></div>
+		
+		<div class="container clearfix home-screenshots">
+			<div class="heading-block">
+				<h1>Our Tool</h1>
+				<span>Our tool has been built to allow its users to create their own websites with our easy-to-use, drag and drop tool.</span>
+			</div>
+			<div class="col_one_third nobottommargin">
+				<div class="feature-box media-box">
+					<div class="fbox-media">
+						<img src="{% static 'divtags/img/services/code.png' %}" alt="Personalise your website">
+					</div>
+					<div class="fbox-desc">
+						<h3>Personalise Your Website<span class="subtitle">Promote Your Brand</span></h3>
+						<p>You can add elements to your webpages, style them how you like to show off your brand.</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="col_one_third nobottommargin">
+				<div class="feature-box media-box">
+					<div class="fbox-media">
+						<img src="{% static 'divtags/img/services/code.png' %}" alt="Advanced Features">
+					</div>
+					<div class="fbox-desc">
+						<h3>Advanced Features<span class="subtitle">Use Our Prebuilt Blocks</span></h3>
+						<p>Add in advanced features such as user management facilities, Paypal integration and more.</p>
+					</div>
+				</div>
+			</div>
+
+			<div class="col_one_third nobottommargin col_last">
+				<div class="feature-box media-box">
+					<div class="fbox-media">
+						<img src="{% static 'divtags/img/services/code.png' %}" alt="Create your own">
+					</div>
+					<div class="fbox-desc">
+						<h3>Go Further<span class="subtitle">Make Your Own</span></h3>
+						<p>Even create your own code, with our simple code creator tool.</p>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		
+		<div class="clear"></div>
+		<div class="divider divider-center"><i>&nbsp;&nbsp;&lt;div&gt;&nbsp;&nbsp;</i></div>
+		
+		<div class="home-examples">
+			<div class="heading-block">
+				<h1>Projects completed</h1>
+				<span>See here a number of cool projects that have been created by using our tool...</span>
+			</div>
+			
+			<a href="{% url 'divtags:examples' %}" class="button button-3d button-red button-xlarge nobottommargin">See More</a>
+		</div>
+		
+	</div>
+</div>
+{% endblock %}

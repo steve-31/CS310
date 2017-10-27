@@ -1,0 +1,31 @@
+{% extends "./base.html" %}
+{% block content %}
+
+<div class="container">
+	<h1>{{title}}</h1>
+	<table class="table table-hover text-left">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Description</th>
+				<th>Owner</th>
+				<th>Contributers</th>
+				<th>Last Edited</th>
+				<th>Published</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for project in myprojects %}
+				<tr>
+					<td><a href="{% url 'divtags:project' project.id %}" >{{ project.name }}</a></td>
+					<td><a href="{% url 'divtags:project' project.id %}" >{{ project.desc }}</a></td>
+					<td><a href="{% url 'divtags:project' project.id %}" >{{ project.owner.first_name }} {{ project.owner.last_name }} ({{ project.owner.username }})</a></td>
+					<td>{% for contributor in project.contributors.all %}<a href="{% url 'divtags:project' project.id %}" >{{ contributor.first_name }} {{ contributor.last_name }} ({{ contributor.username }})<br></a>{% endfor %}</td>
+					<td><a href="{% url 'divtags:project' project.id %}" >{{ project.lastedited }}</a></td>
+					<td><a href="{% url 'divtags:project' project.id %}" >{% if project.ispublished %}<i class="icon-line-circle-check"></i>{% else %}<i class="icon-line-circle-cross"></i>{% endif %}</a></td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

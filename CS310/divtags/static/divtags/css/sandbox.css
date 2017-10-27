@@ -1,0 +1,75 @@
+.container {
+	margin-right: 10%;
+    margin-left: 10%;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.selected-element {
+	border: 1px solid black;
+	cursor: move;
+	position: relative;
+/*	resize: both;
+	overflow: auto;
+*/
+}
+
+.resizer { 
+	width: 10px; 
+	height: 10px; 
+	background: #ffffff;
+	border: 1px solid black; 
+	position: absolute; 
+	cursor: se-resize; 
+}
+
+.resizertopleft {
+	top: -10px; 
+	left: -10px; 
+}
+
+.resizertopright {
+	right: -10px; 
+	top: -10px; 
+}
+
+.resizerbottomleft {
+	left: -10px; 
+	bottom: -10px; 
+}
+
+.resizerbottomright {
+	right: -10px; 
+	bottom: -10px; 
+}
+
+.mover { 
+	width: 15px; 
+	height: 15px; 
+	background-color: #ffffff;
+	border: 1px solid black; 
+	position: absolute; 
+	top: 5px; 
+	left: -35px; 
+	cursor: move; 
+	color: #000000;
+	font-size: 15px;
+}
+
+.element {
+	color:red;
+	cursor: pointer;
+	position: fixed;
+}
+
+.element-editor {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	width: 100px;
+	background-color: #d9d9d9;
+}
+
+.element-padding {
+	width: 40px;
+}

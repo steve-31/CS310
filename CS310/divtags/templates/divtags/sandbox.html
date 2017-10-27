@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+	<head>
+		<link rel="stylesheet" href="{% static 'divtags/css/sandbox.css' %}" type="text/css" />
+		<link rel="stylesheet" href="{% static 'divtags/css/font-icons.css' %}" type="text/css" />
+	
+	</head>
+	<body>
+		<div class="container">
+			<h1 class="element" id="1" onclick="selectElement(this.id)">This is a sandbox application</h1>
+			<p class="element" id="2" onclick="selectElement(this.id)">Use offset of mouse position before and after to get position of drag and drop</p>
+		</div>
+		<div class="element-editor" id="element-editor" style="display:none;">
+			<h4>Position</h4>
+			<p>Top: <span id="element-position-top"></span> px</p>
+			<p>Left: <span id="element-position-left"></span> px</p>
+			
+			<h4>Size</h4>
+			<p>Width: <span id="element-size-width"></span> px</p>
+			<p>Height: <span id="element-size-height"></span> px</p>
+			
+			<h4>Padding</h4>
+			<p>Top: <input class="element-padding" id="element-padding-top" placeholder="Top" value="0"/> px</p>
+			<p>Right: <input class="element-padding" id="element-padding-right" placeholder="Right" value="0"/> px</p>
+			<p>Bottom: <input class="element-padding" id="element-padding-bottom" placeholder="Bottom" value="0"/> px</p>
+			<p>Left: <input class="element-padding" id="element-padding-left" placeholder="Left" value="0"/> px</p>
+			
+			<h4>Colour</h4>
+			<p>Text colour: <span id="element-size-width"></span></p>
+			<p>Background colour: <span id="element-size-height"></span></p>
+		</div>
+	<script type="text/javascript" src="{% static 'divtags/js/jquery.js' %}"></script>
+	<script type="text/javascript" src="{% static 'divtags/js/sandbox.js' %}"></script>
+	</body>
+</html>

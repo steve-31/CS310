@@ -1,0 +1,16 @@
+{% extends "./base.html" %}
+{% load static %}
+{% block content %}
+<div class="content-wrap container clearfix">
+	<div class="col_half nobottommargin">
+		<div class="error404 center">404</div>
+	</div>
+	
+	<div class="col_half nobottommargin col_last">
+		<div class="heading-block nobottomborder">
+			<h4>Oops this page cannot be found</h4>
+			<span><a href="{% url 'divtags:home' %}"><i class="icon-line-arrow-left"></i>&nbsp;Return home</a></span>
+		</div>
+	</div>
+</div>
+{% endblock %}
