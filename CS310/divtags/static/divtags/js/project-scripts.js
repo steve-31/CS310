@@ -1,6 +1,5 @@
 	$('document').ready(function(){
 		var headeroffset = $('#header').offset().top;
-		console.log(headeroffset);
 		if (headeroffset >= 0) {
 	    	$('#header').addClass('sticky-header');
 		}

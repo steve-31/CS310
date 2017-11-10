@@ -12,7 +12,7 @@
 	============================================= -->
 	<link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
 	
-	
+	<link rel="stylesheet" href="{% static 'divtags/css/sandbox.css' %}" type="text/css" />
 	<link rel="stylesheet" href="{% static 'divtags/css/bootstrap.css' %}" type="text/css" />
 	<link rel="stylesheet" href="{% static 'divtags/css/style.css' %}" type="text/css" />
 	<link rel="stylesheet" href="{% static 'divtags/css/dark.css' %}" type="text/css" />
@@ -68,17 +68,14 @@
 										<li><a href="{% url 'divtags:newproject' %}" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new project</a></li>
 									</ul>
 								</li>
-							<li class="project-pages-dropdown"><a class="inactiveLink"><div>Page: &nbsp; {{current_page}} &nbsp;&nbsp;&nbsp; <i class="icon-caret-down" style="float:right;"></i></div></a>
-									<ul>
-										{% for file in projectdir %}
-											<li><a href="{% url 'divtags:project' project.id %}" class="fixedText">{{ file.name }}</a></li>
-										{% endfor %}
-										<li><a href="#" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new page</a></li>
+							<li class="project-pages-dropdown"><a class="inactiveLink"><div id="page-dropdown">Page: &nbsp; {{current_page}} &nbsp;&nbsp;&nbsp; <i class="icon-caret-down" style="float:right;"></i></div></a>
+									<ul id="project-page-list">
+										<li id="project-page-add"><a href="#" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new page</a></li>
 									</ul>
 								</li>
 							
 							
-							<li><a href="#" class="fixedText">Save</a></li>
+							<li><a id="save-button" href="#" class="fixedText" onclick="save()">Save</a></li>
 							<li><a href="#" class="fixedText header-deploy-link">Deploy</a></li>
 							<li id="settings-button"><a class="inactiveLink"><div><i class="icon-settings2"></i></div></a></li>
 						</ul>
