@@ -28,7 +28,7 @@
 
 				<nav class="nav-tree nobottommargin">
 					<ul>
-						<li><a href="#"><i class="icon-line-box"></i>&nbsp;Container</a></li>
+						<li><a href="#" onclick="addContainer(event);"><i class="icon-line-box"></i>&nbsp;Container</a></li>
 						<li><a href="#"><i class="icon-list-ul"></i>&nbsp;Bulleted List</a></li>
 						<li><a href="#"><i class="icon-list-ol"></i>&nbsp;Numbered List</a></li>
 						<li><a href="#"><i class="">h1</i>&nbsp;Heading</a></li>
@@ -77,4 +77,5 @@
 
 {% block scripts %}
 <script type="text/javascript" src="{% static 'divtags/js/project-scripts.js' %}"></script>
+<script type="text/javascript" src="{% static 'divtags/js/sandbox.js' %}"></script>
 {% endblock %}
