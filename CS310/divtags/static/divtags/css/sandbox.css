@@ -7,7 +7,7 @@
 
 .selected-element {
 	border: 1px solid black;
-	cursor: move;
+	cursor: text !important;
 	position: relative;
 /*	resize: both;
 	overflow: auto;
@@ -58,7 +58,7 @@
 
 .element {
 	cursor: pointer;
-	position: fixed;
+	position: absolute;
 }
 
 .element-editor {
