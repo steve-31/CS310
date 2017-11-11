@@ -2,37 +2,303 @@ var Application = {
 	"id": 1,
 	"name": "myFirstProject",
 	"objects": [
-		{ "name": "Customer", "attributes": [
-			{ "first_name": "Char" }, 
-			{ "last_name": "Char" },
-			{ "id": "primary_key"} 
-		] }
+		{ 
+			"name": "Customer", "attributes": [
+				{ "first_name": "String" }, 
+				{ "last_name": "String" },
+				{ "id": "primary_key"} 
+			] 
+		}
 	],
 	"pages": [
-		{ "name": "Home",
+		{ 
+			"name": "Home",
 			"elements": [
-				{ "id": 1, "content": "<h1 class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:'#000000'; background-color:'rgba(0,0,0,0)'; padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a sandbox application</h1>" },
-				{ "id": 2, "content": "<p class=\"element\" id=\"2\" onclick=\"selectElement(this.id)\" style=\"color:'#000000'; background-color:'rgba(0,0,0,0)'; padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
-		],
+				{ "id": 0, "content": "<h1 class=\"element\" id=\"0\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:150px; left:300px;\">This is a Heading</h1>" },
+				{ "id": 1, "content": "<p class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:250px; left:300px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
+			],
+		"workflows": [] 
+		},
+		{ 
+			"name": "Second",
+			"elements": [
+				{ "id": 0, "content": "<h1 class=\"element\" id=\"0\" onclick=\"selectElement(this.id)\" style=\"color:#ff0000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Heading</h1>" },
+				{ "id": 1, "content": "<p class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:#ff0000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
+			],
 		"workflows": [] 
 		}
 	]
 }
 
-window.onload = insertElements(Application);
+var tempApplication = {
+		"id": 1,
+		"name": "myFirstProject",
+		"objects": [
+			{ 
+				"name": "Customer", "attributes": [
+					{ "first_name": "String" }, 
+					{ "last_name": "String" },
+					{ "id": "primary_key"} 
+				] 
+			}
+		],
+		"pages": [
+			{ 
+				"name": "Home",
+				"elements": [
+					{ "id": 0, "content": "<h1 class=\"element\" id=\"0\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:150px; left:300px;\">This is a Heading</h1>" },
+					{ "id": 1, "content": "<p class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:250px; left:300px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
+				],
+			"workflows": [] 
+			},
+			{ 
+				"name": "Second",
+				"elements": [
+					{ "id": 0, "content": "<h1 class=\"element\" id=\"0\" onclick=\"selectElement(this.id)\" style=\"color:#ff0000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Heading</h1>" },
+					{ "id": 1, "content": "<p class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:#ff0000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
+				],
+			"workflows": [] 
+			}
+		]
+	}
 
-function insertElements(jsonInput) {
-	console.log(jsonInput.pages[0].elements[0].content)
-	var elementToAdd;
+var noOfElements = 0;
+var undoChangeStack = new Array();
+var redoChangeStack = new Array();
 
-	var container = document.getElementById("outer-container");
+window.onload = insertElements(tempApplication, 0);
+window.onload = insertPages(tempApplication);
+//window.onload = undoChangeStack.push(JSON.stringify(tempApplication));
+//window.onload = printStack(undoChangeStack);
 
-	for (i in jsonInput.pages[0].elements) {
-		elementToAdd = jsonInput.pages[0].elements[i].content;
-		console.log("print");
-		container.innerHTML += elementToAdd;
+function printStack(inputStack) {
+	console.log("printing stack");
+	for (i in inputStack) {
+		console.log("---------------------");
+		var object = JSON.parse(inputStack[i]);
+		for (j in object.pages[0].elements) {
+			console.log("---------");
+			console.log(object.pages[0].elements[j].content);
+		}
 	}
 }
+
+function undoChange() {
+	if (undoChangeStack.length != 0) {
+		redoChangeStack.push(JSON.stringify(tempApplication));
+		console.log("Redo Stack");
+		printStack(redoChangeStack);
+		console.log("Undoing last change");
+		var pageId = document.getElementById("page-identifier").value;
+		var newJson = JSON.parse(undoChangeStack.pop());
+		insertElements(newJson, pageId);
+		saveJsonLocal(tempApplication);
+		console.log(tempApplication);
+	} else {
+		console.log("No change to undo");
+	}
+	if (undoChangeStack.length == 0) {
+		document.getElementById("undo-change").style.display = "none";
+	} else {
+		document.getElementById("undo-change").style.display = "block";
+	}
+	if (redoChangeStack.length == 0) {
+		document.getElementById("redo-change").style.display = "none";
+	} else {
+		document.getElementById("redo-change").style.display = "block";
+	}
+	
+}
+
+function redoChange() {
+	if (redoChangeStack.length != 0) {
+		undoChangeStack.push(JSON.stringify(tempApplication));
+		console.log("Redoing last change");
+		var pageId = document.getElementById("page-identifier").value;
+		var newJson = JSON.parse(redoChangeStack.pop());
+		insertElements(newJson, pageId);
+		saveJsonLocal(tempApplication);
+	} else {
+		console.log("No change to redo");
+	}
+	if (undoChangeStack.length == 0) {
+		document.getElementById("undo-change").style.display = "none";
+	} else {
+		document.getElementById("undo-change").style.display = "block";
+	}
+	if (redoChangeStack.length == 0) {
+		document.getElementById("redo-change").style.display = "none";
+	} else {
+		document.getElementById("redo-change").style.display = "block";
+	}
+}
+
+function addContainer(event) {
+	event.preventDefault();
+	
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	
+	var container = document.getElementById("outer-container");
+	noOfElements += 1;
+	var divElement = "<div class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Container</div>";
+	container.innerHTML += divElement;
+	console.log("container created");
+	
+	var pageId = document.getElementById("page-identifier").value;
+	saveJsonLocal(tempApplication);
+}
+
+function saveJsonLocal(jsonInput) {
+	var allElements = document.getElementById("outer-container").childNodes;
+	var pageId = document.getElementById("page-identifier").value;
+	var saveElements = [];
+	for (i in allElements) {
+		if (typeof allElements[i].outerHTML !== 'undefined'){
+			allElements[i].classList.remove("selected-element");
+		    $('.resizer').remove();
+		    $('.mover').remove();
+			if (typeof allElements[i].outerHTML !== 'undefined'){
+				saveElements.push(
+						{ 
+							"id": i,
+							"content": allElements[i].outerHTML,
+						}
+				);
+			}
+		}
+	}
+	jsonInput.pages[pageId].elements = saveElements;
+	
+	printStack(undoChangeStack);
+	
+	if (undoChangeStack.length == 0) {
+		document.getElementById("undo-change").style.display = "none";
+	} else {
+		document.getElementById("undo-change").style.display = "block";
+	}
+	if (redoChangeStack.length == 0) {
+		document.getElementById("redo-change").style.display = "none";
+	} else {
+		document.getElementById("redo-change").style.display = "block";
+	}
+}
+
+function newPage(event, id) {
+	event.preventDefault();
+	var pageid = document.getElementById("page-identifier").value;
+	if (checkSave(tempApplication, pageid)) {
+		if (confirm("You haven't saved your changes, are you sure you would like to navigate away from this page and lose them?")) {
+			tempApplication = Application;
+			undoChangeStack.length = 0;
+			redoChangeStack.length = 0;
+			if (undoChangeStack.length == 0) {
+				document.getElementById("undo-change").style.display = "none";
+			} else {
+				document.getElementById("undo-change").style.display = "block";
+			}
+			if (redoChangeStack.length == 0) {
+				document.getElementById("redo-change").style.display = "none";
+			} else {
+				document.getElementById("redo-change").style.display = "block";
+			}
+			insertElements(Application, id);
+		}
+	} else {
+		insertElements(Application, id);
+	}
+}
+
+
+
+
+
+function save() {
+	var id = document.getElementById("page-identifier").value;
+	saveJson(Application, id);
+}
+
+function saveJson(jsonInput, id) {
+	document.getElementById("element-editor").style.display = 'none';
+	var selectedElements = document.getElementsByTagName("*");
+	for (var i=0; i < selectedElements.length; i++) {    
+	    selectedElements[i].classList.remove("selected-element");
+	    $('.resizer').remove();
+	    $('.mover').remove();
+	}
+	
+	var saveButton = document.getElementById("save-button");
+	saveButton.innerHTML = "<i class='icon-line-check'></i> Done";
+	setTimeout(function() { saveButton.innerHTML = "Save"; }, 2000);
+	
+	var allElements = document.getElementById("outer-container").childNodes;
+	var saveElements = [];
+	for (i in allElements) {
+		if (typeof allElements[i].outerHTML !== 'undefined'){
+			saveElements.push(
+					{ 
+						"id": i,
+						"content": allElements[i].outerHTML,
+					}
+			);
+		}
+	}
+	jsonInput.pages[id].elements = saveElements;
+	console.log(jsonInput.pages[id].elements);
+	undoChangeStack.length = 0;
+	redoChangeStack.length = 0;
+	if (undoChangeStack.length == 0) {
+		document.getElementById("undo-change").style.display = "none";
+	} else {
+		document.getElementById("undo-change").style.display = "block";
+	}
+	if (redoChangeStack.length == 0) {
+		document.getElementById("redo-change").style.display = "none";
+	} else {
+		document.getElementById("redo-change").style.display = "block";
+	}
+	console.log("------- UNDO STACK --------");
+	printStack(undoChangeStack);
+	console.log("------- REDO STACK --------");
+	printStack(redoChangeStack);
+}
+
+function insertPages(jsonInput) {
+	for (i in jsonInput.pages) {
+		var list = document.getElementById("project-page-list");
+		var newListItem = document.createElement('li');
+		newListItem.innerHTML = '<a class="fixedText" href="#" id="page-1" onclick="newPage(event, '+i+');">' + jsonInput.pages[i].name + '</a>';
+		list.appendChild(newListItem);
+	}
+	
+}
+
+function insertElements(jsonInput, id) {
+	
+	var dropdown = document.getElementById("page-dropdown");
+	dropdown.innerHTML = "Page: &nbsp; " + jsonInput.pages[id].name + " &nbsp;&nbsp;&nbsp; <i class=\"icon-caret-down\" style=\"float:right;\"></i>";
+	var container = document.getElementById("outer-container");
+	container.innerHTML = "";
+	
+	var pageid = document.getElementById("page-identifier");
+	pageid.value = id;
+
+	var elementToAdd;
+
+	for (i in jsonInput.pages[id].elements) {
+		elementToAdd = jsonInput.pages[id].elements[i].content;
+		container.innerHTML += elementToAdd;
+		noOfElements += 1;
+	}
+}
+
+function checkSave(jsonInput, pageId) {
+	if (JSON.stringify(Application) !== JSON.stringify(tempApplication)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 
 
 
@@ -131,10 +397,12 @@ function selectElement(id) {
 		    $('.mover').remove();
 	    }
 	}
+    
 	
 	var startX, startY, startWidth, startHeight;
 	
 	function initResizeDrag(e) {
+		undoChangeStack.push(JSON.stringify(tempApplication));
 		startX = e.clientX;
 		startY = e.clientY;
 		startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
@@ -153,11 +421,15 @@ function selectElement(id) {
 	function stopResizeDrag(e) {
 		document.documentElement.removeEventListener('mousemove', doResizeDrag, false);    
 	    document.documentElement.removeEventListener('mouseup', stopResizeDrag, false);
+	    
+	    var pageId = document.getElementById("page-identifier").value;
+		saveJsonLocal(tempApplication);
 	}
 	
 	var startTop, startLeft;
 	
 	function initMoveDrag(e) {
+		undoChangeStack.push(JSON.stringify(tempApplication));
 		startX = e.clientX;
 		startY = e.clientY;
 		startLeft = parseInt(document.defaultView.getComputedStyle(element).left, 10);
@@ -167,8 +439,12 @@ function selectElement(id) {
 	}
 	
 	function doMoveDrag(e) {
-		element.style.left = Math.ceil((startLeft + e.clientX - startX) / 10) * 10 + 'px';
-		element.style.top = Math.ceil((startTop + e.clientY - startY) / 10) * 10 + 'px';
+		if (startLeft + e.clientX - startX >= 0) {
+			element.style.left = Math.ceil((startLeft + e.clientX - startX) / 10) * 10 + 'px';
+		}
+		if (startTop + e.clientY - startY >= 0) {
+			element.style.top = Math.ceil((startTop + e.clientY - startY) / 10) * 10 + 'px';
+		}
 		document.getElementById('element-position-top').innerHTML = document.getElementById(id).style.top;
 		document.getElementById('element-position-left').innerHTML = document.getElementById(id).style.left;
 	}
@@ -176,11 +452,16 @@ function selectElement(id) {
 	function stopMoveDrag(e) {
 		document.documentElement.removeEventListener('mousemove', doMoveDrag, false);    
 	    document.documentElement.removeEventListener('mouseup', stopMoveDrag, false);
+	    
+	    var pageId = document.getElementById("page-identifier").value;
+		saveJsonLocal(tempApplication);
 	}
 	
 	var paddingtop, paddingright, paddingbottom, paddingleft;
 	
 	function updatePadding() {
+		undoChangeStack.push(JSON.stringify(tempApplication));
+		
 		paddingtop = document.getElementById('element-padding-top').value;
 		paddingtop = paddingtop.split('px');
 		element.style.paddingTop = paddingtop[0] + 'px';
@@ -194,20 +475,30 @@ function selectElement(id) {
 	    document.documentElement.removeEventListener('keyup', updatePadding, false);
 	    document.documentElement.removeEventListener('keyup', updatePadding, false);
 	    document.documentElement.removeEventListener('keyup', updatePadding, false);
+	    
+		saveJsonLocal(tempApplication);
 	}
 	
 	function textColour() {
+		undoChangeStack.push(JSON.stringify(tempApplication));
+		
 		console.log('changing text colour')
 		var colour = document.getElementById('element-colour-text').value;
 		element.style.color = colour;
+		
+		saveJsonLocal(tempApplication);
 	}
 	
 	function backgroundColour() {
+		undoChangeStack.push(JSON.stringify(tempApplication));
+		
 		var colour = document.getElementById('element-colour-background').value;
 		console.log(colour)
 		element.style.backgroundColor = colour;
 		document.documentElement.removeEventListener('change', textColour, false);
 	    document.documentElement.removeEventListener('change', backgroundColour, false);
+	    
+	    saveJsonLocal(tempApplication);
 	}
 	
 	function rgb2hex(rgb){
@@ -216,4 +507,3 @@ function selectElement(id) {
 	}
 	
 }
-
