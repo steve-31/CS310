@@ -7,6 +7,7 @@
 
 .selected-element {
 	border: 1px solid black;
+	border-style: dashed;
 	cursor: text !important;
 	position: relative;
 /*	resize: both;
@@ -47,10 +48,10 @@
 	width: 15px; 
 	height: 15px; 
 	background-color: #ffffff;
-	border: 1px solid black; 
+	/* border: 1px solid black;  */
 	position: absolute; 
 	top: 5px; 
-	left: -35px; 
+	left: -30px; 
 	cursor: move; 
 	color: #000000;
 	font-size: 15px;

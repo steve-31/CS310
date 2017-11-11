@@ -68,8 +68,6 @@ var redoChangeStack = new Array();
 
 window.onload = insertElements(tempApplication, 0);
 window.onload = insertPages(tempApplication);
-//window.onload = undoChangeStack.push(JSON.stringify(tempApplication));
-//window.onload = printStack(undoChangeStack);
 
 function printStack(inputStack) {
 	console.log("printing stack");
@@ -86,16 +84,10 @@ function printStack(inputStack) {
 function undoChange() {
 	if (undoChangeStack.length != 0) {
 		redoChangeStack.push(JSON.stringify(tempApplication));
-		console.log("Redo Stack");
-		printStack(redoChangeStack);
-		console.log("Undoing last change");
 		var pageId = document.getElementById("page-identifier").value;
 		var newJson = JSON.parse(undoChangeStack.pop());
 		insertElements(newJson, pageId);
 		saveJsonLocal(tempApplication);
-		console.log(tempApplication);
-	} else {
-		console.log("No change to undo");
 	}
 	if (undoChangeStack.length == 0) {
 		document.getElementById("undo-change").style.display = "none";
@@ -113,14 +105,11 @@ function undoChange() {
 function redoChange() {
 	if (redoChangeStack.length != 0) {
 		undoChangeStack.push(JSON.stringify(tempApplication));
-		console.log("Redoing last change");
 		var pageId = document.getElementById("page-identifier").value;
 		var newJson = JSON.parse(redoChangeStack.pop());
 		insertElements(newJson, pageId);
 		saveJsonLocal(tempApplication);
-	} else {
-		console.log("No change to redo");
-	}
+	} 
 	if (undoChangeStack.length == 0) {
 		document.getElementById("undo-change").style.display = "none";
 	} else {
@@ -142,7 +131,62 @@ function addContainer(event) {
 	noOfElements += 1;
 	var divElement = "<div class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Container</div>";
 	container.innerHTML += divElement;
-	console.log("container created");
+	
+	var pageId = document.getElementById("page-identifier").value;
+	saveJsonLocal(tempApplication);
+}
+
+function addHeading(event) {
+	event.preventDefault();
+	
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	
+	var container = document.getElementById("outer-container");
+	noOfElements += 1;
+	var divElement = "<h1 class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Heading</h1>";
+	container.innerHTML += divElement;
+	
+	var pageId = document.getElementById("page-identifier").value;
+	saveJsonLocal(tempApplication);
+}
+
+function addParagraph(event) {
+	event.preventDefault();
+	
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	
+	var container = document.getElementById("outer-container");
+	noOfElements += 1;
+	var divElement = "<p class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Paragraph</p>";
+	container.innerHTML += divElement;
+	
+	var pageId = document.getElementById("page-identifier").value;
+	saveJsonLocal(tempApplication);
+}
+
+function addBulletList(event) {
+	event.preventDefault();
+	
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	
+	var container = document.getElementById("outer-container");
+	noOfElements += 1;
+	var divElement = "<ul class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\"><li>This is a bulleted List</li><li>You can add points here</li></ul>";
+	container.innerHTML += divElement;
+	
+	var pageId = document.getElementById("page-identifier").value;
+	saveJsonLocal(tempApplication);
+}
+
+function addNumberedList(event) {
+	event.preventDefault();
+	
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	
+	var container = document.getElementById("outer-container");
+	noOfElements += 1;
+	var divElement = "<ol class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\"><li>This is a numbered List</li><li>You can add items here</li></ol>";
+	container.innerHTML += divElement;
 	
 	var pageId = document.getElementById("page-identifier").value;
 	saveJsonLocal(tempApplication);
@@ -168,8 +212,6 @@ function saveJsonLocal(jsonInput) {
 		}
 	}
 	jsonInput.pages[pageId].elements = saveElements;
-	
-	printStack(undoChangeStack);
 	
 	if (undoChangeStack.length == 0) {
 		document.getElementById("undo-change").style.display = "none";
@@ -207,10 +249,6 @@ function newPage(event, id) {
 		insertElements(Application, id);
 	}
 }
-
-
-
-
 
 function save() {
 	var id = document.getElementById("page-identifier").value;
@@ -256,10 +294,6 @@ function saveJson(jsonInput, id) {
 	} else {
 		document.getElementById("redo-change").style.display = "block";
 	}
-	console.log("------- UNDO STACK --------");
-	printStack(undoChangeStack);
-	console.log("------- REDO STACK --------");
-	printStack(redoChangeStack);
 }
 
 function insertPages(jsonInput) {
@@ -315,7 +349,6 @@ function selectElement(id) {
 	    $('.mover').remove();
 	}
 	
-	console.log('selecting element');
 	var element = document.getElementById(id);
 	element.className +=' selected-element';
 	
@@ -346,7 +379,6 @@ function selectElement(id) {
     	hexcolourBackground = '#FFFFFF';
     }
     document.getElementById('element-colour-text').value = hexcolourText;
-    console.log(document.getElementById('element-colour-text').value);
     document.getElementById('element-colour-background').value = hexcolourBackground;
 	
 	var resizerbottomright = document.createElement('div');
@@ -370,25 +402,11 @@ function selectElement(id) {
     window.onclick = function(event) {
     	var mover = document.getElementById('icon-move');
     	var resizer = document.getElementById(id + 'resizer');
-    	console.log(event.target);
-//    	console.log("element contains mover :" + mover.parentNode == element);
-    	console.log("element contains resizer :" + element.contains(resizer));
-    	console.log(element == event.target);
+    	var container = document.getElementById("outer-container");
     	var editor = document.getElementById("element-editor");
     	var inelement = false;
-    	if (event.target == element) {
+    	if (event.target != container) {
     		inelement = true;
-    	}
-    	for (var i = 0; i < element.childNodes.length; i++) {
-    		if (element.childNodes[i] == event.target) {
-    			console.out(element.childNodes[i]);
-    			inelement = true;
-    		}
-    	}
-    	for (var i = 0; i < editor.childNodes.length; i++) {
-    		if (editor.childNodes[i] == event.target) {
-    			inelement = true;
-    		}
     	}
 	    if (!inelement) {
 	    	element.classList.remove("selected-element");
@@ -482,7 +500,6 @@ function selectElement(id) {
 	function textColour() {
 		undoChangeStack.push(JSON.stringify(tempApplication));
 		
-		console.log('changing text colour')
 		var colour = document.getElementById('element-colour-text').value;
 		element.style.color = colour;
 		
