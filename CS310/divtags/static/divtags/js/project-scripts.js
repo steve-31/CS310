@@ -1,6 +1,5 @@
 	$('document').ready(function(){
 		var headeroffset = $('#header').offset().top;
-		console.log(headeroffset);
 		if (headeroffset >= 0) {
 	    	$('#header').addClass('sticky-header');
 		}
@@ -65,9 +64,11 @@
 		$('#content-tab').removeClass('project-active-tab')
 		$('#object-tab').removeClass('project-active-tab')
 		$('#workflow-tab').removeClass('project-active-tab')
+		$('#history-tab').removeClass('project-active-tab')
 		$('#components-button').css("display", "none")
 		$('#object-button').css("display", "block")
 		$('#workflow-button').css("display", "block")
+		$('#history-button').css("display", "block")
 		$('#settings-side-button').css("display", "block")
 		$('#back-to-edit').css("display", "block")
 	});
@@ -79,9 +80,11 @@
 		$('#content-tab').removeClass('project-active-tab')
 		$('#settings-tab').removeClass('project-active-tab')
 		$('#workflow-tab').removeClass('project-active-tab')
+		$('#history-tab').removeClass('project-active-tab')
 		$('#components-button').css("display", "none")
 		$('#object-button').css("display", "block")
 		$('#workflow-button').css("display", "block")
+		$('#history-button').css("display", "block")
 		$('#settings-side-button').css("display", "block")
 		$('#back-to-edit').css("display", "block")
 	});
@@ -93,9 +96,27 @@
 		$('#content-tab').removeClass('project-active-tab')
 		$('#settings-tab').removeClass('project-active-tab')
 		$('#object-tab').removeClass('project-active-tab')
+		$('#history-tab').removeClass('project-active-tab')
 		$('#components-button').css("display", "none")
 		$('#object-button').css("display", "block")
 		$('#workflow-button').css("display", "block")
+		$('#history-button').css("display", "block")
+		$('#settings-side-button').css("display", "block")
+		$('#back-to-edit').css("display", "block")
+	});
+	
+	$('#history-button').click(function(event){
+		event.preventDefault();
+		$(window).scrollTop(0)
+		$('#history-tab').addClass('project-active-tab')
+		$('#workflow-tab').removeClass('project-active-tab')
+		$('#content-tab').removeClass('project-active-tab')
+		$('#settings-tab').removeClass('project-active-tab')
+		$('#object-tab').removeClass('project-active-tab')
+		$('#components-button').css("display", "none")
+		$('#object-button').css("display", "block")
+		$('#workflow-button').css("display", "block")
+		$('#history-button').css("display", "block")
 		$('#settings-side-button').css("display", "block")
 		$('#back-to-edit').css("display", "block")
 	});
@@ -107,9 +128,11 @@
 		$('#content-tab').removeClass('project-active-tab')
 		$('#workflow-tab').removeClass('project-active-tab')
 		$('#object-tab').removeClass('project-active-tab')
+		$('#history-tab').removeClass('project-active-tab')
 		$('#components-button').css("display", "none")
 		$('#object-button').css("display", "block")
 		$('#workflow-button').css("display", "block")
+		$('#history-button').css("display", "block")
 		$('#settings-side-button').css("display", "block")
 		$('#back-to-edit').css("display", "block")
 	});
@@ -119,9 +142,11 @@
 		$('#content-tab').addClass('project-active-tab')
 		$('#workflow-tab').removeClass('project-active-tab')
 		$('#object-tab').removeClass('project-active-tab')
+		$('#history-tab').removeClass('project-active-tab')
 		$('#components-button').css("display", "block")
 		$('#object-button').css("display", "block")
 		$('#workflow-button').css("display", "block")
+		$('#history-button').css("display", "block")
 		$('#settings-side-button').css("display", "block")
 		$('#back-to-edit').css("display", "none")
 	})
