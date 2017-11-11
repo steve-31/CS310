@@ -8,8 +8,8 @@
 	</head>
 	<body>
 		<div class="container" id="outer-container">
-			<!-- <h1 class="element" id="1" onclick="selectElement(this.id)" style="color:'#000000'; background-color:'rgba(0,0,0,0)'; padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;">This is a sandbox application</h1>
-			<p class="element" id="2" onclick="selectElement(this.id)" style="color:'#000000'; background-color:'rgba(0,0,0,0)'; padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;">Use offset of mouse position before and after to get position of drag and drop</p> -->
+			<!-- <h1 class="element" id="1" onclick="selectElement(this.id)">This is a sandbox application</h1>
+			<p class="element" id="2" onclick="selectElement(this.id)">Use offset of mouse position before and after to get position of drag and drop</p> -->
 		</div>
 		<div class="element-editor" id="element-editor" style="display:none;">
 			<h4>Position</h4>
@@ -27,8 +27,8 @@
 			<p>Left: <input class="element-padding" id="element-padding-left" placeholder="Left" value="0"/> px</p>
 			
 			<h4>Colour</h4>
-			<p>Text: <input id="element-colour-text" type="color" value="#ff0000"/></p>
-			<p>Background: <input id="element-colour-background" type="color" value="#ff0000"/></p>
+			<p>Text colour: <span id="element-size-width"></span></p>
+			<p>Background colour: <span id="element-size-height"></span></p>
 		</div>
 	<script type="text/javascript" src="{% static 'divtags/js/jquery.js' %}"></script>
 	<script type="text/javascript" src="{% static 'divtags/js/sandbox.js' %}"></script>
