@@ -304,6 +304,10 @@ function checkSave(jsonInput, pageId) {
 
 function selectElement(id) {
 	document.getElementById("element-editor").style.display = 'none';
+	var old_element = document.getElementById("element-editor");
+	var new_element = old_element.cloneNode(true);
+	old_element.parentNode.replaceChild(new_element, old_element);
+
 	var elements = document.getElementsByTagName("*");
 	for (var i=0; i < elements.length; i++) {    
 	    elements[i].classList.remove("selected-element");
@@ -317,22 +321,42 @@ function selectElement(id) {
 	
 	document.getElementById("element-editor").style.display = 'block';
 	
-	document.getElementById('element-size-width').innerHTML = document.getElementById(id).style.width;
-	document.getElementById('element-size-height').innerHTML = document.getElementById(id).style.height;
-	document.getElementById('element-position-top').innerHTML = document.getElementById(id).style.top;
-	document.getElementById('element-position-left').innerHTML = document.getElementById(id).style.left;
-	document.getElementById('element-padding-top').value = document.getElementById(id).style.paddingTop;
-    document.getElementById('element-padding-right').value = document.getElementById(id).style.paddingRight;
-    document.getElementById('element-padding-bottom').value = document.getElementById(id).style.paddingBottom;
-    document.getElementById('element-padding-left').value = document.getElementById(id).style.paddingLeft;
+	var elementwidth = window.getComputedStyle(document.getElementById(id)).getPropertyValue('width').split('px');
+	document.getElementById('element-size-width').innerHTML = elementwidth[0];
+	var elementheight = window.getComputedStyle(document.getElementById(id)).getPropertyValue('height').split('px');
+	document.getElementById('element-size-height').innerHTML = elementheight[0];
+	var elementtop = window.getComputedStyle(document.getElementById(id)).getPropertyValue('top').split('px');
+	document.getElementById('element-position-top').innerHTML = elementtop[0];
+	var elementleft = window.getComputedStyle(document.getElementById(id)).getPropertyValue('left').split('px');
+	document.getElementById('element-position-left').innerHTML = elementleft[0];
+	var paddingtop = document.getElementById(id).style.paddingTop.split('px');
+	document.getElementById('element-padding-top').value = paddingtop[0];
+	var paddingright = document.getElementById(id).style.paddingRight.split('px');
+    document.getElementById('element-padding-right').value = paddingright[0];
+    var paddingbottom = document.getElementById(id).style.paddingBottom.split('px');
+    document.getElementById('element-padding-bottom').value = paddingbottom[0];
+    var paddingleft = document.getElementById(id).style.paddingLeft.split('px');
+    document.getElementById('element-padding-left').value = paddingleft[0];
+    var hexcolourText = rgb2hex(document.getElementById(id).style.color).toString();
+    var hexcolourBackground = rgb2hex(document.getElementById(id).style.backgroundColor).toString();
+    if (!hexcolourText) {
+    	hexcolourText = '#000000';
+    }
+    if (!hexcolourBackground) {
+    	hexcolourBackground = '#FFFFFF';
+    }
+    document.getElementById('element-colour-text').value = hexcolourText;
+    console.log(document.getElementById('element-colour-text').value);
+    document.getElementById('element-colour-background').value = hexcolourBackground;
 	
 	var resizerbottomright = document.createElement('div');
     resizerbottomright.className = 'resizer resizerbottomright';
-    resizerbottomright.id = id
+    resizerbottomright.id = id + 'resizer'
     element.appendChild(resizerbottomright);
     var mover = document.createElement('div');
     mover.className = 'mover';
-    mover.innerHTML = "<i class='icon-move'></i>";
+    mover.id = id + 'mover';
+    mover.innerHTML = "<i class='icon-move' id='move-icon'></i>";
     element.appendChild(mover);
     resizerbottomright.addEventListener('mousedown', initResizeDrag, false);
     mover.addEventListener('mousedown', initMoveDrag, false);
@@ -340,6 +364,39 @@ function selectElement(id) {
     document.getElementById('element-padding-right').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-bottom').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-left').addEventListener('keyup', updatePadding, false);
+    document.getElementById('element-colour-text').addEventListener('change', textColour, false);
+    document.getElementById('element-colour-background').addEventListener('change', backgroundColour, false);
+    
+    window.onclick = function(event) {
+    	var mover = document.getElementById('icon-move');
+    	var resizer = document.getElementById(id + 'resizer');
+    	console.log(event.target);
+//    	console.log("element contains mover :" + mover.parentNode == element);
+    	console.log("element contains resizer :" + element.contains(resizer));
+    	console.log(element == event.target);
+    	var editor = document.getElementById("element-editor");
+    	var inelement = false;
+    	if (event.target == element) {
+    		inelement = true;
+    	}
+    	for (var i = 0; i < element.childNodes.length; i++) {
+    		if (element.childNodes[i] == event.target) {
+    			console.out(element.childNodes[i]);
+    			inelement = true;
+    		}
+    	}
+    	for (var i = 0; i < editor.childNodes.length; i++) {
+    		if (editor.childNodes[i] == event.target) {
+    			inelement = true;
+    		}
+    	}
+	    if (!inelement) {
+	    	element.classList.remove("selected-element");
+	    	editor.style.display = 'none';
+		    $('.resizer').remove();
+		    $('.mover').remove();
+	    }
+	}
     
 	
 	var startX, startY, startWidth, startHeight;
@@ -355,8 +412,8 @@ function selectElement(id) {
 	}
 	
 	function doResizeDrag(e) {
-		element.style.width = (startWidth + e.clientX - startX) + 'px';
-		element.style.height = (startHeight + e.clientY - startY) + 'px';
+		element.style.width = Math.ceil((startWidth + e.clientX - startX) / 10) * 10 + 'px';
+		element.style.height = Math.ceil((startHeight + e.clientY - startY) / 10) * 10 + 'px';
 		document.getElementById('element-size-width').innerHTML = document.getElementById(id).style.width;
 		document.getElementById('element-size-height').innerHTML = document.getElementById(id).style.height;
 	}
@@ -383,10 +440,10 @@ function selectElement(id) {
 	
 	function doMoveDrag(e) {
 		if (startLeft + e.clientX - startX >= 0) {
-			element.style.left = (startLeft + e.clientX - startX) + 'px';
+			element.style.left = Math.ceil((startLeft + e.clientX - startX) / 10) * 10 + 'px';
 		}
 		if (startTop + e.clientY - startY >= 0) {
-			element.style.top = (startTop + e.clientY - startY) + 'px';
+			element.style.top = Math.ceil((startTop + e.clientY - startY) / 10) * 10 + 'px';
 		}
 		document.getElementById('element-position-top').innerHTML = document.getElementById(id).style.top;
 		document.getElementById('element-position-left').innerHTML = document.getElementById(id).style.left;
@@ -406,16 +463,47 @@ function selectElement(id) {
 		undoChangeStack.push(JSON.stringify(tempApplication));
 		
 		paddingtop = document.getElementById('element-padding-top').value;
-		element.style.paddingTop = paddingtop + 'px';
+		paddingtop = paddingtop.split('px');
+		element.style.paddingTop = paddingtop[0] + 'px';
 		paddingright = document.getElementById('element-padding-right').value;
 		element.style.paddingRight = paddingright + 'px';
 		paddingbottom = document.getElementById('element-padding-bottom').value;
 		element.style.paddingBottom = paddingbottom + 'px';
 		paddingleft = document.getElementById('element-padding-left').value;
 		element.style.paddingLeft = paddingleft + 'px';
-		
-		var pageId = document.getElementById("page-identifier").value;
+		document.documentElement.removeEventListener('keyup', updatePadding, false);
+	    document.documentElement.removeEventListener('keyup', updatePadding, false);
+	    document.documentElement.removeEventListener('keyup', updatePadding, false);
+	    document.documentElement.removeEventListener('keyup', updatePadding, false);
+	    
 		saveJsonLocal(tempApplication);
+	}
+	
+	function textColour() {
+		undoChangeStack.push(JSON.stringify(tempApplication));
+		
+		console.log('changing text colour')
+		var colour = document.getElementById('element-colour-text').value;
+		element.style.color = colour;
+		
+		saveJsonLocal(tempApplication);
+	}
+	
+	function backgroundColour() {
+		undoChangeStack.push(JSON.stringify(tempApplication));
+		
+		var colour = document.getElementById('element-colour-background').value;
+		console.log(colour)
+		element.style.backgroundColor = colour;
+		document.documentElement.removeEventListener('change', textColour, false);
+	    document.documentElement.removeEventListener('change', backgroundColour, false);
+	    
+	    saveJsonLocal(tempApplication);
+	}
+	
+	function rgb2hex(rgb){
+		rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+		return (rgb && rgb.length === 4) ? '#' + ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) + ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) + ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
 	}
 	
 }
