@@ -21,3 +21,6 @@ class NewProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ('name', 'desc', 'owner', 'lastedited', )
+        
+# class ProjectJsonForm(forms.ModelForm):
+#     file = forms.JSONField()

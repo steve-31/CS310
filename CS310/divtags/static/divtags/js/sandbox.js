@@ -1,73 +1,11 @@
-var Application = {
-	"id": 1,
-	"name": "myFirstProject",
-	"objects": [
-		{ 
-			"name": "Customer", "attributes": [
-				{ "first_name": "String" }, 
-				{ "last_name": "String" },
-				{ "id": "primary_key"} 
-			] 
-		}
-	],
-	"pages": [
-		{ 
-			"name": "Home",
-			"elements": [
-				{ "id": 0, "content": "<h1 class=\"element\" id=\"0\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:150px; left:300px;\">This is a Heading</h1>" },
-				{ "id": 1, "content": "<p class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:250px; left:300px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
-			],
-		"workflows": [] 
-		},
-		{ 
-			"name": "Second",
-			"elements": [
-				{ "id": 0, "content": "<h1 class=\"element\" id=\"0\" onclick=\"selectElement(this.id)\" style=\"color:#ff0000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Heading</h1>" },
-				{ "id": 1, "content": "<p class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:#ff0000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
-			],
-		"workflows": [] 
-		}
-	]
-}
-
-var tempApplication = {
-		"id": 1,
-		"name": "myFirstProject",
-		"objects": [
-			{ 
-				"name": "Customer", "attributes": [
-					{ "first_name": "String" }, 
-					{ "last_name": "String" },
-					{ "id": "primary_key"} 
-				] 
-			}
-		],
-		"pages": [
-			{ 
-				"name": "Home",
-				"elements": [
-					{ "id": 0, "content": "<h1 class=\"element\" id=\"0\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:150px; left:300px;\">This is a Heading</h1>" },
-					{ "id": 1, "content": "<p class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:250px; left:300px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
-				],
-			"workflows": [] 
-			},
-			{ 
-				"name": "Second",
-				"elements": [
-					{ "id": 0, "content": "<h1 class=\"element\" id=\"0\" onclick=\"selectElement(this.id)\" style=\"color:#ff0000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Heading</h1>" },
-					{ "id": 1, "content": "<p class=\"element\" id=\"1\" onclick=\"selectElement(this.id)\" style=\"color:#ff0000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">Use offset of mouse position before and after to get position of drag and drop</p>" }
-				],
-			"workflows": [] 
-			}
-		]
-	}
+var tempApplication = Application;
 
 var noOfElements = 0;
 var undoChangeStack = new Array();
 var redoChangeStack = new Array();
 
-window.onload = insertElements(tempApplication, 0);
-window.onload = insertPages(tempApplication);
+window.onload = insertElements(Application, 0);
+window.onload = insertPages(Application);
 
 function printStack(inputStack) {
 	console.log("printing stack");
@@ -251,6 +189,8 @@ function newPage(event, id) {
 }
 
 function save() {
+	
+	
 	var id = document.getElementById("page-identifier").value;
 	saveJson(Application, id);
 }
@@ -268,32 +208,35 @@ function saveJson(jsonInput, id) {
 	saveButton.innerHTML = "<i class='icon-line-check'></i> Done";
 	setTimeout(function() { saveButton.innerHTML = "Save"; }, 2000);
 	
-	var allElements = document.getElementById("outer-container").childNodes;
-	var saveElements = [];
-	for (i in allElements) {
-		if (typeof allElements[i].outerHTML !== 'undefined'){
-			saveElements.push(
-					{ 
-						"id": i,
-						"content": allElements[i].outerHTML,
-					}
-			);
-		}
-	}
-	jsonInput.pages[id].elements = saveElements;
-	console.log(jsonInput.pages[id].elements);
-	undoChangeStack.length = 0;
-	redoChangeStack.length = 0;
-	if (undoChangeStack.length == 0) {
-		document.getElementById("undo-change").style.display = "none";
-	} else {
-		document.getElementById("undo-change").style.display = "block";
-	}
-	if (redoChangeStack.length == 0) {
-		document.getElementById("redo-change").style.display = "none";
-	} else {
-		document.getElementById("redo-change").style.display = "block";
-	}
+	Application = tempApplication
+	
+//	var allElements = document.getElementById("outer-container").childNodes;
+//	var saveElements = [];
+//	for (i in allElements) {
+//		if (typeof allElements[i].outerHTML !== 'undefined'){
+//			saveElements.push(
+//					{ 
+//						"id": i,
+//						"content": allElements[i].outerHTML,
+//					}
+//			);
+//		}
+//	}
+//	jsonInput.pages[id].elements = saveElements;
+//	console.log(jsonInput.pages[id].elements);
+	
+//	undoChangeStack.length = 0;
+//	redoChangeStack.length = 0;
+//	if (undoChangeStack.length == 0) {
+//		document.getElementById("undo-change").style.display = "none";
+//	} else {
+//		document.getElementById("undo-change").style.display = "block";
+//	}
+//	if (redoChangeStack.length == 0) {
+//		document.getElementById("redo-change").style.display = "none";
+//	} else {
+//		document.getElementById("redo-change").style.display = "block";
+//	}
 }
 
 function insertPages(jsonInput) {
