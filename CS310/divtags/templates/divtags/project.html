@@ -1,5 +1,6 @@
 {% extends "./base.html" %}
 {% load static %}
+{% load jsonify %}
 {% block content %}
 
 <div id="toolbar" class="toolbar-left">
@@ -85,6 +86,42 @@
 {% endblock %}
 
 {% block scripts %}
+<script type="text/javascript">
+	var Application = {{ project.file|jsonify }};
+</script>
 <script type="text/javascript" src="{% static 'divtags/js/project-scripts.js' %}"></script>
 <script type="text/javascript" src="{% static 'divtags/js/sandbox.js' %}"></script>
+<script type="text/javascript" src="{% static 'divtags/js/ajaxSetup.js' %}"></script>
+<script type="text/javascript">
+
+$("#save-button").on('click', function(event) {
+	event.preventDefault();
+    console.log("form submitted!")  // sanity check
+    create_post();
+    save();
+});
+function create_post() {
+    console.log("create post is working!") // sanity check
+    var file = JSON.stringify(tempApplication);
+    $.ajax({
+	    url : "{% url 'divtags:project_save' project.id %}", // the endpoint
+	    type : "POST", // http method
+	    data : { "file": file }, // data sent with the post request
+	
+	    // handle a successful response
+	    success : function(json) {
+	        console.log(json); // log the returned json to the console
+	        console.log("success"); // another sanity check
+	        $('#json-result').append(json);
+	    },
+	    error : function(xhr,errmsg,err) {
+	    	console.log("FAIL");
+            $('#json-result').html("it didnt work"); // add the error to the dom
+            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+        }
+	});
+}
+
+</script>
+
 {% endblock %}

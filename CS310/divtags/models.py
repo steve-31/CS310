@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from django.contrib.postgres.fields import JSONField
 
 # Create your models here.
 
@@ -14,6 +15,7 @@ class Project(models.Model):
     contributors = models.ManyToManyField(User, related_name='contributers')
     lastedited = models.DateTimeField(default=timezone.now)
     ispublished = models.BooleanField(default=False)
+    file = JSONField()
     
 class ProjectFile(models.Model):
     name = models.CharField(max_length=40)

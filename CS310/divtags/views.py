@@ -2,12 +2,14 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.db.models import Q
 from itertools import chain
 from operator import attrgetter
 import os
+import json
+from django.core.serializers import serialize
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -89,18 +91,41 @@ def project(request, pid):
     projectdir = ""
     projectobj = ProjectObject.objects.filter(project = pid)
     attribute_types = ProjectAttributeType.objects.all().order_by('name')
+    message = ""
+    
+    
     
     context = {
+        "error_message": message,
         "title": "Project",
         "project": project,
         "users": users,
         "projectdir": projectdir,
         "objects": projectobj,
         "attribute_types": attribute_types,
-        "current_page": "Home",
     }
     
     return render(request, 'divtags/project.html', context)
+
+@login_required
+def project_save(request, pid):
+    current_user = request.user
+    
+    try:
+        projecttest = Project.objects.filter(Q(owner=current_user) | Q(contributors=current_user)).distinct()
+        projecttest = projecttest.get(pk=pid)
+    except Project.DoesNotExist:
+        return redirect('permissiondenied')
+    project = Project.objects.get(pk=pid)
+    if request.method == "POST":
+        json_file = request.POST.get('file')
+        json_file = json.loads(json_file)
+        print(json_file)
+        project.file = json_file
+        project.save()
+        return JsonResponse({'message': json_file})
+    else:
+        return render(request, 'divtags/project.html', {})
 
 def changeprojectowner(request, pid):
     owner = request.GET.get('owner-select')

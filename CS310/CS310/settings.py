@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'divtags.apps.DivtagsConfig',
+    'jsonify',
 ]
 
 MIDDLEWARE = [
@@ -79,8 +80,12 @@ WSGI_APPLICATION = 'CS310.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'divtags',
+        'USER': 'postgres',
+        'PASSWORD': 'Tottenh@m1',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
