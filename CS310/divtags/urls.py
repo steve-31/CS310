@@ -14,4 +14,5 @@ urlpatterns = [
     url(r'^project/new/$', views.newproject, name='newproject'),
     url(r'^project/file/$', TemplateView.as_view(template_name='divtags/project-content.html'), name='projectfile'),
     url(r'^project/save/(?P<pid>[0-9]+)/$', views.project_save, name='project_save'),
+    url(r'^project/restore/(?P<pid>[0-9]+)/$', views.project_restore, name='project_restore'),
 ]

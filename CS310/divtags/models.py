@@ -17,10 +17,6 @@ class Project(models.Model):
     ispublished = models.BooleanField(default=False)
     file = JSONField()
     
-class ProjectFile(models.Model):
-    name = models.CharField(max_length=40)
-    url = models.FileField()
-    
 class ProjectAttributeType(models.Model):
     name = models.CharField(max_length=50)
     
@@ -33,4 +29,11 @@ class ProjectObject(models.Model):
     name = models.CharField(max_length=50)
     desc = models.CharField(max_length=150)
     attributes = models.ManyToManyField(ProjectAttribute)
+
+class ProjectVersion(models.Model):
+    project = models.ForeignKey(Project)
+    datetime = models.DateTimeField()
+    versionno = models.IntegerField()
+    iterationno = models.IntegerField()
+    file = JSONField()
     

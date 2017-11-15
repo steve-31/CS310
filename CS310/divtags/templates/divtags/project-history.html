@@ -2,3 +2,22 @@
 
 <h1>Application History</h1>
 
+<table class="table table-hover text-left">
+	<thead>
+		<tr>
+			<th>Version Number</th>
+			<th>Date &amp; Time</th>
+			<th>Restore</th>
+		</tr>
+	</thead>
+	<tbody id="version-table">
+		{% for version in projectversions %}
+			<tr>
+				<td>{{ version.versionno }}.{{ version.iterationno }}</td>
+				<td>{{ version.datetime }}</td>
+				<td><a href="{% url 'divtags:project_restore' version.id %}" >Restore to this version?</a></td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
