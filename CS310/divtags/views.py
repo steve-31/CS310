@@ -13,9 +13,10 @@ from django.core.serializers import serialize
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from .models import Project, ProjectObject, ProjectAttributeType
+from .models import Project, ProjectObject, ProjectAttributeType, ProjectVersion
 from .forms import SignUpForm, NewProjectForm
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
 # Create your views here.
 
@@ -91,18 +92,18 @@ def project(request, pid):
     projectdir = ""
     projectobj = ProjectObject.objects.filter(project = pid)
     attribute_types = ProjectAttributeType.objects.all().order_by('name')
-    message = ""
     
+    projectversions = ProjectVersion.objects.filter(project = project).order_by('-datetime')
     
     
     context = {
-        "error_message": message,
         "title": "Project",
         "project": project,
         "users": users,
         "projectdir": projectdir,
         "objects": projectobj,
         "attribute_types": attribute_types,
+        "projectversions": projectversions,
     }
     
     return render(request, 'divtags/project.html', context)
@@ -117,15 +118,47 @@ def project_save(request, pid):
     except Project.DoesNotExist:
         return redirect('permissiondenied')
     project = Project.objects.get(pk=pid)
+    
     if request.method == "POST":
+        
         json_file = request.POST.get('file')
         json_file = json.loads(json_file)
-        print(json_file)
+        project.lastedited = datetime.now()
         project.file = json_file
         project.save()
-        return JsonResponse({'message': json_file})
+        
+        version_file = project.file
+        last_version = ProjectVersion.objects.filter(project=project).order_by('-datetime')[:1]
+        for version in last_version:
+            version_number = version.versionno
+            iteration_number = version.iterationno
+        iteration_number += 1
+        version = ProjectVersion(project = project, versionno = version_number, iterationno = iteration_number, datetime = project.lastedited, file = version_file)
+        version.save()
+        formattedDate = version.datetime.strftime("%b. %d, %Y, %I:%M %p")
+        
+        return JsonResponse({'versionid': version.id, 'versionNo': version_number, 'iterationNo': iteration_number, 'datetime': formattedDate})
     else:
         return render(request, 'divtags/project.html', {})
+    
+@login_required
+def project_restore(request, pid):
+    version = ProjectVersion.objects.get(pk=pid)
+    project = version.project
+    projectid = project.id
+    
+    current_user = request.user
+    
+    try:
+        projecttest = Project.objects.filter(Q(owner=current_user) | Q(contributors=current_user)).distinct()
+        projecttest = projecttest.get(pk=projectid)
+    except Project.DoesNotExist:
+        return redirect('permissiondenied')
+    
+    project.file = version.file
+    project.save()
+    
+    return redirect('divtags:project', pid=projectid)
 
 def changeprojectowner(request, pid):
     owner = request.GET.get('owner-select')
