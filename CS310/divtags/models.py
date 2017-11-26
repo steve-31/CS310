@@ -15,6 +15,12 @@ class Project(models.Model):
     contributors = models.ManyToManyField(User, related_name='contributers')
     lastedited = models.DateTimeField(default=timezone.now)
     ispublished = models.BooleanField(default=False)
+    currversionno = models.IntegerField()
+    curriterationno = models.IntegerField()
+    currexperimentalno = models.IntegerField(null=True)
+    pubversionno = models.IntegerField(null=True)
+    pubiterationno = models.IntegerField(null=True)
+    pubdate = models.DateTimeField(null=True)
     file = JSONField()
     
 class ProjectAttributeType(models.Model):
@@ -30,10 +36,17 @@ class ProjectObject(models.Model):
     desc = models.CharField(max_length=150)
     attributes = models.ManyToManyField(ProjectAttribute)
 
+class ProjectVersionExperimental(models.Model):
+    #parent = models.ForeignKey(ProjectVersion)
+    experimentalno = models.IntegerField()
+    datetime = models.DateTimeField()
+    file = JSONField()
+
 class ProjectVersion(models.Model):
     project = models.ForeignKey(Project)
     datetime = models.DateTimeField()
     versionno = models.IntegerField()
     iterationno = models.IntegerField()
+    experimentals = models.ManyToManyField(ProjectVersionExperimental)
     file = JSONField()
     
