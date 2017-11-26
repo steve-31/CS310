@@ -96,12 +96,12 @@
 
 $("#save-button").on('click', function(event) {
 	event.preventDefault();
+    create_save();
     console.log("form submitted!")  // sanity check
-    create_post();
     save();
 });
-function create_post() {
-    console.log("create post is working!") // sanity check
+function create_save() {
+    console.log("create save is working!") // sanity check
     var oldFile = JSON.stringify(Application);
     var file = JSON.stringify(tempApplication);
     $.ajax({
@@ -113,7 +113,45 @@ function create_post() {
 	    success : function(json) {
 	        console.log(json); // log the returned json to the console
 	        console.log("success"); // another sanity check
-	        $('#version-table').prepend("<tr><td>" + json.versionNo + "." + json.iterationNo + "</td><td>" + json.datetime + "</td><td><a href=\"/project/restore/" + json.versionid + "/\" >Restore to this version?</a></td></tr>");
+	        if (json.experimentalNo == 0){
+	        	$('#version-table').prepend("<tr><td>" + json.versionNo + "." + json.iterationNo + "</td><td>" + json.datetime + "</td><td><a href=\"/project/restore/" + json.versionid + "/\" >Restore to this version?</a></td></tr>");
+	        } else {
+	        	
+	        }
+	    },
+	    error : function(xhr,errmsg,err) {
+	    	console.log("FAIL");
+            $('#json-result').html("it didnt work"); // add the error to the dom
+            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+        }
+	});
+}
+
+$("#deploy-button").on('click', function(event) {
+	event.preventDefault();
+    if ({% if project.currexperimentalno == None %}true{% else %}false{% endif %}){
+	    if (confirm("Are you sure you wish to deploy this version {{project.currversionno}}.{{project.curriterationno}}{% if not project.currexperimentalno == None %}.{{project.currexperimentalno}}{% endif %}?")) {
+	    	create_deploy();
+	    	console.log("form submitted!")  // sanity check
+	    }
+    } else {
+    	alert("You may not deploy this version, please merge experimental branch into parent branch before deploying");
+    }
+});
+function create_deploy() {
+    console.log("create deploy is working!") // sanity check
+    vno = {{ project.currversionno }};
+    itno = {{ project.curriterationno }};
+    $.ajax({
+	    url : "{% url 'divtags:project_deploy' project.id %}", // the endpoint
+	    type : "POST", // http method
+	    data : { "vno": vno, "itno": itno }, // data sent with the post request
+	
+	    // handle a successful response
+	    success : function(json) {
+	        console.log(json); // log the returned json to the console
+	        console.log("success"); // another sanity check
+	        $('#deployed-version-table').html("<table class=\"table table-hover text-left\"><thead><tr><th>Version Number</th><th>Restore</th></tr></thead><tbody><tr><td>" + json.versionNumber + "." + json.iterationNumber + "</td><td><a href=\"#\" >Restore to this version?</a></td></tr></tbody></table>");
 	    },
 	    error : function(xhr,errmsg,err) {
 	    	console.log("FAIL");

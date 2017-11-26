@@ -19,6 +19,24 @@
     	$('#projectTitleModal').hide()
     });
     
+    function revealExperimentals(id) {
+    	var experimentals = document.getElementsByClassName("experimental-version-" + id);
+    	for (var i=0; i < experimentals.length; i++) {  
+    		experimentals[i].style.display = "";
+    	}
+    	var revealButton = document.getElementById('reveal-button-'+id);
+    	revealButton.outerHTML = '<td id="reveal-button-'+id+'" onclick="hideExperimentals('+id+')"><i id="reveal-arrow-'+id+'" class="icon-caret-down" ></i></td>';
+    }
+    
+    function hideExperimentals(id) {
+    	var experimentals = document.getElementsByClassName("experimental-version-" + id);
+    	for (var i=0; i < experimentals.length; i++) {  
+    		experimentals[i].style.display = "none";
+    	}
+    	var revealButton = document.getElementById('reveal-button-'+id);
+    	revealButton.outerHTML = '<td id="reveal-button-'+id+'" onclick="revealExperimentals('+id+')"><i id="reveal-arrow-'+id+'" class="icon-caret-right" ></i></td>';
+    }
+    
     window.onclick = function(event) {
 	    if (event.target == '#projectTitleModal') {
 	        modal.style.display = "none";
