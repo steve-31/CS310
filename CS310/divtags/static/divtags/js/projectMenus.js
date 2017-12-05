@@ -11,7 +11,7 @@
     });
 
     $('#owner-select').select2({});
-
+    
     $('#projectTitleButton').click(function(){
     	$('#projectTitleModal').show()
     });
@@ -56,24 +56,24 @@
 	    }
 	}
     
-    $('#add-attribute-btn').click(function(event){
-    	event.preventDefault();
-    	var $div = $('div[id^="new-attribute"]:last');
-    	var num = parseInt( $div.prop("id").match(/\d+/g), 10 ) +1;
-    	var $newattribute = $div.clone().prop('id', 'new-attribute'+num );
-    	$('#add-attribute-btn').before($newattribute)
-    	$('#new-attribute'+num+' input').prop('name', 'obj_attrib_name'+num);
-    	$('#new-attribute'+num+' select').prop('name', 'obj_attrib_name'+num);
-    	$('#new-attribute'+num+' button').prop('id', 'delete-attribute-btn'+num);
-    	if (num == 2) {
-    		$('#new-attribute'+num).append('<button type="button" class="delete-attribute-btn" id="delete-attribute-btn2" onclick="deleteattribute(this.id)"><i class="icon-trashcan"></i></button>');
-    	}
-    });
-    
-    function deleteattribute(clicked_id){
-    	document.getElementById(clicked_id).closest('div').remove();
-    	console.log("deleting attribute: " + clicked_id);
-    };
+//    $('#add-attribute-btn').click(function(event){
+//    	event.preventDefault();
+//    	var $div = $('div[id^="new-attribute"]:last');
+//    	var num = parseInt( $div.prop("id").match(/\d+/g), 10 ) +1;
+//    	var $newattribute = $div.clone().prop('id', 'new-attribute'+num );
+//    	$('#add-attribute-btn').before($newattribute)
+//    	$('#new-attribute'+num+' input').prop('name', 'obj_attrib_name'+num);
+//    	$('#new-attribute'+num+' select').prop('name', 'obj_attrib_name'+num);
+//    	$('#new-attribute'+num+' button').prop('id', 'delete-attribute-btn'+num);
+//    	if (num == 2) {
+//    		$('#new-attribute'+num).append('<button type="button" class="delete-attribute-btn" id="delete-attribute-btn2" onclick="deleteattribute(this.id)"><i class="icon-trashcan"></i></button>');
+//    	}
+//    });
+//    
+//    function deleteattribute(clicked_id){
+//    	document.getElementById(clicked_id).closest('div').remove();
+//    	console.log("deleting attribute: " + clicked_id);
+//    };
 
 	$('#settings-button').click(function(event){
 		event.preventDefault();

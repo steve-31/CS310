@@ -268,11 +268,6 @@ function insertElements(jsonInput, id) {
 	}
 }
 
-function insertObjects(jsonInput, id) {
-	var objectTable = document.getElementById("object-table");
-	objectTable.innerHTML = "<tr><td>{{ object.name }}</td><td>{{ object.desc }}</td><td>{% for attribute in object.attributes.all %}{{ attribute.name }} <span style=\"padding-left: 30px;\">{{ attribute.type.name }}</span><br>{% endfor %}</td><td><a href=\"#\"><i class=\"icon-pencil\"></i></a>&nbsp;<a href=\"#\"><i class=\"icon-trashcan\"></i></a></td></tr>"
-}
-
 function checkSave(jsonInput, pageId) {
 	if (JSON.stringify(Application) !== JSON.stringify(tempApplication)) {
 		return true;
