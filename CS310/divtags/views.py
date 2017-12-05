@@ -165,9 +165,91 @@ def project_save(request, pid):
             project.currexperimentalno = experimental_number
             project.save()
         
-            return JsonResponse({'versionid': parent_version.id, 'versionNo': project.currversionno, 'iterationNo': project.curriterationno, 'experimentalNo': experimentalno, 'datetime': formattedDate})
+            return JsonResponse({'versionid': parent_version.id, 'versionNo': project.currversionno, 'iterationNo': project.curriterationno, 'experimentalNo': experimental_number, 'datetime': formattedDate})
     else:
         return render(request, 'divtags/project.html', {})
+    
+@login_required
+def object_save(request, pid):
+    new_object = request.POST.get('object')
+    new_object = json.loads(new_object)
+    
+    project = Project.objects.get(pk=pid)
+    json_file = project.file
+    
+    json_file['objects'].append(new_object)
+    
+    connections = request.POST.get('connections')
+    connections = json.loads(connections)
+    counter = 0
+    for connection in connections['connections']:
+        #connection = json.loads(connection)
+        index = 0
+        for object in json_file['objects']:
+            if object['name'] == connection['targetObject']:
+                json_file['objects'][index]['attributes'].append({ "name": "Connection", "type": "Reference", "details": connection['thisObject']})
+                break
+            index += 1
+        counter += 1
+    
+    
+    project.file = json_file
+    project.save()
+    
+    return JsonResponse({'objects': json.dumps(json_file['objects'], separators=(',',':'))})
+
+@login_required
+def object_edit(request, pid):
+    new_object = request.POST.get('object')
+    new_object = json.loads(new_object)
+    
+    objectname = new_object['name']
+    
+    project = Project.objects.get(pk=pid)
+    project_file = project.file
+    
+    index = 0
+    for object in project_file['objects']:
+        if object['name'] == objectname:
+            project_file['objects'][index] = new_object
+            break
+        index += 1
+        
+    connections = request.POST.get('connections')
+    connections = json.loads(connections)
+    counter = 0
+    for connection in connections['connections']:
+        #connection = json.loads(connection)
+        index = 0
+        for object in project_file['objects']:
+            if object['name'] == connection['targetObject']:
+                project_file['objects'][index]['attributes'].append({ "name": "Connection", "type": "Reference", "details": connection['thisObject']})
+                break
+            index += 1
+        counter += 1
+    
+    project.file = project_file
+    project.save()
+    
+    return JsonResponse({'objects': json.dumps(project_file['objects'], separators=(',',':'))})
+        
+@login_required
+def object_delete(request, pid):
+    objectname = request.POST.get('object')
+    project = Project.objects.get(pk=pid)
+    project_file = project.file
+    
+    count = 0
+    for object in project_file['objects']:
+        if object['name'] == objectname:
+            project_file['objects'].pop(count)
+            break
+        count += 1
+    
+    project.file = project_file
+    project.save()
+    
+    return JsonResponse({ 'success': 'yes' })
     
 @login_required
 def project_restore(request, pid, exp):

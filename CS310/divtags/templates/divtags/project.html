@@ -89,19 +89,129 @@
 <script type="text/javascript">
 	var Application = {{ project.file|jsonify }};
 </script>
-<script type="text/javascript" src="{% static 'divtags/js/project-scripts.js' %}"></script>
-<script type="text/javascript" src="{% static 'divtags/js/sandbox.js' %}"></script>
+<script type="text/javascript" src="{% static 'divtags/js/projectMenus.js' %}"></script>
+<script type="text/javascript" src="{% static 'divtags/js/dragAndDrop.js' %}"></script>
+<script type="text/javascript" src="{% static 'divtags/js/objects.js' %}"></script>
 <script type="text/javascript" src="{% static 'divtags/js/ajaxSetup.js' %}"></script>
 <script type="text/javascript">
 
+function delete_object(element) {
+	var objectname = element.parentElement.parentElement.childNodes[0].innerHTML;
+	$.ajax({
+		url : "{% url 'divtags:object_delete' project.id %}",
+		type : "POST",
+		data : { "object": objectname },
+		
+		success : function() {
+			for (i in currentObjects) {
+				if (currentObjects[i] == objectname) {
+					currentObjects.splice(i, 1);
+					break;
+				}
+			}
+			element.parentElement.parentElement.outerHTML = "";
+		},
+	})
+}
+
+$("#save-object-button").on('click', function(event) {
+	event.preventDefault();
+	var errors = 0;
+	var objname = document.getElementById("obj_name").value;
+	if (objname == "") {
+		document.getElementById("object-name-errors").innerHTML = "Please enter a name for this object";
+		errors = 1;
+	}
+	
+	for (i in currentObjects) {
+		if (currentObjects[i] == objname) {
+			document.getElementById("object-name-errors").innerHTML = "You already have an object with this name, please choose a different name";
+			errors = 1;
+		}
+	}
+	if (errors == 0) {
+		document.getElementById("object-name-errors").innerHTML = "";
+		create_object_save();
+	}
+});
+function create_object_save() {
+	var objname = document.getElementById("obj_name").value;
+	var objdesc = document.getElementById("obj_desc").value;
+	var objattributes = [];
+	var attribtable = document.getElementById("attributes-table");
+	for (var i = 0; i<attribtable.rows.length; i++) {
+		var row = attribtable.rows[i]
+		var newAttrib = { "name": row.cells[0].innerHTML, "type": row.cells[1].innerHTML, "details": row.cells[2].innerHTML };
+		objattributes.push(newAttrib);
+	}
+	var newObjectJson = { "name": objname, "desc": objdesc, "attributes": objattributes};
+	var newObject = JSON.stringify(newObjectJson);
+	var connections = { "connections": currentConnections }
+	connections = JSON.stringify(connections);
+	$.ajax({
+		url : "{% url 'divtags:object_save' project.id %}",
+		type : "POST",
+		data : { "object": newObject, "connections": connections },
+		
+		success : function(json) {
+			tempApplication['objects'] = JSON.parse(json.objects);
+			saveObject(newObjectJson);
+			insertObjects(tempApplication);
+		},
+	})
+}
+
+function create_object_edit() {
+	event.preventDefault();
+	var errors = 0;
+	var objname = document.getElementById("obj_name").value;
+	if (objname == "") {
+		document.getElementById("object-name-errors").innerHTML = "Please enter a name for this object";
+		errors = 1;
+	}
+	for (i in currentObjects) {
+		if (currentObjects[i] == objname) {
+			document.getElementById("object-name-errors").innerHTML = "You already have an object with this name, please choose a different name";
+			errors = 1;
+		}
+	}
+	if (errors == 0) {
+		document.getElementById("object-name-errors").innerHTML = "";
+		var objname = document.getElementById("obj_name").value;
+		var objdesc = document.getElementById("obj_desc").value;
+		var objattributes = [];
+		var attribtable = document.getElementById("attributes-table");
+		for (var i = 0; i<attribtable.rows.length; i++) {
+			var row = attribtable.rows[i]
+			var newAttrib = { "name": row.cells[0].innerHTML, "type": row.cells[1].innerHTML, "details": row.cells[2].innerHTML };
+			objattributes.push(newAttrib);
+		}
+		var newObjectJson = { "name": objname, "desc": objdesc, "attributes": objattributes};
+		var newObject = JSON.stringify(newObjectJson);
+		var connections = { "connections": currentConnections }
+		connections = JSON.stringify(connections);
+		$.ajax({
+			url : "{% url 'divtags:object_edit' project.id %}",
+			type : "POST",
+			data : { "object": newObject, "connections": connections },
+			
+			success : function(json) {
+				tempApplication['objects'] = JSON.parse(json.objects);
+				undoViewEditObject(newObjectJson);
+				console.log(tempApplication);
+				insertObjects(tempApplication);
+			},
+		});
+	}
+}
+
+
 $("#save-button").on('click', function(event) {
 	event.preventDefault();
+	document.getElementById("save-button").innerHTML = "<i class='icon-line-check'></i> Saving...";
     create_save();
-    console.log("form submitted!")  // sanity check
-    save();
 });
 function create_save() {
-    console.log("create save is working!") // sanity check
     var oldFile = JSON.stringify(Application);
     var file = JSON.stringify(tempApplication);
     $.ajax({
@@ -111,8 +221,7 @@ function create_save() {
 	
 	    // handle a successful response
 	    success : function(json) {
-	        console.log(json); // log the returned json to the console
-	        console.log("success"); // another sanity check
+	    	save();
 	        if (json.experimentalNo == 0){
 	        	$('#version-table').prepend("<tr><td>" + json.versionNo + "." + json.iterationNo + "</td><td>" + json.datetime + "</td><td><a href=\"/project/restore/" + json.versionid + "/\" >Restore to this version?</a></td></tr>");
 	        } else {
@@ -132,14 +241,12 @@ $("#deploy-button").on('click', function(event) {
     if ({% if project.currexperimentalno == None %}true{% else %}false{% endif %}){
 	    if (confirm("Are you sure you wish to deploy this version {{project.currversionno}}.{{project.curriterationno}}{% if not project.currexperimentalno == None %}.{{project.currexperimentalno}}{% endif %}?")) {
 	    	create_deploy();
-	    	console.log("form submitted!")  // sanity check
 	    }
     } else {
     	alert("You may not deploy this version, please merge experimental branch into parent branch before deploying");
     }
 });
 function create_deploy() {
-    console.log("create deploy is working!") // sanity check
     vno = {{ project.currversionno }};
     itno = {{ project.curriterationno }};
     $.ajax({
@@ -149,8 +256,6 @@ function create_deploy() {
 	
 	    // handle a successful response
 	    success : function(json) {
-	        console.log(json); // log the returned json to the console
-	        console.log("success"); // another sanity check
 	        $('#deployed-version-table').html("<table class=\"table table-hover text-left\"><thead><tr><th>Version Number</th><th>Restore</th></tr></thead><tbody><tr><td>" + json.versionNumber + "." + json.iterationNumber + "</td><td><a href=\"#\" >Restore to this version?</a></td></tr></tbody></table>");
 	    },
 	    error : function(xhr,errmsg,err) {
