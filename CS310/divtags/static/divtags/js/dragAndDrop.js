@@ -1,10 +1,19 @@
-var tempApplication = Application;
+//var tempApplication = Application;
 
-var noOfElements = 0;
+//var noOfElements = 0;
 var undoChangeStack = new Array();
 var redoChangeStack = new Array();
 
-window.onload = insertElements(Application, 0);
+var homepage = 1;
+for (i in Application.pages) {
+	if (Application.pages[i].homepage == "yes") {
+		homepage = i;
+		break;
+	}
+}
+
+
+window.onload = insertElements(Application, homepage);
 window.onload = insertPages(Application);
 
 function printStack(inputStack) {
@@ -134,22 +143,40 @@ function saveJsonLocal(jsonInput) {
 	var allElements = document.getElementById("outer-container").childNodes;
 	var pageId = document.getElementById("page-identifier").value;
 	var saveElements = [];
-	for (i in allElements) {
-		if (typeof allElements[i].outerHTML !== 'undefined'){
-			allElements[i].classList.remove("selected-element");
-		    $('.resizer').remove();
-		    $('.mover').remove();
-			if (typeof allElements[i].outerHTML !== 'undefined'){
+	var allPageElements = [];
+	for (var i=0; i < allElements.length; i++) {
+//		if (allElements[i].classList == "element selected-element") {
+//			currentselectedelement = 
+//		}
+		var elementtosave = allElements[i].cloneNode(true);
+		if (elementtosave.className == "element selected-element") {
+			elementtosave.childNodes[1].outerHTML = "";
+			elementtosave.childNodes[1].outerHTML = "";
+			elementtosave.childNodes[1].outerHTML = "";
+			elementtosave.className = "element";
+		}
+		
+		if (typeof elementtosave.outerHTML !== 'undefined'){
+			if (elementtosave.id.match(/-/g)) {
+				allPageElements.push(
+						{
+							"content": elementtosave.outerHTML,
+						}
+				);
+			} else {
 				saveElements.push(
 						{ 
-							"id": i,
-							"content": allElements[i].outerHTML,
+							"content": elementtosave.outerHTML,
 						}
 				);
 			}
 		}
 	}
 	jsonInput.pages[pageId].elements = saveElements;
+	if (jsonInput.pages[pageId].showallpages == "yes") {
+		jsonInput.pages[0].elements = allPageElements;
+	}
+	
 	
 	if (undoChangeStack.length == 0) {
 		document.getElementById("undo-change").style.display = "none";
@@ -168,7 +195,7 @@ function newPage(event, id) {
 	var pageid = document.getElementById("page-identifier").value;
 	if (checkSave(tempApplication, pageid)) {
 		if (confirm("You haven't saved your changes, are you sure you would like to navigate away from this page and lose them?")) {
-			tempApplication = Application;
+			//tempApplication = Application;
 			undoChangeStack.length = 0;
 			redoChangeStack.length = 0;
 			if (undoChangeStack.length == 0) {
@@ -181,10 +208,10 @@ function newPage(event, id) {
 			} else {
 				document.getElementById("redo-change").style.display = "block";
 			}
-			insertElements(Application, id);
+			insertElements(tempApplication, id);
 		}
 	} else {
-		insertElements(Application, id);
+		insertElements(tempApplication, id);
 	}
 }
 
@@ -202,6 +229,7 @@ function saveJson(jsonInput, id) {
 	    selectedElements[i].classList.remove("selected-element");
 	    $('.resizer').remove();
 	    $('.mover').remove();
+	    $('.delete').remove();
 	}
 	
 	var saveButton = document.getElementById("save-button");
@@ -241,28 +269,71 @@ function saveJson(jsonInput, id) {
 
 function insertPages(jsonInput) {
 	for (i in jsonInput.pages) {
-		var list = document.getElementById("project-page-list");
-		var newListItem = document.createElement('li');
-		newListItem.innerHTML = '<a class="fixedText" href="#" id="page-1" onclick="newPage(event, '+i+');">' + jsonInput.pages[i].name + '</a>';
-		list.appendChild(newListItem);
+		if (jsonInput.pages[i].name != "AllPages") {
+			var list = document.getElementById("project-page-list");
+			var newListItem = document.createElement('li');
+			if (jsonInput.pages[i].homepage == "yes") {
+				newListItem.innerHTML = '<a class="fixedText" href="#" id="page-'+i+'" onclick="newPage(event, '+i+');"><i class="icon-home"></i> ' + jsonInput.pages[i].name + '</a>';
+			} else {
+				newListItem.innerHTML = '<a class="fixedText" href="#" id="page-'+i+'" onclick="newPage(event, '+i+');">' + jsonInput.pages[i].name + '</a>';
+			}
+			list.appendChild(newListItem);
+		}
 	}
-	
 }
 
 function insertElements(jsonInput, id) {
-	
+	var pageid = document.getElementById("page-identifier");
+	pageid.value = id;
+	document.getElementById("element-editor").style.display = 'none';
+	$('#page-menu-options').hide();
+	$('#element-menu-button').hide();
 	var dropdown = document.getElementById("page-dropdown");
 	dropdown.innerHTML = "Page: &nbsp; " + jsonInput.pages[id].name + " &nbsp;&nbsp;&nbsp; <i class=\"icon-caret-down\" style=\"float:right;\"></i>";
 	var container = document.getElementById("outer-container");
-	container.innerHTML = "";
 	
-	var pageid = document.getElementById("page-identifier");
-	pageid.value = id;
+	
+	document.getElementById("page-options-name").innerHTML = jsonInput.pages[id].name + "<span class=\"fixedText\" onclick=\"deletePage(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-trashcan\"></i></span><span class=\"fixedText\" href=\"#\" onclick=\"editPageName(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-pencil\"></i></span>"
+	if (tempApplication.pages[id].permissions == "members") {
+		$('#permissions-toggle').bootstrapToggle('on');
+	} else {
+		$('#permissions-toggle').bootstrapToggle('off');
+	}
+	if (tempApplication.pages[id].homepage == "yes") {
+		document.getElementById('homepage-toggle').innerHTML = "Homepage Set";
+		document.getElementById('homepage-toggle').disabled = true;
+	} else {
+		document.getElementById('homepage-toggle').innerHTML = "Set as Homepage";
+		document.getElementById('homepage-toggle').disabled = false;
+	}
+	if (tempApplication.pages[id].showallpages == "yes") {
+		$('#show-allpages-elements-toggle').bootstrapToggle('on');
+	} else {
+		$('#show-allpages-elements-toggle').bootstrapToggle('off');
+	}
+	if (tempApplication.pages[id].showinheader == "yes") {
+		$('#page-header-toggle').bootstrapToggle('on');
+	} else {
+		$('#page-header-toggle').bootstrapToggle('off');
+	}
+	document.getElementById('page-background-colour').value = tempApplication.pages[id].background;
+	document.getElementById("project-content").style.backgroundColor = tempApplication.pages[id].background;
+	
+	
+	
+	container.innerHTML = "";
 
 	var elementToAdd;
+	if (jsonInput.pages[id].showallpages == "yes") {
+		for (i in jsonInput.pages[0].elements) {
+			elementToAdd = jsonInput.pages[0].elements[i].content;
+			container.innerHTML += elementToAdd;
+			noOfElements += 1;
+		}
+	}
 
-	for (i in jsonInput.pages[id].elements) {
-		elementToAdd = jsonInput.pages[id].elements[i].content;
+	for (j in jsonInput.pages[id].elements) {
+		elementToAdd = jsonInput.pages[id].elements[j].content;
 		container.innerHTML += elementToAdd;
 		noOfElements += 1;
 	}
@@ -276,20 +347,26 @@ function checkSave(jsonInput, pageId) {
 	}
 }
 
-
+$('#element-menu-button').click(function(){
+	$('#element-editor').toggle();
+	$('#page-menu-options').hide();
+});
 
 
 function selectElement(id) {
+	$('#page-menu-options').hide();
+	$('#element-menu-button').show();
 	document.getElementById("element-editor").style.display = 'none';
 	var old_element = document.getElementById("element-editor");
 	var new_element = old_element.cloneNode(true);
 	old_element.parentNode.replaceChild(new_element, old_element);
-
+	
 	var elements = document.getElementsByTagName("*");
 	for (var i=0; i < elements.length; i++) {    
 	    elements[i].classList.remove("selected-element");
 	    $('.resizer').remove();
 	    $('.mover').remove();
+	    $('.delete').remove();
 	}
 	
 	var element = document.getElementById(id);
@@ -323,10 +400,24 @@ function selectElement(id) {
     }
     document.getElementById('element-colour-text').value = hexcolourText;
     document.getElementById('element-colour-background').value = hexcolourBackground;
+    
+    var testElement = element.cloneNode(true);
+    testElement.className = "element";
+    document.getElementById("show-all-pages").checked = false;
+    for (i in tempApplication.pages[0].elements) {
+    	if (tempApplication.pages[0].elements[i].content == testElement.outerHTML) {
+    		document.getElementById("show-all-pages").checked = true;
+    	}
+    }
 	
+    var deleteButton = document.createElement('div');
+    deleteButton.id = id + 'delete';
+    deleteButton.className = 'delete';
+    deleteButton.innerHTML = '<i class=\"icon-line-cross\"></i>';
+    element.appendChild(deleteButton);
 	var resizerbottomright = document.createElement('div');
     resizerbottomright.className = 'resizer resizerbottomright';
-    resizerbottomright.id = id + 'resizer'
+    resizerbottomright.id = id + 'resizer';
     element.appendChild(resizerbottomright);
     var mover = document.createElement('div');
     mover.className = 'mover';
@@ -335,31 +426,84 @@ function selectElement(id) {
     element.appendChild(mover);
     resizerbottomright.addEventListener('mousedown', initResizeDrag, false);
     mover.addEventListener('mousedown', initMoveDrag, false);
+    deleteButton.addEventListener('mousedown', deleteElement, false);
     document.getElementById('element-padding-top').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-right').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-bottom').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-left').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-colour-text').addEventListener('change', textColour, false);
     document.getElementById('element-colour-background').addEventListener('change', backgroundColour, false);
+    document.getElementById('show-all-pages').addEventListener('change', showAllPages, false);
     
     window.onclick = function(event) {
     	var mover = document.getElementById('icon-move');
     	var resizer = document.getElementById(id + 'resizer');
-    	var container = document.getElementById("outer-container");
+    	var deleteButton = document.getElementById(id + 'delete');
+    	var container = document.getElementById("project-content");
+    	var container2 = document.getElementById("outer-container");
     	var editor = document.getElementById("element-editor");
     	var inelement = false;
-    	if (event.target != container) {
+    	if (event.target != container && event.target != container2) {
     		inelement = true;
     	}
+    	console.log(event.target);
+    	console.log(event.target != container);
+    	console.log(event.target != container2);
 	    if (!inelement) {
 	    	element.classList.remove("selected-element");
 	    	editor.style.display = 'none';
 		    $('.resizer').remove();
 		    $('.mover').remove();
+		    $('.delete').remove();
+		    $('#element-menu-button').hide();
 	    }
 	}
     
-	
+    function showAllPages(e) {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
+    	var oldelement = document.getElementById(id).cloneNode(true);
+    	oldelement.childNodes[1].outerHTML = "";
+    	oldelement.childNodes[1].outerHTML = "";
+    	oldelement.childNodes[1].outerHTML = "";
+    	oldelement.className = "element";
+    	var element = oldelement.cloneNode(true);
+    	if (document.getElementById('show-all-pages').checked) {
+    		element.id = element.id+"-"+document.getElementById("page-identifier").value;
+			tempApplication.pages[0].elements.push({"content": element.outerHTML});
+			for (i in tempApplication.pages[document.getElementById("page-identifier").value].elements) {
+				if (tempApplication.pages[document.getElementById("page-identifier").value].elements[i].content == oldelement.outerHTML) {
+					tempApplication.pages[document.getElementById("page-identifier").value].elements.splice(i,1);
+				}
+			}
+			document.getElementById(id).id = id+"-"+document.getElementById("page-identifier").value;
+			id = id+"-"+document.getElementById("page-identifier").value
+    	} else {
+    		for (i in tempApplication.pages[0].elements) {
+    			if (tempApplication.pages[0].elements[i].content == oldelement.outerHTML) {
+    				tempApplication.pages[0].elements.splice(i,1);
+    			}
+    		}
+    		var elementid = element.id.match(/\d+/g)
+    		element.id = elementid[0];
+    		tempApplication.pages[elementid[1]].elements.push({"content": element.outerHTML});
+    		if (elementid[1] != document.getElementById("page-identifier").value) {
+    			document.getElementById(id).outerHTML = "";
+    			document.getElementById("element-editor").style.display = 'none';
+    		} else {
+    			document.getElementById(id).outerHTML = element.outerHTML;
+        		id = elementid[0]
+    			selectElement(id);
+    		}
+    	}
+    }
+    
+    function deleteElement(e) {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
+    	document.getElementById(id).outerHTML = "";
+    	saveJsonLocal(tempApplication);
+    	document.getElementById("element-editor").style.display = 'none';
+    }
+    
 	var startX, startY, startWidth, startHeight;
 	
 	function initResizeDrag(e) {
@@ -453,7 +597,6 @@ function selectElement(id) {
 		undoChangeStack.push(JSON.stringify(tempApplication));
 		
 		var colour = document.getElementById('element-colour-background').value;
-		console.log(colour)
 		element.style.backgroundColor = colour;
 		document.documentElement.removeEventListener('change', textColour, false);
 	    document.documentElement.removeEventListener('change', backgroundColour, false);

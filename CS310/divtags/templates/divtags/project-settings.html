@@ -1,48 +1,45 @@
-		<h1>{{project.name}}{% if project.owner == request.user %}&nbsp;<span id="projectTitleButton"><i class="icon-pencil"></i></span><span class="label label-primary nocolor" style="float:right;margin:5px;">Project Owner</span>{% endif %}</h1>
+		<h1><span id="project-title" style="color:#444">{{project.name}}</span>{% if project.owner == request.user %}&nbsp;<span id="projectTitleButton"><i class="icon-pencil"></i></span><span id="project-owner-label" class="label label-primary nocolor" style="float:right;margin:5px;">Project Owner</span>{% endif %}</h1>
 		<ul class="entry-meta clearfix">
-			<li><i class="icon-user"></i> {{ project.owner }}</li>
-			<li><i class="icon-stopwatch"></i> {{ project.lastedited }}</li>
-			<li><i class="icon-line2-users"></i> {% for contributor in project.contributors.all %}{{ contributor.username }}{% if forloop.counter < project.contributors.count %}, {% endif %}{% endfor %}</li>
+			<li id="display-project-owner"><i class="icon-user"></i> {{ project.owner }}</li>
+			<li id="display-project-last-edit"><i class="icon-stopwatch"></i> {{ project.lastedited }}</li>
+			<li id="display-project-contributors"><i class="icon-line2-users"></i> {% for contributor in project.contributors.all %}{{ contributor.username }}{% if forloop.counter < project.contributors.count %}, {% endif %}{% endfor %}</li>
 		</ul>
 		<div class="clear bottommargin"></div>
-		<h2>{{project.name}} Description{% if project.owner == request.user %}&nbsp;<span id="projectDescButton"><i class="icon-pencil"></i></span>{% endif %}</h2>
-		<p>{{project.desc}}</p>
+		<h2><span id="project-title-desc" style="color:#444">{{project.name}}</span> Description{% if project.owner == request.user %}&nbsp;<span id="projectDescButton"><i class="icon-pencil"></i></span>{% endif %}</h2>
+		<p id="project-desc">{{project.desc}}</p>
 		
 		{% if project.owner == request.user %}
-		<h2>Change Project Owner</h2>
-		<form method="post">
+		<div id="owner-specific-content">
+			<h2>Change Project Owner</h2>
 			<select id="owner-select" style="width:50%;">
 				{% for owner in project.contributors.all %}<option value="{{owner.id}}" {% if owner == project.owner %}selected="selected"{% endif %}>{{ owner.first_name }} {{owner.last_name}} ({{owner.username}})</option>{% endfor %}
 			</select>
-			<button class="button button-3d button-blue bottommargin" type="submit">Change Owner</button>
-		</form>
-		
-		<h2>Add/Edit Contributors</h2>
-		<form method="post">
+			<button class="button button-3d button-blue bottommargin" onclick="change_owner(event)">Change Owner</button>
+			
+			<h2>Add/Edit Contributors</h2>
 			<select id="contributer-select" multiple="multiple" style="width:100%;">
 				{% for user in users %}<option value="{{user.id}}" {% if user in project.contributors.all %}selected="selected"{% endif %}>{{ user.first_name }} {{user.last_name}} ({{user.username}})</option>{% endfor %}
 			</select>
-			<button class="button button-3d button-blue bottommargin" type="submit">Change Contributors</button>
-		</form>
+			<button class="button button-3d button-blue bottommargin" onclick="change_contributors(event)">Change Contributors</button>
+		</div>
 		{% endif %}
+		
 		
 		<!-- Project Title Modal -->
 		<div id="projectTitleModal" class="modal">
 		
 			<!-- Modal content -->
 			<div class="modal-content">
-				<form>
-					<div class="modal-header">
-						<span class="close">&times;</span>
-						<h2>Change Project Title</h2>
-					</div>
-					<div class="modal-body">
-						<input type="text" class="form-control" name="title" placeholder="New Project Title"/>
-					</div>
-					<div class="modal-footer">
-						<button type="submit" class="button button-3d button-blue bottommargin"><i class="icon-user2"></i>Change Title</button>
-					</div>
-				</form>
+				<div class="modal-header">
+					<span class="close">&times;</span>
+					<h2>Change Project Title</h2>
+				</div>
+				<div class="modal-body">
+					<input id="new-project-title" type="text" class="form-control" name="title" placeholder="New Project Title"/>
+				</div>
+				<div class="modal-footer">
+					<button class="button button-3d button-blue bottommargin" onclick="change_title(event)"><i class="icon-user2"></i>Change Title</button>
+				</div>
 			</div>
 	
 		</div>
@@ -52,18 +49,16 @@
 		
 			<!-- Modal content -->
 			<div class="modal-content">
-				<form method="post" action="">
-					<div class="modal-header">
-						<span class="close">&times;</span>
-						<h2>Change Project Description</h2>
-					</div>
-					<div class="modal-body">
-						<input type="text" class="form-control" name="desc" placeholder="New Project Description"/>
-					</div>
-					<div class="modal-footer">
-						<button type="submit" class="button button-3d button-blue bottommargin"><i class="icon-user2"></i>Change Description</button>
-					</div>
-				</form>
+				<div class="modal-header">
+					<span class="close">&times;</span>
+					<h2>Change Project Description</h2>
+				</div>
+				<div class="modal-body">
+					<input id="new-project-desc" type="text" class="form-control" name="desc" placeholder="New Project Description"/>
+				</div>
+				<div class="modal-footer">
+					<button class="button button-3d button-blue bottommargin" onclick="change_desc(event)"><i class="icon-user2"></i>Change Description</button>
+				</div>
 			</div>
 	
 		</div>

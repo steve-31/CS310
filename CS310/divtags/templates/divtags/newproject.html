@@ -3,20 +3,15 @@
 
 <div class="container">
 	<h1>{{title}}</h1>
-	<form method="post">
-		{% csrf_token %}
-		{% for field in form %}
-			<p>
-				{{ field.label_tag }}&nbsp;
-				{{ field }}
-				{% if field.help_text %}
-					<small style="color: grey">{{ field.help_text|safe }}</small>
-				{% endif %}
-				{% for error in field.errors %}
-					<p style="color: red">{{ error|safe }}</p>
-				{% endfor %}
-			</p>
-		{% endfor %}
+	<form method="post">{% csrf_token %}
+		<div class="form-group">
+			<label for="proj_name">Name: </label><span id="object-name-errors"></span>
+			<input type="text" class="form-control" id="proj_name" placeholder="Project Name" name="projname" style="width:50%"><small style="color: grey">Max length 30 characters</small>
+	    </div>
+	    <div class="form-group">
+			<label for="proj_desc">Description: </label>
+			<input type="text" class="form-control" id="obj_desc" placeholder="Project Description" name="projdesc" style="width:50%"><small style="color: grey">Max length 300 characters</small>
+	    </div>
 		<button type="submit" class="button button-3d button-teal button-xlarge nobottommargin"><i class="icon-plus"></i>Create New Project</button>
 	</form>
 </div>

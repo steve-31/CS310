@@ -138,14 +138,19 @@ function editAttribute(element) {
 		}
 		attributes += "</optgroup>";
 		for (i in tempApplication.objects) {
-			attributes += "<optgroup label=\""+tempApplication.objects[i].name+"\">";
-			for (j in tempApplication.objects[i].attributes) {
-				if (tempApplication.objects[i].attributes[j].type == "Number") {
-					attributes += "<option value=\""+tempApplication.objects[i].attributes[j].name+"\">"+tempApplication.objects[i].attributes[j].name+"</option>";
+			for (o in currentConnections) {
+				if (tempApplication.objects[i].name == currentConnections[o].targetObject) {
+					attributes += "<optgroup label=\""+tempApplication.objects[i].name+"\">";
+					for (j in tempApplication.objects[i].attributes) {
+						if (tempApplication.objects[i].attributes[j].type == "Number") {
+							attributes += "<option value=\""+tempApplication.objects[i].attributes[j].name+"\">"+tempApplication.objects[i].attributes[j].name+"</option>";
+						}
+					}
+					attributes += "</optgroup>";
+					break;
 				}
 			}
-			attributes += "</optgroup>";
-		}
+			}
 		
 		detailsDiv.innerHTML += "<div id=\"calc-attribute-reference\"class=\" col-sm-4\">Attribute <select id=\"calc-attribute-select\" class=\"form-control\" style=\"width:50%\">"+attributes+"</select><button id=\"calc-add-attribute-button\" onclick=\"addAttributeToCalcField(event)\">Add</button></div>";
 		
@@ -195,7 +200,6 @@ function inputDetails() {
 			
 		var attributes = "";
 		var currentObjectName = document.getElementById('obj_name').value;
-		console.log(currentObjectName);
 		attributes += "<optgroup label=\""+currentObjectName+"\">";
 		for (m in currentAttributes) {
 			if ( currentAttributes[m].type == "Number"){
@@ -204,13 +208,18 @@ function inputDetails() {
 		}
 		attributes += "</optgroup>";
 		for (i in tempApplication.objects) {
-			attributes += "<optgroup label=\""+tempApplication.objects[i].name+"\">";
-			for (j in tempApplication.objects[i].attributes) {
-				if (tempApplication.objects[i].attributes[j].type == "Number") {
-					attributes += "<option value=\""+tempApplication.objects[i].attributes[j].name+"\">"+tempApplication.objects[i].attributes[j].name+"</option>";
+			for (o in currentConnections) {
+				if (tempApplication.objects[i].name == currentConnections[o].targetObject) {
+					attributes += "<optgroup label=\""+tempApplication.objects[i].name+"\">";
+					for (j in tempApplication.objects[i].attributes) {
+						if (tempApplication.objects[i].attributes[j].type == "Number") {
+							attributes += "<option value=\""+tempApplication.objects[i].attributes[j].name+"\">"+tempApplication.objects[i].attributes[j].name+"</option>";
+						}
+					}
+					attributes += "</optgroup>";
+					break;
 				}
 			}
-			attributes += "</optgroup>";
 		}
 		
 		detailsDiv.innerHTML += "<div id=\"calc-attribute-reference\"class=\" col-sm-4\">Attribute <select id=\"calc-attribute-select\" class=\"form-control\" style=\"width:50%\">"+attributes+"</select><button id=\"calc-add-attribute-button\" onclick=\"addAttributeToCalcField(event)\">Add</button></div>";

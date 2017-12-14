@@ -1,4 +1,7 @@
-	$('document').ready(function(){
+var tempApplication = Application;
+var noOfElements = 0;
+
+$('document').ready(function(){
 		var headeroffset = $('#header').offset().top;
 		if (headeroffset >= 0) {
 	    	$('#header').addClass('sticky-header');
@@ -17,6 +20,11 @@
     });
     $('.close').click(function(){
     	$('#projectTitleModal').hide()
+    });
+    
+    $('#page-menu-button').click(function(){
+    	$('#page-menu-options').toggle()
+    	$('#element-editor').hide()
     });
     
     function revealExperimentals(id) {
@@ -55,6 +63,121 @@
 	        modal.style.display = "none";
 	    }
 	}
+    
+    function addPage(event) {
+    	event.preventDefault();
+    	newpage = {"name": "NewPage", "elements": [], "background": "#ffffff", "permissions": "public", "homepage":"no", "showinheader":"yes", "showallpages":"yes"};
+    	tempApplication['pages'].push(newpage);
+    	document.getElementById("project-page-list").innerHTML = "<li id=\"project-page-add\"><a href=\"#\" onclick=\"addPage(event)\" class=\"fixedText\"><i class=\"icon-plus\"></i>&nbsp;Add new page</a></li>";
+    	insertPages(tempApplication);
+    	var page = document.getElementById("project-page-list").lastChild.childNodes[0].id;
+    	var pagenum = parseInt(page.match(/\d+/g), 10);
+    	newPage(event, pagenum);
+    }
+    
+    function editPageName(event) {
+    	event.preventDefault();
+    	var pageId = document.getElementById("page-identifier").value;
+    	var pageName = tempApplication.pages[pageId].name;
+    	document.getElementById("page-options-name").innerHTML = "<input class=\"form-control\" id=\"new-page-name\" type=\"text\" placeholder=\"New Page Name\" value=\""+pageName+"\"><button class=\"btn btn-default\" onclick=\"savePageNameChange(event)\" style=\"float:right\">Save</button>";
+    }
+    
+    function savePageNameChange(event) {
+    	event.preventDefault();
+    	var pageId = document.getElementById("page-identifier").value;
+    	var newPageName = document.getElementById("new-page-name").value;
+    	tempApplication.pages[pageId].name = newPageName;
+    	document.getElementById("page-options-name").innerHTML = newPageName + "<span class=\"fixedText\" onclick=\"deletePage(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-trashcan\"></i></span><span class=\"fixedText\" href=\"#\" onclick=\"editPageName(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-pencil\"></i></span>"
+    	document.getElementById("page-dropdown").innerHTML = "Page: &nbsp; " + newPageName + " &nbsp;&nbsp;&nbsp; <i class=\"icon-caret-down\" style=\"float:right;\"></i>";
+    	document.getElementById("page-"+pageId).innerHTML = newPageName;
+    }
+    
+    function deletePage(event) {
+    	event.preventDefault();
+    	var pageId = document.getElementById("page-identifier").value;
+    	var pageName = tempApplication.pages[pageId].name;
+    	if (confirm("Are you sure you wish to delete this page: "+pageName))
+    	//delete tempApplication.pages[pageId];
+    	tempApplication.pages.splice(pageId, 1);
+    	document.getElementById("project-page-list").innerHTML = "<li id=\"project-page-add\"><a href=\"#\" onclick=\"addPage(event)\" class=\"fixedText\"><i class=\"icon-plus\"></i>&nbsp;Add new page</a></li>";
+    	insertPages(tempApplication);
+    	insertElements(tempApplication, 0);
+    	console.log(tempApplication);
+    	//document.getElementById("page-"+pageId).outerHTML = "";
+    }
+    
+    document.getElementById('page-background-colour').addEventListener('input', changeBackgroundColour, false);
+    function changeBackgroundColour() {
+    	var pageid = document.getElementById("page-identifier").value;
+    	tempApplication.pages[pageid].background = document.getElementById('page-background-colour').value;
+    	document.getElementById("project-content").style.backgroundColor = tempApplication.pages[pageid].background;
+    }
+    
+    $('#permissions-toggle').change(function() {changePagePermissions();});
+    function changePagePermissions() {
+    	var pageid = document.getElementById("page-identifier").value;
+    	if (document.getElementById('permissions-toggle').checked) {
+    		tempApplication.pages[pageid].permissions = "members";
+    	} else {
+    		tempApplication.pages[pageid].permissions = "public";
+    	}
+    }
+    
+    $('#page-header-toggle').change(function() {changeShowInHeader();});
+    function changeShowInHeader() {
+    	var pageid = document.getElementById("page-identifier").value;
+    	if (document.getElementById('page-header-toggle').checked) {
+    		tempApplication.pages[pageid].showinheader = "yes";
+    	} else {
+    		tempApplication.pages[pageid].showinheader = "no";
+    	}
+    }
+    
+    $('#homepage-toggle').click(function() {changeHomepage();});
+    function changeHomepage() {
+    	var pageid = document.getElementById("page-identifier").value;
+		for (i in tempApplication.pages) {
+			tempApplication.pages[i].homepage = "no";
+		}
+		tempApplication.pages[pageid].homepage = "yes";
+		document.getElementById('homepage-toggle').innerHTML = "Homepage Set";
+		document.getElementById('homepage-toggle').disabled = true;
+    		
+    	document.getElementById("project-page-list").innerHTML = "<li id=\"project-page-add\"><a href=\"#\" onclick=\"addPage(event)\" class=\"fixedText\"><i class=\"icon-plus\"></i>&nbsp;Add new page</a></li>";
+    	insertPages(tempApplication);
+    	console.log(tempApplication);
+    }
+    
+    $('#show-allpages-elements-toggle').change(function() {changeShowInHeader();});
+    function changeShowInHeader() {
+    	var pageid = document.getElementById("page-identifier").value;
+    	if (document.getElementById('show-allpages-elements-toggle').checked) {
+    		tempApplication.pages[pageid].showallpages = "yes";
+    		var elementToAdd;
+    		var container = document.getElementById("outer-container");
+    		container.innerHTML = "";
+    		for (i in tempApplication.pages[0].elements) {
+    			elementToAdd = tempApplication.pages[0].elements[i].content;
+    			container.innerHTML += elementToAdd;
+    			noOfElements += 1;
+    		}
+    		for (i in tempApplication.pages[pageid].elements) {
+    			elementToAdd = tempApplication.pages[pageid].elements[i].content;
+    			container.innerHTML += elementToAdd;
+    			noOfElements += 1;
+    		}
+    	} else {
+    		tempApplication.pages[pageid].showallpages = "no";
+    		var elementToAdd;
+    		var container = document.getElementById("outer-container");
+    		container.innerHTML = "";
+    		for (i in tempApplication.pages[pageid].elements) {
+    			elementToAdd = tempApplication.pages[pageid].elements[i].content;
+    			container.innerHTML += elementToAdd;
+    			noOfElements += 1;
+    		}
+    	}
+    }
     
 //    $('#add-attribute-btn').click(function(event){
 //    	event.preventDefault();

@@ -11,6 +11,10 @@ urlpatterns = [
     
     url(r'^project/$', views.myprojectlist, name='myprojectlist'),
     url(r'^project/(?P<pid>[0-9]+)/$', views.project, name='project'),
+    url(r'^project/(?P<pid>[0-9]+)/changetitle/$', views.changeprojecttitle, name='changeprojecttitle'),
+    url(r'^project/(?P<pid>[0-9]+)/changedesc/$', views.changeprojectdesc, name='changeprojectdesc'),
+    url(r'^project/(?P<pid>[0-9]+)/changeowner/$', views.changeprojectowner, name='changeprojectowner'),
+    url(r'^project/(?P<pid>[0-9]+)/changecontributors/$', views.changeprojectcontributors, name='changeprojectcontributors'),
     url(r'^project/new/$', views.newproject, name='newproject'),
     url(r'^project/file/$', TemplateView.as_view(template_name='divtags/project-content.html'), name='projectfile'),
     url(r'^project/save/(?P<pid>[0-9]+)/$', views.project_save, name='project_save'),
