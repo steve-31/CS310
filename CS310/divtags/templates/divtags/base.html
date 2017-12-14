@@ -14,6 +14,7 @@
 	
 	<link rel="stylesheet" href="{% static 'divtags/css/sandbox.css' %}" type="text/css" />
 	<link rel="stylesheet" href="{% static 'divtags/css/bootstrap.css' %}" type="text/css" />
+	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="{% static 'divtags/css/style.css' %}" type="text/css" />
 	<link rel="stylesheet" href="{% static 'divtags/css/dark.css' %}" type="text/css" />
 	<link rel="stylesheet" href="{% static 'divtags/css/font-icons.css' %}" type="text/css" />
@@ -61,16 +62,16 @@
 
 						<ul class="one-page-menu">
 							<li class="current"><a href="{% url 'divtags:myprojectlist' %}"><div>My Projects &nbsp;&nbsp;&nbsp; <i class="icon-caret-down" style="float:right;"></i></div></a>
-									<ul>
+									<ul id="projects-list-dropdown">
 										{% for project in myprojects %}
 											<li><a href="{% url 'divtags:project' project.id %}" class="fixedText">{{ project.name }}</a></li>
 										{% endfor %}
 										<li><a href="{% url 'divtags:newproject' %}" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new project</a></li>
 									</ul>
 								</li>
-							<li class="project-pages-dropdown"><a class="inactiveLink"><div id="page-dropdown">Page: &nbsp; {{current_page}} &nbsp;&nbsp;&nbsp; <i class="icon-caret-down" style="float:right;"></i></div></a>
+							<li id="project-pages-dropdown" class="project-pages-dropdown"><a class="inactiveLink"><div id="page-dropdown">Page: &nbsp; {{current_page}} &nbsp;&nbsp;&nbsp; <i class="icon-caret-down" style="float:right;"></i></div></a>
 									<ul id="project-page-list">
-										<li id="project-page-add"><a href="#" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new page</a></li>
+										<li id="project-page-add"><a href="#" onclick="addPage(event)" class="fixedText"><i class="icon-plus"></i>&nbsp;Add new page</a></li>
 									</ul>
 								</li>
 							
@@ -251,7 +252,7 @@
 	<!-- Footer Scripts
 	============================================= -->
 	<script type="text/javascript" src="{% static 'divtags/js/functions.js' %}"></script>
-
+	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 	<script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyDMxJ92oBkSnVNHFX3R8XhtYQPEgk1_IiI"></script>
 	<script type="text/javascript" src="{% static 'divtags/js/jquery.gmap.js' %}"></script>
 	<script type="text/javascript" src="{% static 'divtags/js/select2.min.js' %}"></script>

@@ -165,7 +165,7 @@ def project_save(request, pid):
             project.currexperimentalno = experimental_number
             project.save()
         
-            return JsonResponse({'versionid': parent_version.id, 'versionNo': project.currversionno, 'iterationNo': project.curriterationno, 'experimentalNo': experimental_number, 'datetime': formattedDate})
+            return JsonResponse({'versionid': parent_version.id, 'versionNo': project.currversionno, 'iterationNo': project.curriterationno, 'experimentalNo': experimental_number, 'experimentalid':experimental_version.id, 'datetime': formattedDate})
     else:
         return render(request, 'divtags/project.html', {})
     
@@ -404,31 +404,88 @@ def project_version_delete(request, vid, exp):
         experimental.delete()
         
     return redirect('divtags:project', pid=project.id)
-        
+
+def changeprojecttitle(request, pid):
+    title = request.POST.get('newtitle')
+    project = Project.objects.get(pk=pid)
+    project.name = title
+    project.lastedited = datetime.now()
+    project.save()
+    
+    formattedDate = datetime.now().strftime("%b. %d, %Y, %I:%M %p")
+    
+    return JsonResponse({"datetime": formattedDate})
+
+def changeprojectdesc(request, pid):
+    desc = request.POST.get('newdesc')
+    project = Project.objects.get(pk=pid)
+    project.desc = desc
+    project.lastedited = datetime.now()
+    project.save()
+    
+    formattedDate = datetime.now().strftime("%b. %d, %Y, %I:%M %p")
+    
+    return JsonResponse({"datetime": formattedDate})
 
 def changeprojectowner(request, pid):
-    owner = request.GET.get('owner-select')
-    project = Project.objects.filter(pk=pid)
+    owner = request.POST.get('newowner')
+    project = Project.objects.get(pk=pid)
     project.owner_id = owner
+    project.lastedited = datetime.now()
     project.save()
+    
+    newowner = User.objects.get(pk=owner)
+    newownerusername = newowner.username
+    
+    formattedDate = datetime.now().strftime("%b. %d, %Y, %I:%M %p")
+    
+    return JsonResponse({"ownerid":owner, "ownerusername": newownerusername, "datetime": formattedDate})
+
+def changeprojectcontributors(request, pid):
+    contributors = request.POST.get('contributors')
+    contributors = json.loads(contributors)
+    print(contributors)
+    ownerincontributors = False
+    project = Project.objects.get(pk=pid)
+    project.lastedited = datetime.now()
+    
+    for oldcontributor in project.contributors.all():
+        project.contributors.remove(oldcontributor)
+
+    for newcontributor in contributors:
+        if newcontributor == project.owner_id:
+            ownerincontributors = True
+        project.contributors.add(int(newcontributor))
+    
+    if ownerincontributors == False:
+        project.contributors.add(project.owner_id)
+    
+    project.save()
+        
+    contributor_usernames = []
+    for user in contributors:
+        contributor_usernames.append(User.objects.get(pk=user).username)
+    
+    formattedDate = datetime.now().strftime("%b. %d, %Y, %I:%M %p")
+        
+    return JsonResponse({"usernames":contributor_usernames, "datetime": formattedDate})
 
 def newproject(request):
-    
-    
     if request.method == 'POST':
-        form = NewProjectForm(request.POST)
-        if form.is_valid():
-            form.save(commit=False)
-            form.owner = request.user
-            form.lastedited = timezone.now
-            new_proj = form.save()
-            return redirect('divtags:project', new_proj.pk)
-    else:
-        form = NewProjectForm()
+        projname = request.POST.get('projname')
+        projdesc = request.POST.get('projdesc')
+        projowner = request.user
+        jsonfile = {"name": projname, "objects": [], "pages": [{"name": "allPages", "elements":[]}, {"name": "Home", "elements": [], "permissions": "public", "background":"#ffffff", "homepage":"yes", "showinheader":"yes", "showallpages":"yes"}]}
+        newproject = Project(name=projname, desc=projdesc, owner=projowner, lastedited=datetime.now(), ispublished=False, currversionno=0, curriterationno=1, file=jsonfile)
+        newproject.save()
+        
+        firstVersion = ProjectVersion(project=newproject, datetime=datetime.now(), versionno=0, iterationno=1, file=jsonfile)
+        firstVersion.save()
+        
+        return redirect('divtags:project', newproject.pk)
     
     context = {
         "title": "New Project",
-        "form": form,
     }
     
     return render(request, 'divtags/newproject.html', context)

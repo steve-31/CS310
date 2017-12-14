@@ -11,7 +11,7 @@
 			<li id="back-to-edit" style="display:none;"><a><i class="icon-caret-left"></i><span>Back to Edit</span></a></li>
 			<li id="components-button"><a><i class="icon-code side-panel-trigger"></i><span>Components</span></a></li>
 			<li id="object-button"><a><i class="icon-table"></i><span>Manage Objects</span></a></li>
-			<li id="workflow-button"><a><i class="icon-sitemap"></i><span>Workflow Editor</span></a></li>
+			<!-- <li id="workflow-button"><a><i class="icon-sitemap"></i><span>Workflow Editor</span></a></li> --->
 			<li id="history-button"><a><i class="icon-book2"></i><span>Application History</span></a></li>
 			<li id="settings-side-button"><a><i class="icon-settings2"></i><span>Project Settings</span></a></li>
 		</ul>
@@ -60,7 +60,7 @@
 	</div>
 	
 	<div class="container project-tab project-active-tab" id="content-tab" style="margin:0;padding:0;width:100%;">
-		<div class="project-content container" style="width:100%;padding: 0 0 0 60px;margin:0;">
+		<div class="project-content container" id="project-content" style="width:100%;padding: 0 0 0 60px;margin:0;">
 			{% include "./project-content.html" %}
 		</div>
 	</div>
@@ -94,6 +94,95 @@
 <script type="text/javascript" src="{% static 'divtags/js/objects.js' %}"></script>
 <script type="text/javascript" src="{% static 'divtags/js/ajaxSetup.js' %}"></script>
 <script type="text/javascript">
+
+function change_title(event) {
+	event.preventDefault();
+	var newTitle = document.getElementById("new-project-title").value;
+	$.ajax({
+		url: "{% url 'divtags:changeprojecttitle' project.id %}",
+		type: "POST",
+		data: {"newtitle": newTitle},
+		success: function(json) {
+			document.getElementById("project-title").innerHTML = newTitle;
+			document.getElementById("project-title-desc").innerHTML = newTitle;
+			document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
+			document.getElementById("new-project-title").value = "";
+			document.getElementById("projectTitleModal").style.display = "none";
+			var dropdown = document.getElementById("projects-list-dropdown");
+			for (i in dropdown.childNodes) {
+				if (typeof dropdown.childNodes[i].outerHTML !== 'undefined'){
+					if (dropdown.childNodes[i].childNodes[0].getAttribute("href") == "{% url 'divtags:project' project.id %}") {
+						dropdown.childNodes[i].childNodes[0].innerHTML = newTitle;
+					}
+				}
+			}
+		}
+	})
+}
+
+function change_desc(event) {
+	event.preventDefault();
+	var newDesc = document.getElementById("new-project-desc").value;
+	$.ajax({
+		url: "{% url 'divtags:changeprojectdesc' project.id %}",
+		type: "POST",
+		data: {"newdesc": newDesc},
+		success: function(json) {
+			document.getElementById("project-desc").innerHTML = newDesc;
+			document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
+			document.getElementById("new-project-desc").value = "";
+			document.getElementById("projectDescModal").style.display = "none";
+		}
+	})
+}
+
+function change_owner(event) {
+	event.preventDefault();
+	var newOwner = document.getElementById("owner-select").value;
+	$.ajax({
+		url : "{% url 'divtags:changeprojectowner' project.id %}",
+		type: "POST",
+		data: { "newowner": newOwner },
+		success: function(json) {
+			if (json.ownerid != {{ request.user.id }}) {
+				document.getElementById("owner-specific-content").outerHTML = "";
+				document.getElementById("projectTitleButton").outerHTML = "";
+				document.getElementById("projectDescButton").outerHTML = "";
+				document.getElementById("project-owner-label").outerHTML = "";
+				document.getElementById("display-project-owner").innerHTML = "<i class=\"icon-user\"></i> "+json.ownerusername;
+				document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
+			}
+		}
+	})
+}
+
+function change_contributors(event) {
+	event.preventDefault();
+	var contributors = $("#contributer-select").val();
+	var newcontributors = [];
+	for (i in contributors) {
+		newcontributors.push(contributors[i]);
+	}
+	newcontributors = JSON.stringify(newcontributors);
+	$.ajax({
+		url: "{% url 'divtags:changeprojectcontributors' project.id %}",
+		type: "POST",
+		data: { "contributors" : newcontributors },
+		success: function(json) {
+			document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
+			var topContribs = document.getElementById("display-project-contributors");
+			topContribs.innerHTML = "<i class=\"icon-line2-users\"></i> ";
+			for (i in json.usernames) {
+				if (i < json.usernames.length-1) {
+					topContribs.innerHTML += json.usernames[i] + ", ";
+				} else {
+					topContribs.innerHTML += json.usernames[i];
+				}
+				
+			}
+		}
+	})
+}
 
 function delete_object(element) {
 	var objectname = element.parentElement.parentElement.childNodes[0].innerHTML;
@@ -223,9 +312,11 @@ function create_save() {
 	    success : function(json) {
 	    	save();
 	        if (json.experimentalNo == 0){
-	        	$('#version-table').prepend("<tr><td>" + json.versionNo + "." + json.iterationNo + "</td><td>" + json.datetime + "</td><td><a href=\"/project/restore/" + json.versionid + "/\" >Restore to this version?</a></td></tr>");
+	        	$('#current-version-table').html("<tr><td>"+json.versionNo+"."+json.iterationNo+"</td><td>"+json.datetime+"</td><td><a href=\"/project/deploy/link/"+json.versionid+"\" >Deploy</a></td></tr>");
+	        	$('#version-table').prepend("<tr><td></td><td>" + json.versionNo + "." + json.iterationNo + "</td><td>" + json.datetime + "</td><td><a href=\"/project/"+json.versionid+"/restore/0\" >Restore</a></td><td><a href=\"/project/deploy/link/"+json.versionid+"\" >Deploy</a></td><td><a href=\"/project/"+json.versionid+"/branch\" >Branch</a></td><td></td></tr>");
 	        } else {
-	        	
+	        	$('#current-version-table').html("<tr><td>"+json.versionNo+"."+json.iterationNo+"."+"</td><td>"+json.datetime+"</td><td><a href=\"/project/deploy/link/"+json.versionid+"\" >Deploy</a></td></tr>");
+	        	$('#version-table').prepend("<tr><td></td><td>" + json.versionNo + "." + json.iterationNo + "." + json.experimentalNo + "</td><td>" + json.datetime + "</td><td><a href=\"/project/"+json.versionid+"/restore/1\" >Restore</a></td><td></td><td><a href=\"/project/merge/"+json.experimentalid+"\" >Merge to " + json.versionNo + "." + json.iterationNo + "</a></td><td></td></tr>");
 	        }
 	    },
 	    error : function(xhr,errmsg,err) {
@@ -256,7 +347,7 @@ function create_deploy() {
 	
 	    // handle a successful response
 	    success : function(json) {
-	        $('#deployed-version-table').html("<table class=\"table table-hover text-left\"><thead><tr><th>Version Number</th><th>Restore</th></tr></thead><tbody><tr><td>" + json.versionNumber + "." + json.iterationNumber + "</td><td><a href=\"#\" >Restore to this version?</a></td></tr></tbody></table>");
+	        $('#deployed-version-table').html("<table class=\"table table-hover text-left\"><thead><tr><th>Version Number</th><th>Restore</th></tr></thead><tbody><tr><td>" + json.versionNumber + "." + json.iterationNumber + "</td><td><a href=\"/project/"+json.id+"/restore/0\">Restore</a></td></tr></tbody></table>");
 	    },
 	    error : function(xhr,errmsg,err) {
 	    	console.log("FAIL");
