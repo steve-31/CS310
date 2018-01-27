@@ -82,9 +82,9 @@ input:checked + .slider:before {
 
 .page-menu-button {
 	text-align:center;
-	position: absolute;
+	position: fixed;
 	right: 20px;
-	top: 20px;
+	top: 140px;
 	width:50px;
 	height:50px;
 	border-radius: 5px;
@@ -106,9 +106,9 @@ input:checked + .slider:before {
 }
 
 .side-menu {
-	position: absolute;
+	position: fixed;
 	right: 20px;
-	top: 70px;
+	top: 190px;
 	width:250px;
 	border-radius: 5px;
 	background-color: rgba(0,0,0,0.6);
@@ -123,6 +123,149 @@ input:checked + .slider:before {
 #new-page-name {
 	width:150px;
 	display: inline-block;
+}
+
+#form-object-list {
+	padding-left: 10px;
+}
+
+.form-field-delete {
+	cursor: pointer;
+}
+
+#user-logo {
+    font-size: 30px;
+    display: inline-block;
+    font-weight: 800;
+}
+
+#project-logo-input {
+	margin-bottom: 20px;
+}
+
+#remove-logo-button {
+	line-height: 60px;
+	margin-right: 20px;
+	font-size: 20px;
+	cursor: pointer;
+}
+
+.user-form {
+	margin-bottom: 10px;
+}
+
+#element-text-editor-container {
+	padding:20px;
+}
+
+#element-text-editor-query-contianer {
+	
+}
+
+.object-query-odd {
+	background-color: #1abc9c;
+	color: #ffffff;
+}
+
+.object-query-block {
+	display: inline-block;
+	width: 100%;
+	border: 1px solid #ccc;
+	padding: 10px;
+	border-radius:3px;
+	margin-bottom: 0px !important;
+	background-color: #ffffff;
+    color: #333;
+}
+
+.object-query-block select, .object-query-block input {
+	border: 0px;
+	width: 100%;
+}
+
+.object-query-odd select, .object-query-odd select option {
+	background-color: #1abc9c;
+}
+
+.object-query-container {
+	margin: 10px;
+}
+
+#object-query-object, #object-query-field-display {
+	
+}
+
+#element-inner-text .query {
+	cursor: pointer;
+}
+
+#element-inner-text .query:hover {
+	color: #1abc9c;
+}
+
+#element-inner-text * {
+	margin: 0;
+}
+
+.element-text-edit-btn {
+	width:30px;
+	margin: 5px;
+	display: inline-block;
+	background-color: rgb(64, 63, 63);
+	border: 0px;
+	height: 30px;
+}
+
+#element-text-font-size-dropdown {
+	width: 73px;
+}
+
+#edit-rich-text-btn {
+	font-size: 10px;
+	cursor: pointer;
+	margin: 0;
+	color: #ffffff;
+	float: right;
+	line-height: 27px;
+}
+
+#edit-rich-text-btn:hover {
+	color: #1abc9c;
+}
+
+#start-query-btn {
+	cursor: pointer;
+	color: #ffffff;
+}
+
+#start-query-btn:hover {
+	color: #1abc9c;
+}
+
+#query-builder {
+	right: 270px;
+	width: 500px;
+}
+
+#extend-page-btn {
+	margin: auto;
+	bottom: 0px;
+	position: absolute;
+	width:100%;
+	cursor: pointer;
+	background-color: #ffffff;
+}
+
+#extend-page-btn i {
+	margin-left: 50%;
+	margin-right: 50%;
+	margin-top:10px;
+	font-size: 20px;
+}
+
+#extend-page-btn h4 {
+	margin-bottom: 15px;
+	text-align: center;
 }
 
 .tooltip {

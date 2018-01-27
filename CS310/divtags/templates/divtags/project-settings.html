@@ -8,6 +8,21 @@
 		<h2><span id="project-title-desc" style="color:#444">{{project.name}}</span> Description{% if project.owner == request.user %}&nbsp;<span id="projectDescButton"><i class="icon-pencil"></i></span>{% endif %}</h2>
 		<p id="project-desc">{{project.desc}}</p>
 		
+		<div id="editor"></div>
+		
+		<h2>Add/Change Project Logo</h2>
+		<form action="{% url 'divtags:logoUpload' project.id %}" method="post" id="logo-upload-form" enctype="multipart/form-data"> {% csrf_token %}
+			<div class="row">
+				<div class="col-md-3">
+					<input id="project-logo-input" name="project-logo" type="file" class="file file-loading" accept="image/*">
+					<div id="current-logo-div">{% if project.logo %}<span><i class="icon-line-cross" id="remove-logo-button"></i></span><img id="current-logo-preview" src="{{project.logo.url}}" alt="{{project.name}} Logo">{% else %}<p>You currently have no logo uploaded for this project.</p>{% endif %}</div>
+				</div>
+				<div class="col-md-3">
+					<button type="submit" class="btn btn-primary" id='logo-upload-btn'>Upload</button>
+				</div>
+			</div>
+		</form>
+		
 		{% if project.owner == request.user %}
 		<div id="owner-specific-content">
 			<h2>Change Project Owner</h2>
@@ -38,7 +53,7 @@
 					<input id="new-project-title" type="text" class="form-control" name="title" placeholder="New Project Title"/>
 				</div>
 				<div class="modal-footer">
-					<button class="button button-3d button-blue bottommargin" onclick="change_title(event)"><i class="icon-user2"></i>Change Title</button>
+					<button class="button button-3d button-blue bottommargin" onclick="change_title(event)">Change Title</button>
 				</div>
 			</div>
 	
@@ -57,7 +72,7 @@
 					<input id="new-project-desc" type="text" class="form-control" name="desc" placeholder="New Project Description"/>
 				</div>
 				<div class="modal-footer">
-					<button class="button button-3d button-blue bottommargin" onclick="change_desc(event)"><i class="icon-user2"></i>Change Description</button>
+					<button class="button button-3d button-blue bottommargin" onclick="change_desc(event)">Change Description</button>
 				</div>
 			</div>
 	

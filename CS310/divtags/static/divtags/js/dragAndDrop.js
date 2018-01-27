@@ -3,6 +3,7 @@
 //var noOfElements = 0;
 var undoChangeStack = new Array();
 var redoChangeStack = new Array();
+var intervals = [];
 
 var homepage = 1;
 for (i in Application.pages) {
@@ -15,6 +16,7 @@ for (i in Application.pages) {
 
 window.onload = insertElements(Application, homepage);
 window.onload = insertPages(Application);
+window.onload = populateFormObject();
 
 function printStack(inputStack) {
 	console.log("printing stack");
@@ -76,7 +78,7 @@ function addContainer(event) {
 	
 	var container = document.getElementById("outer-container");
 	noOfElements += 1;
-	var divElement = "<div class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Container</div>";
+	var divElement = "<div class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px; height:100px; width:300px;\"><div class=\"element-text\"></div></div>";
 	container.innerHTML += divElement;
 	
 	var pageId = document.getElementById("page-identifier").value;
@@ -90,7 +92,7 @@ function addHeading(event) {
 	
 	var container = document.getElementById("outer-container");
 	noOfElements += 1;
-	var divElement = "<h1 class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Heading</h1>";
+	var divElement = "<h1 class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\"><div class=\"element-text\">This is a Heading</div></h1>";
 	container.innerHTML += divElement;
 	
 	var pageId = document.getElementById("page-identifier").value;
@@ -104,39 +106,136 @@ function addParagraph(event) {
 	
 	var container = document.getElementById("outer-container");
 	noOfElements += 1;
-	var divElement = "<p class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\">This is a Paragraph</p>";
+	var divElement = "<p class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\"><div class=\"element-text\">This is a Paragraph</div></p>";
+	container.innerHTML += divElement;
+	
+	var pageId = document.getElementById("page-identifier").value;
+	saveJsonLocal(tempApplication);
+}
+//
+//function addBulletList(event) {
+//	event.preventDefault();
+//	
+//	undoChangeStack.push(JSON.stringify(tempApplication));
+//	
+//	var container = document.getElementById("outer-container");
+//	noOfElements += 1;
+//	var divElement = "<ul class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\"><li>This is a bulleted List</li><li>You can add points here</li></ul>";
+//	container.innerHTML += divElement;
+//	
+//	var pageId = document.getElementById("page-identifier").value;
+//	saveJsonLocal(tempApplication);
+//}
+//
+//function addNumberedList(event) {
+//	event.preventDefault();
+//	
+//	undoChangeStack.push(JSON.stringify(tempApplication));
+//	
+//	var container = document.getElementById("outer-container");
+//	noOfElements += 1;
+//	var divElement = "<ol class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\"><li>This is a numbered List</li><li>You can add items here</li></ol>";
+//	container.innerHTML += divElement;
+//	
+//	var pageId = document.getElementById("page-identifier").value;
+//	saveJsonLocal(tempApplication);
+//}
+//
+//function addMenu(event) {
+//	event.preventDefault();
+//	
+//	undoChangeStack.push(JSON.stringify(tempApplication));
+//	
+//	var container = document.getElementById("outer-container");
+//	noOfElements += 1;
+//	
+//	var pagelist = "";
+//	for (i in tempApplication.pages) {
+//		if (tempApplication.pages[i].showinheader == "yes") {
+//			pagelist += "<li class=\"element\"><a id=\"page"+tempApplication.pages[i].name+"\" href=\"#\" class=\"fixed-text\">"+tempApplication.pages[i].name+"</a></li>"
+//		}
+//	}
+//	console.log(pagelist);
+//	
+//	var header = "<header id=\"header\" class=\"sticky-header element\"><div id=\"\" class=\"\"><div class=\"container clearfix\"><div id=\"primary-menu-trigger\"><i class=\"icon-reorder\"></i></div><div id=\"logo\"><a href=\"#\" class=\"retina-logo\">Logo</a></div><nav id=\"primary-menu\"><ul class=\"one-page-menu sf-js-enabled\" style=\"touch-action: pan-y;\">"+pagelist+"</ul></nav></div></div></header>"
+//	container.innerHTML += header;
+//	
+//	saveJsonLocal(tempApplication);
+//}
+
+function addToHeader() {
+	var list = document.getElementById("user-menu-pages-list");
+	list.innerHTML = "";
+	var pageId = document.getElementById("page-identifier").value;
+	if (tempApplication.pages[pageId].permissions == "public") {
+		//public pages menu
+		for (i in tempApplication.pages) {
+			if (tempApplication.pages[i].showinheader == "yes") {
+				if (tempApplication.pages[i].permissions == "public") {
+					list.innerHTML += "<li>"+tempApplication.pages[i].name+"</li>";
+				}
+			}
+		}
+	} else if(tempApplication.pages[pageId].permissions == "members") {
+		//members pages menu
+		for (i in tempApplication.pages) {
+			if (tempApplication.pages[i].showinheader == "yes") {
+				if (tempApplication.pages[i].permissions == "members") {
+					list.innerHTML += "<li>"+tempApplication.pages[i].name+"</li>";
+				}
+			}
+		}
+		list.innerHTML += "<li><i class=\"icon-user2\"></i></li>";
+	}
+	
+}
+
+function addForm(object, type) {
+	event.preventDefault();
+	
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	noOfElements += 1;
+	var formElements = "";
+	var fieldNo = 0;
+	for (i in tempApplication.objects[object].attributes) {
+		if (tempApplication.objects[object].attributes[i].type == "Text"){
+			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:none\"></i>";
+			formElements += "<label> &nbsp;" + tempApplication.objects[object].attributes[i].name + "</label><input type=\"text\" class=\"form-control user-form\"/>";
+			fieldNo += 1;
+		} else if (tempApplication.objects[object].attributes[i].type == "Number"){
+			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:none\"></i>";
+			formElements += "<label> &nbsp;" + tempApplication.objects[object].attributes[i].name + "</label><input type=\"number\" class=\"form-control user-form\"/>";
+			fieldNo += 1;
+		} else if (tempApplication.objects[object].attributes[i].type == "Reference"){
+			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:none\"></i>";
+			formElements += "<label> &nbsp;" + tempApplication.objects[object].attributes[i].name + "</label><select class=\"form-control user-form\"/></select>";
+			fieldNo += 1;
+		}
+	}
+	formElements += "<button disabled class=\"btn btn-default\">Submit</button>";
+	
+	var container = document.getElementById("outer-container");
+	
+	var divElement = "<form class=\"element\" id=\"" + noOfElements + " " + type + " " + object +"\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\">"+formElements+"</form>";
 	container.innerHTML += divElement;
 	
 	var pageId = document.getElementById("page-identifier").value;
 	saveJsonLocal(tempApplication);
 }
 
-function addBulletList(event) {
-	event.preventDefault();
-	
-	undoChangeStack.push(JSON.stringify(tempApplication));
-	
-	var container = document.getElementById("outer-container");
-	noOfElements += 1;
-	var divElement = "<ul class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\"><li>This is a bulleted List</li><li>You can add points here</li></ul>";
-	container.innerHTML += divElement;
-	
-	var pageId = document.getElementById("page-identifier").value;
-	saveJsonLocal(tempApplication);
-}
-
-function addNumberedList(event) {
-	event.preventDefault();
-	
-	undoChangeStack.push(JSON.stringify(tempApplication));
-	
-	var container = document.getElementById("outer-container");
-	noOfElements += 1;
-	var divElement = "<ol class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px;\"><li>This is a numbered List</li><li>You can add items here</li></ol>";
-	container.innerHTML += divElement;
-	
-	var pageId = document.getElementById("page-identifier").value;
-	saveJsonLocal(tempApplication);
+function populateFormObject() {
+	var list = document.getElementById("form-objects-list-add");
+	for (i in tempApplication.objects) {
+		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm("+i+", \'add\')\">"+tempApplication.objects[i].name+"</a></li>";
+	}
+	var list = document.getElementById("form-objects-list-update");
+	for (i in tempApplication.objects) {
+		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm("+i+", \'update\')\">"+tempApplication.objects[i].name+"</a></li>";
+	}
+	var list = document.getElementById("form-objects-list-verify");
+	for (i in tempApplication.objects) {
+		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm("+i+", \'verify\')\">"+tempApplication.objects[i].name+"</a></li>";
+	}
 }
 
 function saveJsonLocal(jsonInput) {
@@ -150,11 +249,28 @@ function saveJsonLocal(jsonInput) {
 //		}
 		var elementtosave = allElements[i].cloneNode(true);
 		if (elementtosave.className == "element selected-element") {
-			elementtosave.childNodes[1].outerHTML = "";
-			elementtosave.childNodes[1].outerHTML = "";
-			elementtosave.childNodes[1].outerHTML = "";
+			for (var k=0; k<elementtosave.childNodes.length; k++) {
+				if (typeof elementtosave.childNodes[k].outerHTML !== 'undefined') {
+					if (elementtosave.childNodes[k].classList.contains("resizer") || elementtosave.childNodes[k].classList.contains("mover") || elementtosave.childNodes[k].classList.contains("delete") || elementtosave.childNodes[k].classList.contains("editText") || elementtosave.childNodes[k].classList.contains("refresh")){
+						elementtosave.childNodes[k].outerHTML = "";
+						k -= 1;
+						continue;
+					}
+					if (elementtosave.childNodes[k].classList.contains("form-field-delete")) {
+						elementtosave.childNodes[k].style.display = "none";
+					}
+				}
+			}
+//			if (elementtosave.tagName == "FORM") {
+//				
+//			} else {
+//				elementtosave.childNodes[1].outerHTML = "";
+//				elementtosave.childNodes[1].outerHTML = "";
+//				elementtosave.childNodes[1].outerHTML = "";
+//			}
 			elementtosave.className = "element";
 		}
+		console.log(tempApplication);
 		
 		if (typeof elementtosave.outerHTML !== 'undefined'){
 			if (elementtosave.id.match(/-/g)) {
@@ -292,8 +408,11 @@ function insertElements(jsonInput, id) {
 	dropdown.innerHTML = "Page: &nbsp; " + jsonInput.pages[id].name + " &nbsp;&nbsp;&nbsp; <i class=\"icon-caret-down\" style=\"float:right;\"></i>";
 	var container = document.getElementById("outer-container");
 	
-	
-	document.getElementById("page-options-name").innerHTML = jsonInput.pages[id].name + "<span class=\"fixedText\" onclick=\"deletePage(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-trashcan\"></i></span><span class=\"fixedText\" href=\"#\" onclick=\"editPageName(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-pencil\"></i></span>"
+	if (jsonInput.pages[id].name != "Login" && jsonInput.pages[id].name != "Register") {
+		document.getElementById("page-options-name").innerHTML = jsonInput.pages[id].name + "<span class=\"fixedText\" onclick=\"deletePage(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-trashcan\"></i></span><span class=\"fixedText\" href=\"#\" onclick=\"editPageName(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-pencil\"></i></span>"
+	} else {
+		document.getElementById("page-options-name").innerHTML = jsonInput.pages[id].name;
+	}
 	if (tempApplication.pages[id].permissions == "members") {
 		$('#permissions-toggle').bootstrapToggle('on');
 	} else {
@@ -319,7 +438,13 @@ function insertElements(jsonInput, id) {
 	document.getElementById('page-background-colour').value = tempApplication.pages[id].background;
 	document.getElementById("project-content").style.backgroundColor = tempApplication.pages[id].background;
 	
+	document.getElementById('heading-background-colour').value = tempApplication.headerBackgroundColour;
+	document.getElementById("user-header").style.backgroundColor = tempApplication.headerBackgroundColour;
 	
+	document.getElementById('heading-text-colour').value = tempApplication.headerTextColour;
+	document.getElementById("user-header").style.color = tempApplication.headerTextColour;
+	
+	addToHeader();
 	
 	container.innerHTML = "";
 
@@ -337,6 +462,30 @@ function insertElements(jsonInput, id) {
 		container.innerHTML += elementToAdd;
 		noOfElements += 1;
 	}
+	
+	document.getElementById("project-content").style.height = "1000px"
+	
+	for (k in container.childNodes) {
+		if(container.childNodes[k].tagName) {
+			var elementTop = 0;
+			var elementHeight = 0;
+			if (container.childNodes[k].style.top) {
+				elementTop = container.childNodes[k].style.top.match(/\d+/g);
+				elementTop = parseInt(elementTop[0], 10);
+			}
+			if (container.childNodes[k].style.height) {
+				elementHeight = container.childNodes[k].style.height.match(/\d+/g);
+				elementHeight = parseInt(elementHeight[0], 10);
+			}
+			
+			var containerHeight = $("#project-content").height();
+			
+			while (elementTop + elementHeight > containerHeight) {
+				extendPageLength();
+				containerHeight = $("#project-content").height()
+			}
+		}
+	}
 }
 
 function checkSave(jsonInput, pageId) {
@@ -349,31 +498,371 @@ function checkSave(jsonInput, pageId) {
 
 $('#element-menu-button').click(function(){
 	$('#element-editor').toggle();
+	$('#query-builder').hide();
 	$('#page-menu-options').hide();
 });
 
+$('#object-query-type').change(selectQueryType);
+
+function selectQueryType() {
+	var selection = document.getElementById("object-query-type-dropdown").value;
+	var container = document.getElementById("object-query-type-container");
+	if (selection == "user") {
+		if (document.getElementById("object-query-object-container") != null) {
+			document.getElementById("object-query-object-container").outerHTML = "";
+		}
+		if (document.getElementById("object-query-field-container") != null) {
+			document.getElementById("object-query-field-container").outerHTML = "";
+		}
+		if (document.getElementById("object-query-comparator-container") != null) {
+			document.getElementById("object-query-comparator-container").outerHTML = "";
+		}
+		var userFields = "<option disabled selected value=\"userReset\">User Fields</option>";
+		for (i in tempApplication.objects) {
+			if (tempApplication.objects[i].name == "User") {
+				for (j in tempApplication.objects[i].attributes) {
+					userFields += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+				}
+			}
+		}
+		container.innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-user\">" +
+				"<select id=\"object-query-user-dropdown\">"+ userFields +"</select></div>";
+	} else if (selection == "search") {
+		container.innerHTML = "<div class=\"col_half object-query-block object-query-even\" id=\"object-query-object\"></div>" +
+			"<div class=\"col_half col_last object-query-block object-query-even\" id=\"object-query-field-display\">Field</div>"
+		container.insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-object-container\"></div>");
+		var objectList = "<option disabled selected value=\"objectReset\">Object</option>";
+		for (i in tempApplication.objects) {
+			objectList += "<option value=\""+ tempApplication.objects[i].name + "\">"+ tempApplication.objects[i].name +"</option>";
+		}
+		document.getElementById("object-query-object").innerHTML = "<select id=\"object-query-object-dropdown\">"+ objectList +"</select>";
+		$('#object-query-object').change(selectObjectType);
+	}
+	$('#add-object-query-btn').click(addQuery);
+}
+
+
+
+function selectObjectType() {
+	var fieldDisplay = document.getElementById("object-query-field-display");
+	var fieldList = "<option disabled selected value=\"fieldReset\">Field</option>";
+	var selectedObjectName = document.getElementById("object-query-object-dropdown").value;
+	for (i in tempApplication.objects) {
+		if (selectedObjectName == tempApplication.objects[i].name) {
+			for (j in tempApplication.objects[i].attributes){
+				fieldList += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+			}
+		}
+	}
+	fieldDisplay.innerHTML = "<select id=\"object-query-field-display-dropdown\">" + fieldList + "</select>";
+	var container = document.getElementById("object-query-object-container");
+	if (document.getElementById("object-query-add-constraint-btn") == null){
+		container.innerHTML += "<button class=\"button button-green\" id=\"object-query-add-constraint-btn\"><i class=\"icon-line-plus\"></i> Add Constraint</button>";
+		$('#object-query-add-constraint-btn').click(populateObjectFieldsQuery);
+	}
+}
+
+function populateObjectFieldsQuery() {
+	var container = document.getElementById("object-query-object-container");
+	container.insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-field-container\">" +
+			"<div class=\"col_one_third object-query-block object-query-even\" id=\"object-query-field\">Field</div>" +
+			"<div class=\"col_one_third object-query-block object-query-even\" id=\"object-query-operator\">" +
+				"<select id=\"object-query-operator-dropdown\">" +
+					"<option disabled selected value=\"operatorReset\">Operator</option>" +
+					"<option value=\"equal\">=</option>" +
+					"<option value=\"not-equal\">!=</option>" +
+					"<option value=\"lt\">&lt;</option>" +
+					"<option value=\"gt\">&gt;</option>" +
+					"<option value=\"lte\">&lt;=</option>" +
+					"<option value=\"gte\">&gt;=</option>" +
+				"</select>" +
+			"</div>" +
+			"<div class=\"col_one_third col_last object-query-block object-query-even\" id=\"object-query-comparator-select\">" +
+				"<select id=\"object-query-comparator-select-dropdown\">" +
+					"<option disabled selected value=\"comparatorReset\">Comparator</option>" +
+					"<option value=\"userId\">Current User</option>" +
+					"<option value=\"value\">Value</option>" +
+					"<option value=\"query\">Nested Search</option>" +
+					"<option disabled value=\"pageObject\">Page's object</option>" +
+				"</select>" +
+			"</div>" +
+		"</div>");
+	
+	var fieldList = "<option disabled selected>Field</option>";
+	var selectedObjectName = document.getElementById("object-query-object-dropdown").value;
+	for (i in tempApplication.objects) {
+		if (selectedObjectName == tempApplication.objects[i].name) {
+			for (j in tempApplication.objects[i].attributes){
+				fieldList += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+			}
+		}
+	}
+	
+	document.getElementById("object-query-field").innerHTML = "<select id=\"object-query-field-dropdown\">" + fieldList + "</select>";
+	$('#object-query-comparator-select-dropdown').change(selectQueryComparator);
+}
+
+function selectQueryComparator() {
+	var container = document.getElementById("object-query-field-container");
+	var comparatorSelection = document.getElementById("object-query-comparator-select-dropdown").value;
+	if (comparatorSelection == "userId") {
+		var userFields = "";
+		for (i in tempApplication.objects) {
+			if (tempApplication.objects[i].name == "User") {
+				for (j in tempApplication.objects[i].attributes) {
+					userFields += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+				}
+			}
+		}
+		container.insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-comparator-container\">" +
+				"<div class=\"col_full object-query-block object-query-even\" id=\"object-query-comparator\">" +
+					"<select id=\"object-query-comparator-dropdown\">" +
+						"<option disabled selected>Current User</option>" +
+						userFields +
+				"</div>" +
+			"</div>")
+	} else if(comparatorSelection == "value") {
+		container.insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-comparator-container\">" +
+				"<div class=\"col_full object-query-block object-query-even\" id=\"object-query-comparator\">" +
+					"<input type=\"text\" id=\"object-query-comparator-dropdown\">" +
+				"</div>" +
+			"</div>")
+		
+	}
+	
+}
+
+function addQuery() {
+	var failed = false;
+	var queryType = document.getElementById("object-query-type-dropdown").value;
+	if (queryType == "user") {
+		if (document.getElementById("object-query-user-dropdown").value == "userReset") {
+			failed = true;
+		} else {
+			var userField = document.getElementById("object-query-user-dropdown").value;
+			var queryJson = {
+				"id": noOfQueries,
+				"display": {
+					"object": "User",
+					"field": userField
+				},
+				"query": {
+					"object": "User",
+					"field": "primary_key",
+					"operator": "equal",
+					"comparator": "userId"
+				}
+			};
+			tempApplication['queries'].push(queryJson);
+			var element = document.getElementsByClassName("selected-element")[0];
+			for (i in element.childNodes) {
+				if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+					if (element.childNodes[i].classList.contains('element-text')) {
+						element.childNodes[i].innerHTML += "<span class=\"query\" id=\"query-"+noOfQueries+"\" onclick=\"editQuery(this)\">User." + userField + "</span>";
+					}
+				}
+			}
+			//document.getElementById("element-inner-text").innerHTML += "<span class=\"query\" id=\"query-"+noOfQueries+"\" onclick=\"editQuery(this)\">User." + userField + "</span>";
+		}
+	} else if(queryType == "search") {
+		if (document.getElementById("object-query-object-dropdown").value == "objectReset") {
+			failed = true;
+		} else if (document.getElementById("object-query-field-display-dropdown").value == "fieldReset") {
+			failed = true;
+		} else {
+			var object = document.getElementById("object-query-object-dropdown").value;
+			var displayField = document.getElementById("object-query-field-display-dropdown").value;
+			var queryField = document.getElementById("object-query-field-dropdown").value;
+			var operator = document.getElementById("object-query-operator-dropdown").value;
+			var comparator = document.getElementById("object-query-comparator-dropdown").value;
+			var comparatorSelect = document.getElementById("object-query-comparator-select-dropdown").value;
+			var queryJson = { 
+				"id": noOfQueries,
+				"display": {
+					"object": object,
+					"field": displayField
+				},
+			  	"query": {
+			  		"object": object, 
+			  		"field": queryField,
+			  		"operator": operator,
+			  		"comparator": comparator,
+			  		"comparatorType": comparatorSelect
+			  	}
+			};
+			tempApplication['queries'].push(queryJson);
+			for (i in element.childNodes) {
+				if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+					if (element.childNodes[i].classList.contains('element-text')) {
+						element.childNodes[i].innerHTML += "<span class=\"query\" id=\"query-"+noOfQueries+"\" onclick=\"editQuery(this)\">" + object + "." + displayField + "</span>";
+					}
+				}
+			}
+			//document.getElementById("element-inner-text").innerHTML += "<span class=\"query\" id=\"query-"+noOfQueries+"\" onclick=\"editQuery(this)\">" + object + "." + displayField + "</span>";
+			document.getElementById("object-query-object-container").outerHTML = "";
+			document.getElementById("object-query-field-container").outerHTML = "";
+			document.getElementById("object-query-comparator-container").outerHTML = "";
+		}
+	}
+	
+	if (!failed) {
+		noOfQueries += 1;
+		document.getElementById("object-query-type-container").outerHTML = "";
+		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+			"<select id=\"object-query-type-dropdown\">"+
+				"<option disabled selected value=\"reset\">Search Type</option>"+
+				"<option value=\"search\">Object Search</option>"+
+				"<option value=\"user\">Current User Fields</option>"+
+			"</select>"+
+		"</div>";
+		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
+		$('#object-query-type').change(selectQueryType);
+		$('#query-builder').hide();
+	}
+}
+
+function editQuery(query) {
+	console.log("editing query");
+	queryId = query.id.match(/\d+/g);
+	queryId = queryId[0];
+	var queryJson = tempApplication.queries[queryId];
+	$('#query-builder').show();
+	if (queryJson.display.object == "User" && queryJson.query.object == "User" && queryJson.query.field == "primary_key" && queryJson.query.operator == "equal" && queryJson.query.comparator == "userId") {
+		//then show the user object queries
+		document.getElementById("object-query-type-dropdown").value = "user";
+		selectQueryType();
+		document.getElementById("object-query-user-dropdown").value = queryJson.display.field;
+	} else {
+		//show the search object queries
+		document.getElementById("object-query-type-dropdown").value = "search";
+		selectQueryType();
+		document.getElementById("object-query-object-dropdown").value = queryJson.display.object;
+		selectObjectType();
+		document.getElementById("object-query-field-display-dropdown").value = queryJson.display.field;
+		populateObjectFieldsQuery();
+		document.getElementById("object-query-field-dropdown").value = queryJson.query.field;
+		document.getElementById("object-query-operator-dropdown").value = queryJson.query.operator;
+		document.getElementById("object-query-comparator-select-dropdown").value = queryJson.query.comparatorType;
+		selectQueryComparator();
+		document.getElementById("object-query-comparator-dropdown").value = queryJson.query.comparator;
+	}
+	if (document.getElementById("add-object-query-btn") != null) {
+		document.getElementById("add-object-query-btn").outerHTML = "<button class=\"button nobottommargin\" id=\"edit-object-query-btn\" onclick=\"completeEditQuery("+queryId+")\">Edit Object Query</button>";
+	}
+}
+
+function completeEditQuery(queryId) {
+	var textbox = document.getElementById("element-inner-text");
+	var query = document.getElementById("query-"+queryId);
+	var failed = false;
+	var queryType = document.getElementById("object-query-type-dropdown").value;
+	if (queryType == "user") {
+		if (document.getElementById("object-query-user-dropdown").value == "userReset") {
+			failed = true;
+		} else {
+			var userField = document.getElementById("object-query-user-dropdown").value;
+			var queryJson = {
+				"id": noOfQueries,
+				"display": {
+					"object": "User",
+					"field": userField
+				},
+				"query": {
+					"object": "User",
+					"field": "primary_key",
+					"operator": "equal",
+					"comparator": "userId"
+				}
+			};
+			tempApplication.queries[queryId] = queryJson;
+			query.innerHTML = "User." + userField;
+		}
+	} else if(queryType == "search") {
+		if (document.getElementById("object-query-object-dropdown").value == "objectReset") {
+			failed = true;
+		} else if (document.getElementById("object-query-field-display-dropdown").value == "fieldReset") {
+			failed = true;
+		} else {
+			var object = document.getElementById("object-query-object-dropdown").value;
+			var displayField = document.getElementById("object-query-field-display-dropdown").value;
+			var queryField = document.getElementById("object-query-field-dropdown").value;
+			var operator = document.getElementById("object-query-operator-dropdown").value;
+			var comparator = document.getElementById("object-query-comparator-dropdown").value;
+			var comparatorSelect = document.getElementById("object-query-comparator-select-dropdown").value;
+			var queryJson = { 
+				"id": noOfQueries,
+				"display": {
+					"object": object,
+					"field": displayField
+				},
+			  	"query": {
+			  		"object": object, 
+			  		"field": queryField,
+			  		"operator": operator,
+			  		"comparator": comparator,
+			  		"comparatorType": comparatorSelect
+			  	}
+			};
+			tempApplication.queries[queryId] = queryJson;
+			query.innerHTML = object + "." + displayField;
+			document.getElementById("object-query-object-container").outerHTML = "";
+			document.getElementById("object-query-field-container").outerHTML = "";
+			document.getElementById("object-query-comparator-container").outerHTML = "";
+		}
+	}
+	if (!failed) {
+		document.getElementById("object-query-type-container").outerHTML = "";
+		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+			"<select id=\"object-query-type-dropdown\">"+
+				"<option disabled selected value=\"reset\">Search Type</option>"+
+				"<option value=\"search\">Object Search</option>"+
+				"<option value=\"user\">Current User Fields</option>"+
+			"</select>"+
+		"</div>";
+		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
+		document.getElementById("edit-object-query-btn").outerHTML = "<button class=\"button nobottommargin\" id=\"add-object-query-btn\" onclick=\"addQuery()\">Add Object Query</button>";
+		$('#object-query-type').change(selectQueryType);
+		$('#query-builder').hide();
+	}
+}
 
 function selectElement(id) {
 	$('#page-menu-options').hide();
 	$('#element-menu-button').show();
 	document.getElementById("element-editor").style.display = 'none';
+	document.getElementById("query-builder").style.display = 'none';
 	var old_element = document.getElementById("element-editor");
 	var new_element = old_element.cloneNode(true);
 	old_element.parentNode.replaceChild(new_element, old_element);
+	var element = document.getElementById(id);
 	
-	var elements = document.getElementsByTagName("*");
+	var elements = document.getElementsByClassName("element");
 	for (var i=0; i < elements.length; i++) {    
 	    elements[i].classList.remove("selected-element");
+	    intervals.forEach(clearInterval);
 	    $('.resizer').remove();
 	    $('.mover').remove();
 	    $('.delete').remove();
+	    $('.refresh').remove();
+	    $('.editText').remove();
+	}
+	var fieldDeletes = document.getElementsByClassName("form-field-delete");
+	for (var i=0; i<fieldDeletes.length; i++) {
+		fieldDeletes[i].style.display = "none";
 	}
 	
-	var element = document.getElementById(id);
 	element.className +=' selected-element';
-	
 	document.getElementById("element-editor").style.display = 'block';
 	
+	var innertext;
+	for (i in element.childNodes) {
+		if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+			if (element.childNodes[i].classList.contains('element-text')) {
+    			innertext = element.childNodes[i].innerHTML;
+			}
+		}
+	}
+	document.getElementById("element-inner-text").innerHTML = innertext;
 	var elementwidth = window.getComputedStyle(document.getElementById(id)).getPropertyValue('width').split('px');
 	document.getElementById('element-size-width').innerHTML = elementwidth[0];
 	var elementheight = window.getComputedStyle(document.getElementById(id)).getPropertyValue('height').split('px');
@@ -423,10 +912,16 @@ function selectElement(id) {
     mover.className = 'mover';
     mover.id = id + 'mover';
     mover.innerHTML = "<i class='icon-move' id='move-icon'></i>";
+    var refresh = document.createElement('div');
+    refresh.className = 'refresh';
+    refresh.id = id + 'refresh';
+    refresh.innerHTML = "<i class='icon-refresh' id='refresh-icon'></i>";
     element.appendChild(mover);
+    var editText = document.getElementById("edit-rich-text-btn");
     resizerbottomright.addEventListener('mousedown', initResizeDrag, false);
     mover.addEventListener('mousedown', initMoveDrag, false);
     deleteButton.addEventListener('mousedown', deleteElement, false);
+    refresh.addEventListener('mousedown', refreshForm, false);
     document.getElementById('element-padding-top').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-right').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-bottom').addEventListener('keyup', updatePadding, false);
@@ -434,6 +929,19 @@ function selectElement(id) {
     document.getElementById('element-colour-text').addEventListener('change', textColour, false);
     document.getElementById('element-colour-background').addEventListener('change', backgroundColour, false);
     document.getElementById('show-all-pages').addEventListener('change', showAllPages, false);
+    
+    if (element.nodeName == "FORM") {
+    	element.appendChild(refresh);
+    	var fieldDeletes = document.getElementsByClassName("form-field-delete");
+    	for (i in element.childNodes) {
+    		if (typeof element.childNodes[i].outerHTML !== 'undefined') {
+	    		if (element.childNodes[i].classList.contains("form-field-delete")) {
+	    			element.childNodes[i].style.display = "inline-block";
+	    			element.childNodes[i].addEventListener('mousedown', deleteFormFieldInit, false);
+	    		}
+    		}
+    	}
+    }
     
     window.onclick = function(event) {
     	var mover = document.getElementById('icon-move');
@@ -446,16 +954,29 @@ function selectElement(id) {
     	if (event.target != container && event.target != container2) {
     		inelement = true;
     	}
-    	console.log(event.target);
-    	console.log(event.target != container);
-    	console.log(event.target != container2);
 	    if (!inelement) {
 	    	element.classList.remove("selected-element");
 	    	editor.style.display = 'none';
+	    	document.getElementById("query-builder").style.display = 'none';
+	    	intervals.forEach(clearInterval);
 		    $('.resizer').remove();
 		    $('.mover').remove();
 		    $('.delete').remove();
+		    $('.refresh').remove();
+		    $('.editText').remove();
 		    $('#element-menu-button').hide();
+		    var fieldDeletes = document.getElementsByClassName("form-field-delete");
+			for (var i=0; i<fieldDeletes.length; i++) {
+				fieldDeletes[i].style.display = "none";
+			}
+			for (i in element.childNodes) {
+				if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+					if (element.childNodes[i].classList.contains('element-text')) {
+						console.log(element.childNodes[i]);
+						element.childNodes[i].contentEditable = "false";
+					}
+				}
+			}
 	    }
 	}
     
@@ -503,6 +1024,237 @@ function selectElement(id) {
     	saveJsonLocal(tempApplication);
     	document.getElementById("element-editor").style.display = 'none';
     }
+
+    function refreshForm(e) {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
+    	var form = document.getElementById(id);
+    	var formElements = "";
+    	var fieldNo = 0;
+    	var formobject = form.id.match(/[0-9a-z]*/g);
+    	for (i in tempApplication.objects[formobject[4]].attributes) {
+    		if (tempApplication.objects[formobject[4]].attributes[i].type == "Text"){
+    			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:inline-block\"></i>";
+    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject[4]].attributes[i].name + "</label><input type=\"text\" class=\"form-control user-form\"/>";
+    			fieldNo += 1;
+    		} else if (tempApplication.objects[formobject[4]].attributes[i].type == "Number"){
+    			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:inline-block\"></i>";
+    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject[4]].attributes[i].name + "</label><input type=\"number\" class=\"form-control user-form\"/>";
+    			fieldNo += 1;
+    		} else if (tempApplication.objects[formobject[4]].attributes[i].type == "Reference"){
+    			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:inline-block\"></i>";
+    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject[4]].attributes[i].name + "</label><select class=\"form-control user-form\"/></select>";
+    			fieldNo += 1;
+    		}
+    	}
+    	formElements += "<button disabled class=\"btn btn-default\">Submit</button>";
+    	form.innerHTML = formElements;
+    	element.appendChild(mover);
+    	element.appendChild(deleteButton);
+    	element.appendChild(resizerbottomright);
+    	element.appendChild(refresh);
+    	element.appendChild(editText);
+    	saveJsonLocal(tempApplication);
+    }
+    
+    function deleteFormFieldInit(event){
+    	var field = event.target.id;
+    	var fieldNo = parseInt(field.slice(5,10), 10);
+    	
+    	deleteFormField(fieldNo);
+    }
+    
+    function deleteFormField(fieldNo) {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
+    	element.childNodes[fieldNo*3].classList.remove("form-field-delete");
+    	element.childNodes[fieldNo*3].style.display = "none";
+    	element.childNodes[fieldNo*3+1].style.display = "none";
+    	element.childNodes[fieldNo*3+2].style.display = "none";
+    	saveJsonLocal(tempApplication);
+    }
+    
+    $('#start-query-btn').click(function(){
+    	document.getElementById("query-builder").style.display = 'block';
+    	if (document.getElementById("edit-object-query-btn") != null) {
+    		document.getElementById("object-query-type-container").outerHTML = "";
+    		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+    			"<select id=\"object-query-type-dropdown\">"+
+    				"<option disabled selected value=\"reset\">Search Type</option>"+
+    				"<option value=\"search\">Object Search</option>"+
+    				"<option value=\"user\">Current User Fields</option>"+
+    			"</select>"+
+    		"</div>";
+    		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
+    		document.getElementById("edit-object-query-btn").outerHTML = "<button class=\"button nobottommargin\" id=\"add-object-query-btn\" onclick=\"addQuery()\">Add Object Query</button>";
+    		$('#object-query-type').change(selectQueryType);
+    	}
+    });
+    
+    $('#cancel-object-query-btn').click(function(){
+    	document.getElementById("query-builder").style.display = 'none';
+    	document.getElementById("object-query-type-container").outerHTML = "";
+		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+			"<select id=\"object-query-type-dropdown\">"+
+				"<option disabled selected value=\"reset\">Search Type</option>"+
+				"<option value=\"search\">Object Search</option>"+
+				"<option value=\"user\">Current User Fields</option>"+
+			"</select>"+
+		"</div>";
+		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
+		$('#object-query-type').change(selectQueryType);
+    });
+    
+    $('#element-text-bold-btn').click(function() {
+    	if (window.getComputedStyle(document.getElementById('element-text-bold-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
+    		document.getElementById('element-text-bold-btn').style.backgroundColor = "rgb(134, 133, 133)";
+    	} else {
+    		document.getElementById('element-text-bold-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	}
+    	document.execCommand('bold', false, "");
+    });
+    
+    $('#element-text-italic-btn').click(function() {
+    	if (window.getComputedStyle(document.getElementById('element-text-italic-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
+    		document.getElementById('element-text-italic-btn').style.backgroundColor = "rgb(134, 133, 133)";
+    	} else {
+    		document.getElementById('element-text-italic-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	}
+    	document.execCommand('italic', false, "");
+    });
+    
+    $('#element-text-underline-btn').click(function() {
+    	if (window.getComputedStyle(document.getElementById('element-text-underline-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
+    		document.getElementById('element-text-underline-btn').style.backgroundColor = "rgb(134, 133, 133)";
+    	} else {
+    		document.getElementById('element-text-underline-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	}
+    	document.execCommand('underline', false, "");
+    });
+    
+    $('#element-text-ul-btn').click(function() {
+    	if (window.getComputedStyle(document.getElementById('element-text-ul-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
+    		document.getElementById('element-text-ul-btn').style.backgroundColor = "rgb(134, 133, 133)";
+    	} else {
+    		document.getElementById('element-text-ul-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	}
+    	document.execCommand('insertUnorderedList', false, "");
+    });
+    
+    $('#element-text-ol-btn').click(function() {
+    	if (window.getComputedStyle(document.getElementById('element-text-ol-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
+    		document.getElementById('element-text-ol-btn').style.backgroundColor = "rgb(134, 133, 133)";
+    	} else {
+    		document.getElementById('element-text-ol-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	}
+    	document.execCommand('insertOrderedList', false, "");
+    });
+    
+    $('#element-text-link-btn').click(function() {
+    	document.getElementById("element-text-link-container").style.display = "block";
+    });
+    
+    $('#element-text-link-button').click(function() {
+    	var linkAddress = document.getElementById("element-text-link-input").value;
+    	document.getElementById("element-text-link-container").style.display = "none";
+    	document.execCommand('createLink', false, linkAddress);
+    });
+    
+    $('#element-text-unlink-btn').click(function() {
+    	document.execCommand('unlink', false, "");
+    });
+    
+    $('#element-text-align-left-btn').click(function() {
+    	if (window.getComputedStyle(document.getElementById('element-text-align-left-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
+    		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(134, 133, 133)";
+    		document.getElementById('element-text-align-centre-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	} else {
+    		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-centre-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	}
+    	document.execCommand('justifyLeft', false, "");
+    });
+    
+    $('#element-text-align-centre-btn').click(function() {
+    	if (window.getComputedStyle(document.getElementById('element-text-align-centre-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
+    		document.getElementById('element-text-align-centre-btn').style.backgroundColor = "rgb(134, 133, 133)";
+    		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	} else {
+    		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-centre-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	}
+    	document.execCommand('justifyCenter', false, "");
+    });
+    
+    $('#element-text-align-right-btn').click(function() {
+    	if (window.getComputedStyle(document.getElementById('element-text-align-right-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
+    		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(134, 133, 133)";
+    		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-centre-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	} else {
+    		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-centre-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(64, 63, 63)";
+    	}
+    	document.execCommand('justifyRight', false, "");
+    });
+    
+    $('#element-text-font-size-dropdown').change(function() {
+    	var size = document.getElementById("element-text-font-size-dropdown").value;
+    	document.execCommand('fontSize', false, size);
+    });
+    
+    function editTextInit() {
+    	$('#editTextModal').show();
+    	clearInterval(textRefresh);
+    	var elementText = document.getElementById("element-inner-text").innerHTML;
+    	
+    	document.getElementsByClassName("ql-editor")[0].innerHTML = elementText;
+    	
+    	document.getElementById("element-text-edit-btn").addEventListener('mousedown', finishEditText, false);
+    }
+    
+
+    function finishEditText() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
+    	var newText = document.getElementsByClassName("ql-editor")[0].innerHTML;
+    	for (i in element.childNodes) {
+    		if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+    			if (element.childNodes[i].classList.contains('element-text')) {
+	    			element.childNodes[i].innerHTML = newText;
+    			}
+    		}
+    	}
+    	
+    	$('#editTextModal').hide()
+    	
+    	saveJsonLocal(tempApplication);
+    }
+    
+    function copyTextToElement() {
+    	var text = document.getElementById("element-inner-text");
+    	for (i in element.childNodes) {
+    		if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+    			if (element.childNodes[i].classList.contains('element-text')) {
+    				text.innerHTML = element.childNodes[i].innerHTML;
+    			}
+    		}
+    	}
+    }
+    
+    for (i in element.childNodes) {
+		if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+			if (element.childNodes[i].classList.contains('element-text')) {
+				element.childNodes[i].contentEditable = "true";
+			}
+		}
+	}
+    
+	var textRefresh = setInterval(copyTextToElement, 3000);
+	intervals.push(textRefresh);
+    
     
 	var startX, startY, startWidth, startHeight;
 	

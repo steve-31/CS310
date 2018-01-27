@@ -17,6 +17,8 @@ from .models import Project, ProjectObject, ProjectAttributeType, ProjectVersion
 from .forms import SignUpForm, NewProjectForm
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+from pip._vendor.lockfile import pidlockfile
+from psycopg2.sql import NULL
 
 # Create your views here.
 
@@ -114,6 +116,12 @@ def project(request, pid):
     }
     
     return render(request, 'divtags/project.html', context)
+
+def project_delete(request):
+    projectid = request.POST.get('id')
+    project = Project.objects.get(pk=projectid)
+    project.delete()
+    return JsonResponse({})
 
 @login_required
 def project_save(request, pid):
@@ -470,13 +478,34 @@ def changeprojectcontributors(request, pid):
         
     return JsonResponse({"usernames":contributor_usernames, "datetime": formattedDate})
 
+def uploadLogoImage(request, pid):
+    if request.method == 'POST':
+        logo = request.FILES['project-logo']
+        project = Project.objects.get(pk=pid)
+        project.logo = logo
+        project.save()
+        
+    return JsonResponse({"logo":project.logo.url, "name":project.name})
+
+def removeCurrentLogo(request, pid):
+    if request.method == 'POST':
+        project = Project.objects.get(pk=pid)
+        project.logo = None
+        project.save()
+        
+    return JsonResponse({"logo":"", "name":project.name})
+        
+
 def newproject(request):
     if request.method == 'POST':
         projname = request.POST.get('projname')
         projdesc = request.POST.get('projdesc')
         projowner = request.user
-        jsonfile = {"name": projname, "objects": [], "pages": [{"name": "allPages", "elements":[]}, {"name": "Home", "elements": [], "permissions": "public", "background":"#ffffff", "homepage":"yes", "showinheader":"yes", "showallpages":"yes"}]}
+        jsonfile = {"name": projname, "headerTextColour": "#000000", "headerBackgroundColour": "#ffffff","objects": [{"attributes": [{"type": "primaryKey", "name": "primary_key", "details": ""}, {"type": "Text", "name": "username", "details": ""}, {"type": "Text", "name": "first_name", "details": ""}, {"type": "Text", "name": "last_name", "details": ""}, {"type": "Text", "name": "email", "details": ""}, {"type": "Text", "name": "password", "details": ""}, {"type": "Date", "name": "last_login", "details": ""}], "name": "User", "desc": "User's required for project"}], "pages": [{"name": "AllPages", "elements":[]}, {"name": "Home", "elements": [], "permissions": "public", "background":"#ffffff", "homepage":"yes", "showinheader":"yes", "showallpages":"yes"}, {"elements": [{"content": "<form class=\"element\" id=\"21 add 2\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 180px; width: 610px; height: 370px; left: 20px;\"><i class=\"icon-line-cross form-field-delete\" id=\"field0\" style=\"display: none;\"></i><label> &nbsp;username</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field1\" style=\"display: none;\"></i><label> &nbsp;first_name</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field2\" style=\"display: none;\"></i><label> &nbsp;last_name</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field3\" style=\"display: none;\"></i><label> &nbsp;email</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field4\" style=\"display: none;\"></i><label> &nbsp;password</label><input type=\"text\" class=\"form-control user-form\"><button disabled=\"\" class=\"btn btn-default\">Submit</button></form>"}, {"content": "<h1 class=\"element\" id=\"22\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 90px; left: 20px;\">This is a Heading</h1>"}], "showallpages": "no", "name": "Register", "showinheader": "yes", "background": "#ffffff", "homepage": "no", "permissions": "public"}, {"elements": [{"content": "<form class=\"element\" id=\"9 verify 2\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 180px; left: 30px; width: 530px; height: 210px;\"><i class=\"icon-line-cross form-field-delete\" id=\"field0\" style=\"display: none;\"></i><label> &nbsp;username</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross\" id=\"field1\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;first_name</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross\" id=\"field2\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;last_name</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross\" id=\"field3\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;email</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross form-field-delete\" id=\"field4\" style=\"display: none;\"></i><label> &nbsp;password</label><input type=\"text\" class=\"form-control user-form\"><button disabled=\"\" class=\"btn btn-default\">Submit</button></form>"}, {"content": "<h1 class=\"element\" id=\"10\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 90px; left: 20px;\">This is a Heading</h1>"}], "showallpages": "yes", "name": "Login", "showinheader": "yes", "background": "#ffffff", "homepage": "no", "permissions": "public"}]}
         newproject = Project(name=projname, desc=projdesc, owner=projowner, lastedited=datetime.now(), ispublished=False, currversionno=0, curriterationno=1, file=jsonfile)
+        newproject.save()
+        
+        newproject.contributors.add(request.user)
         newproject.save()
         
         firstVersion = ProjectVersion(project=newproject, datetime=datetime.now(), versionno=0, iterationno=1, file=jsonfile)

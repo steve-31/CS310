@@ -3,6 +3,8 @@
 {% load jsonify %}
 {% block content %}
 
+<div id="text-editor"></div>
+
 <div id="toolbar" class="toolbar-left">
 	<nav class="vertical-top" style="margin-top: 60px;">
 		<ul>
@@ -33,17 +35,25 @@
 				<nav class="nav-tree nobottommargin">
 					<ul>
 						<li><a href="#" onclick="addContainer(event);"><i class="icon-line-box"></i>&nbsp;Container</a></li>
-						<li><a href="#" onclick="addBulletList(event);"><i class="icon-list-ul"></i>&nbsp;Bulleted List</a></li>
-						<li><a href="#" onclick="addNumberedList(event);"><i class="icon-list-ol"></i>&nbsp;Numbered List</a></li>
-						<li><a href="#" onclick="addHeading(event);"><i class="">h1</i>&nbsp;Heading</a></li>
-						<li><a href="#" onclick="addParagraph(event);"><i class="">T </i>&nbsp;Paragraph</a></li>
+						<li><a href="#" onclick="addHeading(event);"><i class="">h</i>&nbsp;Heading</a></li>
+						<li><a href="#" onclick="addParagraph(event);"><i class="lowercase">t </i>&nbsp;Paragraph</a></li>
 						<li><a href="#"><i class="icon-photo"></i>&nbsp;Image</a></li>
-						<li><a href="#"><i class="icon-form"></i>&nbsp;Form</a></li>
-						<li><a href="#"><i class="icon-reorder"></i>&nbsp;Menu</a></li>
-						<li><a href="#"><i class="icon-user"></i>&nbsp;User Login</a></li>
-						<li><a href="#"><i class="icon-facebook"></i>&nbsp;Social</a></li>
-						<li><a href="#"><i class="icon-table"></i>&nbsp;Object</a></li>
-						<li><a href="#"><i class="icon-plus"></i>&nbsp;Mathematics</a></li>
+						<li>
+							<a href="#"><i class="icon-checkbox-checked"></i>&nbsp;Form</a>
+								<ul>
+									<li><a href="#">Add new object</a>
+										<ul id="form-objects-list-add"></ul>
+									</li>
+									<li><a href="#">Update existing object</a>
+										<ul id="form-objects-list-update"></ul>
+									</li>
+									<li><a href="#">Verify existing object</a>
+										<ul id="form-objects-list-verify"></ul>
+									</li>
+								</ul>
+							
+						</li>
+						<!-- <li><a href="#" onclick="addMenu(event);"><i class="icon-reorder"></i>&nbsp;Menu</a></li> -->
 					</ul>
 				</nav>
 
@@ -82,6 +92,7 @@
 			{% include "./project-history.html" %}
 		</div>
 	</div>
+
 	
 {% endblock %}
 
@@ -93,7 +104,49 @@
 <script type="text/javascript" src="{% static 'divtags/js/dragAndDrop.js' %}"></script>
 <script type="text/javascript" src="{% static 'divtags/js/objects.js' %}"></script>
 <script type="text/javascript" src="{% static 'divtags/js/ajaxSetup.js' %}"></script>
+
 <script type="text/javascript">
+function uploadLogo() {
+	var data = new FormData($('#logo-upload-form').get(0));
+
+	$.ajax({
+	    url: "{% url 'divtags:logoUpload' project.id %}",
+	    type: "POST",
+	    data: data,
+	    cache: false,
+	    processData: false,
+	    contentType: false,
+	    success: function(json) {
+	    	document.getElementById("current-logo-div").innerHTML = "<span><i class=\"icon-line-cross\" id=\"remove-logo-button\"></i></span><img src=\""+ json.logo +"\" alt=\""+ json.name +" Logo\" style=\"height:60px;\">";
+	    	document.getElementById("user-logo").innerHTML = "<img src=\""+ json.logo +"\" alt=\""+ json.name +" Logo\" style=\"height:60px;\">";
+	    }
+	});
+}
+
+$(function() {
+    $('#logo-upload-form').submit(function() {
+    	event.preventDefault();
+    	uploadLogo();
+    });
+});
+
+function removeLogo(event) {
+	event.preventDefault();
+	
+	$.ajax({
+		url: "{% url 'divtags:logoRemove' project.id %}",
+		type: "POST",
+		data: {},
+		success: function(json) {
+			document.getElementById("current-logo-div").innerHTML = "<p>You currently have no logo uploaded for this project.</p>";
+			document.getElementById("user-logo").innerHTML = "<span style=\"line-height:60px;\">"+ json.name +"</span>";
+		}
+	});
+}
+
+$(function() {
+    $('#remove-logo-button').click(removeLogo);
+});
 
 function change_title(event) {
 	event.preventDefault();
