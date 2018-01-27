@@ -2,19 +2,20 @@
 {% block content %}
 
 <div class="container">
-	<h1>{{title}}</h1>
+	<h1>{{title}}<a href="{% url 'divtags:newproject' %}" style="position: absolute; right:50px; font-size:25px; line-height:54px;"><span><i class="icon-line-plus"></i>&nbsp; Add New Project</span></a></h1>
 	<table class="table table-hover text-left">
 		<thead>
 			<tr>
 				<th>Name</th>
 				<th>Description</th>
 				<th>Owner</th>
-				<th>Contributers</th>
+				<th>Contributors</th>
 				<th>Last Edited</th>
 				<th>Published</th>
+				<th></th>
 			</tr>
 		</thead>
-		<tbody>
+		<tbody>{% csrf_token %}
 			{% for project in myprojects %}
 				<tr>
 					<td><a href="{% url 'divtags:project' project.id %}" >{{ project.name }}</a></td>
@@ -23,9 +24,29 @@
 					<td>{% for contributor in project.contributors.all %}<a href="{% url 'divtags:project' project.id %}" >{{ contributor.first_name }} {{ contributor.last_name }} ({{ contributor.username }})<br></a>{% endfor %}</td>
 					<td><a href="{% url 'divtags:project' project.id %}" >{{ project.lastedited }}</a></td>
 					<td><a href="{% url 'divtags:project' project.id %}" >{% if project.ispublished %}<i class="icon-line-circle-check"></i>{% else %}<i class="icon-line-circle-cross"></i>{% endif %}</a></td>
+					<td>{% if project.owner == request.user %}<a id="{{project.id}}" onclick="delete_project(event, this)"><i class="icon-trashcan"></i></a>{% endif %}</td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 </div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+
+function delete_project(event, element) {
+	if (confirm("Are you sure you wish to permenantly delete this project?")) {
+		event.preventDefault();
+		var id = element.id;
+		$.ajax({
+			url: "{% url 'divtags:project_delete' %}",
+			type: "POST",
+			data: {"id": id, csrfmiddlewaretoken: '{{ csrf_token }}'},
+			success: function(json) {
+				element.parentNode.parentNode.outerHTML = "";
+			}
+		});
+	}
+}
+</script>
 {% endblock %}

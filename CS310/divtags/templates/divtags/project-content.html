@@ -1,12 +1,25 @@
 {% load static %}
 
 <div id="json-result" style="display:none;"></div>
-<div class="container" id="outer-container" style="height:100%"></div>
+<div class="container" id="outer-container" style="height:1000px"></div>
 <div id="page-menu-button" class="page-menu-button">
 	<i class="icon-reorder"></i>
 </div>
 <div id="element-menu-button" class="page-menu-button">
 	<i class="icon-caret-down"></i>
+</div>
+
+<div class="user-header" id="user-header">
+	<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
+	<div id="user-logo">{% if project.logo %}<img src="{{ project.logo.url }}" alt="{{project.name}}Logo" style="height:60px;">{% else %}<span style="line-height:60px;">{{ project.name }}</span>{% endif %}</div>
+	<nav id="user-menu">
+		<ul id="user-menu-pages-list">
+		</ul>
+	</nav>
+</div>
+<div id="extend-page-btn">
+	<i class="icon-chevron-sign-down" id="extend-page-icon"></i>
+	<h4 id="extend-page-text">Extend Page Length</h4>
 </div>
 <div id="page-menu-options" class="side-menu" style="display:none">
 	<h4 id="page-options-name"></h4>
@@ -25,42 +38,119 @@
 		<input id="page-header-toggle" type="checkbox" data-toggle="toggle" data-offstyle="danger" data-onstyle="success" data-on="Yes" data-off="No" data-width="50px">
 	</label>
 	
-	<h6>Background Colour</h6>
+	<h6>Page Background Colour</h6>
 	<input class="form-control" id="page-background-colour" type="color" value="#ff0000" style="width:150px"/>
+	
+	<h6 style="margin-top:20px;margin-bottom:10px;">Heading Colour</h6>
+	<div class="row" style="margin-bottom:20px;">
+		<div class="col-sm-6">
+			Background
+			<input class="form-control" id="heading-background-colour" type="color" value="#ff0000"/>
+		</div>
+		
+		<div class="col-sm-6">
+			Text
+			<input class="form-control" id="heading-text-colour" type="color" value="#ff0000"/>
+		</div>
+	</div>
 </div>
 <input id="page-identifier" value="0" type="hidden">
+<div class="side-menu" id="query-builder" style="display:none;">
+	<div id="element-text-editor-query-contianer">
+		<h4 class="nobottommargin">Search for Objects</h4>
+		<div class="row object-query-container" id="object-query-type-select-container">
+			<div class="col_full object-query-block object-query-even" id="object-query-type">
+				<select id="object-query-type-dropdown">
+					<option disabled selected value="typeReset">Search Type</option>
+					<option value="search">Object Search</option>
+					<option value="user">Current User Fields</option>
+				</select>
+			</div>
+		</div>
+		<div class="row object-query-container" id="object-query-type-container"></div>
+		<button class="button nobottommargin" id="add-object-query-btn">Add Object Query</button>
+		<button class="button button-red nobottommargin" id="cancel-object-query-btn" style="float:right;">Cancel</button>
+	</div>
+</div>
 <div class="side-menu" id="element-editor" style="display:none;">
-	<h4 style="margin-bottom:10px;">Position</h4>
+	<h4 style="margin-bottom:10px;">Text</h4>
+	<div class="row" style="margin-bottom:10px;">
+		<div class="col-sm-10" id="element-inner-text"></div>
+		<div class="col-sm-2"><i id="start-query-btn" class="icon-plus"></i></div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12" id="element-text-buttons-1">
+			<select class="element-text-edit-btn" id="element-text-font-size-dropdown">
+				<option disabled selected>Font Size</option>
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<option value="5">5</option>
+				<option value="6">6</option>
+				<option value="7">7</option>
+			</select>
+			<button class="element-text-edit-btn" id="element-text-bold-btn"><strong>B</strong></button>
+			<button class="element-text-edit-btn" id="element-text-italic-btn"><i>I</i></button>
+			<button class="element-text-edit-btn" id="element-text-underline-btn"><u>U</u></button>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12" id="element-text-buttons-2">
+			<button class="element-text-edit-btn" id="element-text-ol-btn"><i class="icon-list-ol"></i></button>
+			<button class="element-text-edit-btn" id="element-text-ul-btn"><i class="icon-list-ul"></i></button>
+			<button class="element-text-edit-btn" id="element-text-align-left-btn"><i class="icon-align-left2"></i></button>
+			<button class="element-text-edit-btn" id="element-text-align-centre-btn"><i class="icon-align-center2"></i></button>
+			<button class="element-text-edit-btn" id="element-text-align-right-btn"><i class="icon-align-right2"></i></button>
+		</div>
+	</div>
+	<div class="row" style="margin-bottom:10px;">
+		<div class="col-sm-12" id="element-text-buttons-3">
+			<button class="element-text-edit-btn" id="element-text-link-btn"><i class="icon-line-link"></i></button>
+			<button class="element-text-edit-btn" id="element-text-unlink-btn"><i class="icon-unlink"></i></button>
+			<!-- <button class="element-text-edit-btn" id="element-text-insert-image-btn"><i class="icon-line-image"></i></button> -->
+		</div>
+	</div>
+	<div class="row" id="element-text-link-container" style="margin-bottom:20px; display:none;">
+		<div class="col-sm-9" id="element-text-link">
+			<input class="form-control" type="text" id="element-text-link-input">
+		</div>
+		<div class="col-sm-3">
+			<button id="element-text-link-button">Add</button>
+		</div>
+	</div>
+	
+	<div class="row" style="margin-bottom:20px;">
+		<div class="col-sm-6">Text: <br><input class="form-control element-colors" id="element-colour-text" type="color" value="#ff0000"/></div>
+		<div class="col-sm-6">B/ground: <br><input class="form-control element-colors" id="element-colour-background" type="color" value="#ff0000"/></div>
+	</div>
+	
+	<div class="row" style="margin-bottom:10px;">
+		<div class="col-sm-6">Width: <span id="element-size-width"></span> px</div>
+		<div class="col-sm-6">Height: <span id="element-size-height"></span> px</div>
+	</div>
 	<div class="row" style="margin-bottom:20px;">
 		<div class="col-sm-6">Top: <span id="element-position-top"></span> px</div>
 		<div class="col-sm-6">Left: <span id="element-position-left"></span> px</div>
 	</div>
 	
-	<h4 style="margin-bottom:10px;">Size</h4>
-	<div class="row" style="margin-bottom:20px;">
-		<div class="col-sm-6">Width: <span id="element-size-width"></span> px</div>
-		<div class="col-sm-6">Height: <span id="element-size-height"></span> px</div>
-	</div>
-	
 	<h4 style="margin-bottom:10px;">Padding</h4>
 	<div class="row" style="margin-bottom:10px;">
-		<div class="col-sm-6">Top: <br><input class="element-padding form-control" id="element-padding-top" placeholder="Top" value="0" style="width:75px; display:inline-block;"/> px</div>
-		<div class="col-sm-6">Bottom: <br><input class="element-padding form-control" id="element-padding-bottom" placeholder="Bottom" value="0" style="width:75px; display:inline-block;"/> px</div>
+		<div class="col-sm-6">Top: <br><input class="form-control element-padding" id="element-padding-top" placeholder="Top" value="0" style="width:75px; display:inline-block;"/> px</div>
+		<div class="col-sm-6">Bottom: <br><input class="form-control element-padding" id="element-padding-bottom" placeholder="Bottom" value="0" style="width:75px; display:inline-block;"/> px</div>
 	</div>
 	<div class="row" style="margin-bottom:20px;">
-		<div class="col-sm-6">Left: <br><input class="element-padding form-control" id="element-padding-left" placeholder="Left" value="0" style="width:75px; display:inline-block;"/> px</div>
-		<div class="col-sm-6">Right: <br><input class="element-padding form-control" id="element-padding-right" placeholder="Right" value="0" style="width:75px; display:inline-block;"/> px</div>
+		<div class="col-sm-6">Left: <br><input class="form-control element-padding" id="element-padding-left" placeholder="Left" value="0" style="width:75px; display:inline-block;"/> px</div>
+		<div class="col-sm-6">Right: <br><input class="form-control element-padding" id="element-padding-right" placeholder="Right" value="0" style="width:75px; display:inline-block;"/> px</div>
 	</div>
 	
-	<h4 style="margin-bottom:10px;">Colour</h4>
-	<div class="row" style="margin-bottom:20px;">
-		<div class="col-sm-6">Text: <br><input class="form-control" id="element-colour-text" type="color" value="#ff0000" style="width:75px"/></div>
-		<div class="col-sm-6">B/ground: <br><input class="form-control" id="element-colour-background" type="color" value="#ff0000" style="width:75px"/></div>
-	</div>
- 	
  	<h4 style="margin-bottom:10px;">Show on all Pages</h4>
 	<label class="switch">
 		<input type="checkbox" id="show-all-pages" value="show">
 		<span class="slider round"></span>
 	</label>
 </div>
+
+
+<!-- Create the editor container -->
+

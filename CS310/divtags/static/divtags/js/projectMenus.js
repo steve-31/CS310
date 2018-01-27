@@ -1,5 +1,6 @@
 var tempApplication = Application;
 var noOfElements = 0;
+var noOfQueries = 0;
 
 $('document').ready(function(){
 		var headeroffset = $('#header').offset().top;
@@ -58,6 +59,10 @@ $('document').ready(function(){
     	$('#projectDescModal').hide()
     });
     
+    $('.close').click(function(){
+    	$('#editTextModal').hide()
+    });
+    
     window.onclick = function(event) {
 	    if (event.target == '#projectDescModal') {
 	        modal.style.display = "none";
@@ -90,6 +95,7 @@ $('document').ready(function(){
     	document.getElementById("page-options-name").innerHTML = newPageName + "<span class=\"fixedText\" onclick=\"deletePage(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-trashcan\"></i></span><span class=\"fixedText\" href=\"#\" onclick=\"editPageName(event)\" style=\"display:inline-block; float:right;\"><i class=\"icon-pencil\"></i></span>"
     	document.getElementById("page-dropdown").innerHTML = "Page: &nbsp; " + newPageName + " &nbsp;&nbsp;&nbsp; <i class=\"icon-caret-down\" style=\"float:right;\"></i>";
     	document.getElementById("page-"+pageId).innerHTML = newPageName;
+    	addToHeader();
     }
     
     function deletePage(event) {
@@ -102,7 +108,6 @@ $('document').ready(function(){
     	document.getElementById("project-page-list").innerHTML = "<li id=\"project-page-add\"><a href=\"#\" onclick=\"addPage(event)\" class=\"fixedText\"><i class=\"icon-plus\"></i>&nbsp;Add new page</a></li>";
     	insertPages(tempApplication);
     	insertElements(tempApplication, 0);
-    	console.log(tempApplication);
     	//document.getElementById("page-"+pageId).outerHTML = "";
     }
     
@@ -113,6 +118,18 @@ $('document').ready(function(){
     	document.getElementById("project-content").style.backgroundColor = tempApplication.pages[pageid].background;
     }
     
+    document.getElementById('heading-background-colour').addEventListener('input', changeHeadingBackgroundColour, false);
+    function changeHeadingBackgroundColour() {
+    	tempApplication.headerBackgroundColour = document.getElementById('heading-background-colour').value;
+    	document.getElementById("user-header").style.backgroundColor = tempApplication.headerBackgroundColour;
+    }
+    
+    document.getElementById('heading-text-colour').addEventListener('input', changeHeadingTextColour, false);
+    function changeHeadingTextColour() {
+    	tempApplication.headerTextColour = document.getElementById('heading-text-colour').value;
+    	document.getElementById("user-header").style.color = tempApplication.headerTextColour;
+    }
+    
     $('#permissions-toggle').change(function() {changePagePermissions();});
     function changePagePermissions() {
     	var pageid = document.getElementById("page-identifier").value;
@@ -121,6 +138,7 @@ $('document').ready(function(){
     	} else {
     		tempApplication.pages[pageid].permissions = "public";
     	}
+    	addToHeader();
     }
     
     $('#page-header-toggle').change(function() {changeShowInHeader();});
@@ -131,6 +149,7 @@ $('document').ready(function(){
     	} else {
     		tempApplication.pages[pageid].showinheader = "no";
     	}
+    	addToHeader();
     }
     
     $('#homepage-toggle').click(function() {changeHomepage();});
@@ -148,8 +167,8 @@ $('document').ready(function(){
     	console.log(tempApplication);
     }
     
-    $('#show-allpages-elements-toggle').change(function() {changeShowInHeader();});
-    function changeShowInHeader() {
+    $('#show-allpages-elements-toggle').change(function() {changeShowAllElements();});
+    function changeShowAllElements() {
     	var pageid = document.getElementById("page-identifier").value;
     	if (document.getElementById('show-allpages-elements-toggle').checked) {
     		tempApplication.pages[pageid].showallpages = "yes";
@@ -177,6 +196,13 @@ $('document').ready(function(){
     			noOfElements += 1;
     		}
     	}
+    }
+    
+    $('#extend-page-btn').click(extendPageLength);
+    function extendPageLength() {
+    	var containerHeight = $("#project-content").height();
+    	document.getElementById("project-content").style.height = containerHeight + 1000 + "px";
+    	document.getElementById("outer-container").style.height = containerHeight + 1000 + "px";
     }
     
 //    $('#add-attribute-btn').click(function(event){
@@ -278,7 +304,9 @@ $('document').ready(function(){
 		$('#back-to-edit').css("display", "block")
 	});
 	
-	$('#back-to-edit').click(function(){
+	$('#back-to-edit').click(function(event){
+		event.preventDefault();
+		$(window).scrollTop(0)
 		$('#settings-tab').removeClass('project-active-tab')
 		$('#content-tab').addClass('project-active-tab')
 		$('#workflow-tab').removeClass('project-active-tab')

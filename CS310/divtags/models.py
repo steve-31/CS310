@@ -22,6 +22,7 @@ class Project(models.Model):
     pubiterationno = models.IntegerField(null=True)
     pubdate = models.DateTimeField(null=True)
     file = JSONField()
+    logo = models.ImageField(upload_to="img/ProjectLogos", null=True)
     
 class ProjectAttributeType(models.Model):
     name = models.CharField(max_length=50)
