@@ -55,6 +55,20 @@
 	font-size: 15px;
 }
 
+.link { 
+	width: 15px; 
+	height: 15px; 
+	line-height:15px;
+	background-color: #ffffff;
+	/* border: 1px solid black;  */
+	position: absolute; 
+	top: 55px; 
+	left: -30px; 
+	cursor: pointer; 
+	color: #000000;
+	font-size: 15px;
+}
+
 .refresh { 
 	width: 15px; 
 	height: 15px; 

@@ -62,8 +62,9 @@
 			<div class="col_full object-query-block object-query-even" id="object-query-type">
 				<select id="object-query-type-dropdown">
 					<option disabled selected value="typeReset">Search Type</option>
-					<option value="search">Object Search</option>
-					<option value="user">Current User Fields</option>
+					<option value="search-single">Single Object Search</option>
+					<option value="search-multiple">Multiple Object Search</option>
+					<option id="user-option" value="user">Current User Fields</option>
 				</select>
 			</div>
 		</div>
@@ -72,6 +73,74 @@
 		<button class="button button-red nobottommargin" id="cancel-object-query-btn" style="float:right;">Cancel</button>
 	</div>
 </div>
+
+<div class="side-menu" id="multi-query-builder" style="display:none;">
+	<div id="multi-query-contianer">
+		<h4 class="nobottommargin">Search for Objects with Multiple Results</h4>
+		<div class="row object-query-container" id="multi-object-select-container">
+			<div class="col_half object-query-block object-query-even" id="multi-query-object">
+				<select id="multi-query-object-dropdown">
+				</select>
+			</div>
+			<div class="col_half col_last object-query-block object-query-even" id="multi-query-object-field">
+				<select id="multi-query-object-field-dropdown" multiple="multiple">
+				</select>
+			</div>
+		</div>
+		<div class="row object-query-container" id="multi-query-add-constraint-container">
+			<button class="button button-green" id="object-query-add-constraint-btn"><i class="icon-line-plus"></i> Add Constraint</button>
+		</div>
+		<!-- <div class="row object-query-container" id="object-query-field-container">
+			<div class="col_one_third object-query-block object-query-even" id="object-query-field">
+				<select id="multi-query-field-dropdown">
+				</select>
+			</div>
+			<div class="col_one_third object-query-block object-query-even" id="object-query-operator">
+				<select id="multi-query-operator-dropdown">
+					<option disabled="" selected="" value="operatorReset">Operator</option>
+					<option value="equal">=</option>
+					<option value="not-equal">!=</option>
+					<option value="lt">&lt;</option>
+					<option value="gt">&gt;</option>
+					<option value="lte">&lt;=</option>
+					<option value="gte">&gt;=</option>
+				</select>
+			</div>
+			<div class="col_one_third col_last object-query-block object-query-even" id="object-query-comparator-select">
+				<select id="multi-query-comparator-select-dropdown">
+					<option disabled="" selected="" value="comparatorReset">Comparator</option>
+					<option value="userId">Current User</option>
+					<option value="value">Value</option>
+					<option value="query">Nested Search</option>
+					<option disabled="" value="pageObject">Page's object</option>
+				</select>
+			</div>
+		</div>
+		<div class="row object-query-container" id="object-query-field-container">
+			<div class="col_full object-query-block object-query-even" id="multi-query-comparator" style="display:none;">
+			
+			</div>
+		</div> -->
+		<div class="row object-query-container" id="multi-query-options-container">
+			<div class="col_one_fourth">
+				Limit (0 for no limit): <input class="form-control" type="number" id="query-limit" value="0">
+			</div>
+			<div class="col_one_fourth">
+				Order By: <select id="query-order-by" class="form-control"></select>
+			</div>
+			<div class="col_one_fourth">
+				Ascending/Descending: <select id="query-order-by" class="form-control"><option value="None">None</option><option value="Asc">Ascending</option><option value="Desc">Descending</option></select>
+			</div>
+			<div class="col_one_fourth col_last">
+				Display Headings: <select id="query-display-headings" class="form-control"><option value="yes">Yes</option><option value="no">No</option></select>
+			</div>
+		</div>
+		<button class="button nobottommargin" id="add-multi-query-btn">Add Object Query</button>
+		<button class="button button-red nobottommargin" id="cancel-multi-query-btn" style="float:right;">Cancel</button>
+	</div>
+</div>
+
+
 <div class="side-menu" id="element-editor" style="display:none;">
 	<h4 style="margin-bottom:10px;">Text</h4>
 	<div class="row" style="margin-bottom:10px;">
@@ -152,5 +221,22 @@
 </div>
 
 
-<!-- Create the editor container -->
+<div id="elementLinkModal" class="modal">
+		
+	<!-- Modal content -->
+	<div class="modal-content">
+		<div class="modal-header">
+			<span class="close">&times;</span>
+			<h2>Choose Page To Link To</h2>
+		</div>
+		<div class="modal-body">
+			<select id="page-link-select" class="form-control">
+			</select>
+		</div>
+		<div class="modal-footer">
+			<button class="button button-3d button-blue bottommargin" id="set-link-btn">Set Link</button>
+		</div>
+	</div>
+
+</div>
 

@@ -71,7 +71,7 @@ $('document').ready(function(){
     
     function addPage(event) {
     	event.preventDefault();
-    	newpage = {"name": "NewPage", "elements": [], "background": "#ffffff", "permissions": "public", "homepage":"no", "showinheader":"yes", "showallpages":"yes"};
+    	newpage = {"name": "NewPage", "elements": [], "queries": [], "links": [], "multiqueries": [], "forms": [], "background": "#ffffff", "permissions": "public", "homepage":"no", "showinheader":"yes", "showallpages":"yes"};
     	tempApplication['pages'].push(newpage);
     	document.getElementById("project-page-list").innerHTML = "<li id=\"project-page-add\"><a href=\"#\" onclick=\"addPage(event)\" class=\"fixedText\"><i class=\"icon-plus\"></i>&nbsp;Add new page</a></li>";
     	insertPages(tempApplication);
@@ -156,7 +156,9 @@ $('document').ready(function(){
     function changeHomepage() {
     	var pageid = document.getElementById("page-identifier").value;
 		for (i in tempApplication.pages) {
-			tempApplication.pages[i].homepage = "no";
+			if (tempApplication.pages[i].permissions == tempApplication.pages[pageid].permissions) {
+				tempApplication.pages[i].homepage = "no";
+			}
 		}
 		tempApplication.pages[pageid].homepage = "yes";
 		document.getElementById('homepage-toggle').innerHTML = "Homepage Set";

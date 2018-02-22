@@ -7,9 +7,11 @@ var intervals = [];
 
 var homepage = 1;
 for (i in Application.pages) {
-	if (Application.pages[i].homepage == "yes") {
-		homepage = i;
-		break;
+	if (Application.pages[i].permissions == "public"){
+		if (Application.pages[i].homepage == "yes") {
+			homepage = i;
+			break;
+		}
 	}
 }
 
@@ -106,7 +108,7 @@ function addParagraph(event) {
 	
 	var container = document.getElementById("outer-container");
 	noOfElements += 1;
-	var divElement = "<p class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\"><div class=\"element-text\">This is a Paragraph</div></p>";
+	var divElement = "<div class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\"><p class=\"element-text\">This is a Paragraph</p></div>";
 	container.innerHTML += divElement;
 	
 	var pageId = document.getElementById("page-identifier").value;
@@ -197,18 +199,28 @@ function addForm(object, type) {
 	noOfElements += 1;
 	var formElements = "";
 	var fieldNo = 0;
-	for (i in tempApplication.objects[object].attributes) {
-		if (tempApplication.objects[object].attributes[i].type == "Text"){
+	var formobject;
+	for (i in tempApplication.objects) {
+		if (tempApplication.objects[i].name == object) {
+			formobject = tempApplication.objects[i];
+		}
+	}
+	for (i in formobject.attributes) {
+		if (formobject.attributes[i].type == "Text"){
 			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:none\"></i>";
-			formElements += "<label> &nbsp;" + tempApplication.objects[object].attributes[i].name + "</label><input type=\"text\" class=\"form-control user-form\"/>";
+			formElements += "<label>" + formobject.attributes[i].name + "</label><input type=\"text\" class=\"form-control user-form\"/>";
 			fieldNo += 1;
-		} else if (tempApplication.objects[object].attributes[i].type == "Number"){
+		} else if (formobject.attributes[i].type == "Number"){
 			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:none\"></i>";
-			formElements += "<label> &nbsp;" + tempApplication.objects[object].attributes[i].name + "</label><input type=\"number\" class=\"form-control user-form\"/>";
+			formElements += "<label>" + formobject.attributes[i].name + "</label><input type=\"number\" class=\"form-control user-form\"/>";
 			fieldNo += 1;
-		} else if (tempApplication.objects[object].attributes[i].type == "Reference"){
+		} else if (formobject.attributes[i].type == "Reference"){
 			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:none\"></i>";
-			formElements += "<label> &nbsp;" + tempApplication.objects[object].attributes[i].name + "</label><select class=\"form-control user-form\"/></select>";
+			formElements += "<label>" + formobject.attributes[i].name + "</label><select class=\"form-control user-form\"/></select>";
+			fieldNo += 1;
+		} else if (formobject.attributes[i].type == "Date"){
+			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:none\"></i>";
+			formElements += "<label>" + formobject.attributes[i].name + "</label><input type=\"date\" class=\"form-control user-form\"/>";
 			fieldNo += 1;
 		}
 	}
@@ -216,33 +228,207 @@ function addForm(object, type) {
 	
 	var container = document.getElementById("outer-container");
 	
-	var divElement = "<form class=\"element\" id=\"" + noOfElements + " " + type + " " + object +"\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\">"+formElements+"</form>";
+	var divElement = "<form class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\">"+formElements+"</form>";
 	container.innerHTML += divElement;
 	
 	var pageId = document.getElementById("page-identifier").value;
+	
+	var formFields = [];
+	for (i in formobject.attributes) {
+		if (formobject.attributes[i].type != "primaryKey" && formobject.attributes[i].type != "Connection"){
+			formFields.push(
+					{
+						"type": formobject.attributes[i].type,
+						"label": formobject.attributes[i].name,
+						"details": formobject.attributes[i].details
+					}
+			);
+		}
+	}
+	
+	var formJSON = {
+			"id": noOfElements,
+			"type": type,
+			"object": object,
+			"fields": formFields
+	}
+	
+	tempApplication.pages[pageId].forms.push(formJSON);
+	
 	saveJsonLocal(tempApplication);
 }
 
 function populateFormObject() {
 	var list = document.getElementById("form-objects-list-add");
 	for (i in tempApplication.objects) {
-		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm("+i+", \'add\')\">"+tempApplication.objects[i].name+"</a></li>";
+		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm(\'"+tempApplication.objects[i].name+"\', \'add\')\">"+tempApplication.objects[i].name+"</a></li>";
 	}
 	var list = document.getElementById("form-objects-list-update");
 	for (i in tempApplication.objects) {
-		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm("+i+", \'update\')\">"+tempApplication.objects[i].name+"</a></li>";
+		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm(\""+tempApplication.objects[i].name+"\", \'update\')\">"+tempApplication.objects[i].name+"</a></li>";
 	}
 	var list = document.getElementById("form-objects-list-verify");
 	for (i in tempApplication.objects) {
-		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm("+i+", \'verify\')\">"+tempApplication.objects[i].name+"</a></li>";
+		list.innerHTML += "<li><a href=\"#\" onclick=\"addForm(\""+tempApplication.objects[i].name+"\", \'verify\')\">"+tempApplication.objects[i].name+"</a></li>";
 	}
 }
+
+function addMultiQuery(event) {
+	document.getElementById("multi-query-builder").style.display = "block";
+	var objectList = "<option disabled selected value=\"objectReset\">Object</option>";
+	for (i in tempApplication.objects) {
+		objectList += "<option value=\""+ tempApplication.objects[i].name + "\">"+ tempApplication.objects[i].name +"</option>";
+	}
+	document.getElementById("multi-query-object-dropdown").innerHTML = objectList;
+}
+
+$('#add-multi-query-btn').click(function(){
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	var pageId = document.getElementById("page-identifier").value;
+	noOfElements += 1;
+	var displayFields = $("#multi-query-object-field-dropdown").val();
+	var displayFieldsJson = [];
+	for (i in displayFields){
+		displayFieldsJson.push({"name": displayFields[i]})
+	}
+	
+	var multiQueryJson = {
+			"id": noOfElements,
+			"display": {
+				"object": document.getElementById("multi-query-object-dropdown").value,
+				"fields": displayFieldsJson
+			},
+			"query": {
+				"object": document.getElementById("multi-query-object-dropdown").value,
+				"field": document.getElementById("multi-query-field-dropdown").value,
+				"operator": document.getElementById("multi-query-operator-dropdown").value,
+				"comparator": document.getElementById("multi-query-comparator-dropdown").value
+			},
+			"limit": document.getElementById("query-limit").value,
+			"order": document.getElementById("query-order-by").value,
+			"headings": document.getElementById("query-display-headings").value
+	};
+	tempApplication['pages'][pageId]['multiqueries'].push(multiQueryJson);
+	var container = document.getElementById("outer-container");
+	
+	var queryTable = "<table class=\"table\">";
+	if (multiQueryJson.headings == "yes") {
+		queryTable += "<tr>";
+		for (i in multiQueryJson.display.fields) {
+			queryTable += "<th>"+multiQueryJson.display.fields[i].name+"</th>";
+		}
+		queryTable += "</tr>";
+	}
+	console.log(parseInt(multiQueryJson.limit)==0);
+	if (parseInt(multiQueryJson.limit) != 0) {
+		for (var i=0; i<parseInt(multiQueryJson.limit); i++){
+			queryTable += "<tr>";
+			for (j in multiQueryJson.display.fields) {
+				queryTable += "<td>"+multiQueryJson.display.object+"."+multiQueryJson.display.fields[j].name+"</td>";
+			}
+			queryTable += "</tr>";
+		}
+	} else {
+		for (var i=0; i<10; i++){
+			queryTable += "<tr>";
+			for (j in multiQueryJson.display.fields) {
+				queryTable += "<td>"+multiQueryJson.display.object+"."+multiQueryJson.display.fields[j].name+"</td>";
+			}
+			queryTable += "</tr>";
+		}
+	}
+	queryTable += "</table>";
+	
+	
+	var divElement = "<div class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\">" +
+			queryTable +
+			"</div>";
+	container.innerHTML += divElement;
+	
+	document.getElementById("multi-query-builder").style.display = "none";
+	saveJsonLocal(tempApplication);
+});
+
+$('#object-query-add-constraint-btn').click(function(){
+	var newconstraint = '<div class="row object-query-container" id="object-query-field-container">' +
+		'<div class="col_one_third object-query-block object-query-even" id="object-query-field">'+
+			'<select id="multi-query-field-dropdown"></select>' +
+		'</div>'+
+		'<div class="col_one_third object-query-block object-query-even" id="object-query-operator">'+
+			'<select id="multi-query-operator-dropdown">'+
+				'<option disabled="" selected="" value="operatorReset">Operator</option>'+
+				'<option value="equal">=</option>'+
+				'<option value="not-equal">!=</option>'+
+				'<option value="lt">&lt;</option>'+
+				'<option value="gt">&gt;</option>'+
+				'<option value="lte">&lt;=</option>'+
+				'<option value="gte">&gt;=</option>'+
+			'</select>'+
+		'</div>'+
+		'<div class="col_one_third col_last object-query-block object-query-even" id="object-query-comparator-select">'+
+			'<select id="multi-query-comparator-select-dropdown">'+
+				'<option disabled="" selected="" value="comparatorReset">Comparator</option>'+
+				'<option value="userId">Current User</option>'+
+				'<option value="value">Value</option>'+
+				'<option value="query">Nested Search</option>'+
+				'<option disabled="" value="pageObject">Page\'s object</option>'+
+			'</select>'+
+		'</div>'+
+	'</div>'+
+	'<div class="row object-query-container" id="object-query-field-container">'+
+		'<div class="col_full object-query-block object-query-even" id="multi-query-comparator" style="display:none;">'+
+		'</div>'+
+	'</div>';
+	
+	document.getElementById('multi-query-options-container').insertAdjacentHTML('beforebegin', newconstraint);
+	
+	$('#multi-query-comparator-select-dropdown').change(function() {
+		var container = document.getElementById("multi-query-comparator");
+		document.getElementById("multi-query-comparator").style.display = "block";
+		var comparatorSelection = document.getElementById("multi-query-comparator-select-dropdown").value;
+		if (comparatorSelection == "userId") {
+			var userFields = "";
+			for (i in tempApplication.objects) {
+				if (tempApplication.objects[i].name == "User") {
+					for (j in tempApplication.objects[i].attributes) {
+						userFields += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+					}
+				}
+			}
+			container.innerHTML = "<select id=\"multi-query-comparator-dropdown\"><option disabled selected>Current User</option>" + userFields +"</select>";
+		} else if(comparatorSelection == "value") {
+			container.innerHTML = "<input type=\"text\" id=\"multi-query-comparator-dropdown\">";
+		}
+		
+	});
+});
+
+$('#cancel-multi-query-btn').click(function(){
+	document.getElementById("multi-query-builder").style.display = "none";
+});
+
+$('#multi-query-object-dropdown').change(function() {
+	var selectedObjectName = document.getElementById("multi-query-object-dropdown").value;
+	var fieldList = "<option disabled selected value=\"fieldReset\">Field</option>";
+	for (i in tempApplication.objects) {
+		if (selectedObjectName == tempApplication.objects[i].name) {
+			for (j in tempApplication.objects[i].attributes){
+				fieldList += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+			}
+		}
+	}
+	document.getElementById("multi-query-object-field-dropdown").innerHTML = fieldList;
+	document.getElementById("multi-query-field-dropdown").innerHTML = fieldList;
+	document.getElementById("query-order-by").innerHTML = fieldList;
+});
 
 function saveJsonLocal(jsonInput) {
 	var allElements = document.getElementById("outer-container").childNodes;
 	var pageId = document.getElementById("page-identifier").value;
 	var saveElements = [];
+	var saveForms = [];
 	var allPageElements = [];
+	var allPageForms = [];
 	for (var i=0; i < allElements.length; i++) {
 //		if (allElements[i].classList == "element selected-element") {
 //			currentselectedelement = 
@@ -251,7 +437,7 @@ function saveJsonLocal(jsonInput) {
 		if (elementtosave.className == "element selected-element") {
 			for (var k=0; k<elementtosave.childNodes.length; k++) {
 				if (typeof elementtosave.childNodes[k].outerHTML !== 'undefined') {
-					if (elementtosave.childNodes[k].classList.contains("resizer") || elementtosave.childNodes[k].classList.contains("mover") || elementtosave.childNodes[k].classList.contains("delete") || elementtosave.childNodes[k].classList.contains("editText") || elementtosave.childNodes[k].classList.contains("refresh")){
+					if (elementtosave.childNodes[k].classList.contains("resizer") || elementtosave.childNodes[k].classList.contains("mover") || elementtosave.childNodes[k].classList.contains("delete") || elementtosave.childNodes[k].classList.contains("link") || elementtosave.childNodes[k].classList.contains("refresh")){
 						elementtosave.childNodes[k].outerHTML = "";
 						k -= 1;
 						continue;
@@ -270,7 +456,7 @@ function saveJsonLocal(jsonInput) {
 //			}
 			elementtosave.className = "element";
 		}
-		console.log(tempApplication);
+		//console.log(tempApplication);
 		
 		if (typeof elementtosave.outerHTML !== 'undefined'){
 			if (elementtosave.id.match(/-/g)) {
@@ -279,6 +465,7 @@ function saveJsonLocal(jsonInput) {
 							"content": elementtosave.outerHTML,
 						}
 				);
+				
 			} else {
 				saveElements.push(
 						{ 
@@ -384,16 +571,26 @@ function saveJson(jsonInput, id) {
 }
 
 function insertPages(jsonInput) {
+	var linklist = document.getElementById("page-link-select");
+	linklist.innerHTML = "";
+	
 	for (i in jsonInput.pages) {
 		if (jsonInput.pages[i].name != "AllPages") {
 			var list = document.getElementById("project-page-list");
 			var newListItem = document.createElement('li');
 			if (jsonInput.pages[i].homepage == "yes") {
-				newListItem.innerHTML = '<a class="fixedText" href="#" id="page-'+i+'" onclick="newPage(event, '+i+');"><i class="icon-home"></i> ' + jsonInput.pages[i].name + '</a>';
+				if (jsonInput.pages[i].permissions == "public") {
+					newListItem.innerHTML = '<a class="fixedText" href="#" id="page-'+i+'" onclick="newPage(event, '+i+');"><i class="icon-home"></i> ' + jsonInput.pages[i].name + '</a>';
+				} else {
+					newListItem.innerHTML = '<a class="fixedText" href="#" id="page-'+i+'" onclick="newPage(event, '+i+');"><i>M</i> ' + jsonInput.pages[i].name + '</a>';
+				}
 			} else {
 				newListItem.innerHTML = '<a class="fixedText" href="#" id="page-'+i+'" onclick="newPage(event, '+i+');">' + jsonInput.pages[i].name + '</a>';
 			}
 			list.appendChild(newListItem);
+			
+			
+			linklist.innerHTML += "<option value=\""+jsonInput.pages[i].name+"\">"+jsonInput.pages[i].name+"</option>"
 		}
 	}
 }
@@ -527,7 +724,7 @@ function selectQueryType() {
 		}
 		container.innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-user\">" +
 				"<select id=\"object-query-user-dropdown\">"+ userFields +"</select></div>";
-	} else if (selection == "search") {
+	} else {
 		container.innerHTML = "<div class=\"col_half object-query-block object-query-even\" id=\"object-query-object\"></div>" +
 			"<div class=\"col_half col_last object-query-block object-query-even\" id=\"object-query-field-display\">Field</div>"
 		container.insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-object-container\"></div>");
@@ -633,6 +830,8 @@ function selectQueryComparator() {
 }
 
 function addQuery() {
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	var pageId = document.getElementById("page-identifier").value;
 	var failed = false;
 	var queryType = document.getElementById("object-query-type-dropdown").value;
 	if (queryType == "user") {
@@ -647,13 +846,14 @@ function addQuery() {
 					"field": userField
 				},
 				"query": {
+					"type": "user",
 					"object": "User",
 					"field": "primary_key",
 					"operator": "equal",
 					"comparator": "userId"
 				}
 			};
-			tempApplication['queries'].push(queryJson);
+			tempApplication['pages'][pageId]['queries'].push(queryJson);
 			var element = document.getElementsByClassName("selected-element")[0];
 			for (i in element.childNodes) {
 				if (typeof element.childNodes[i].outerHTML !== 'undefined'){
@@ -664,12 +864,13 @@ function addQuery() {
 			}
 			//document.getElementById("element-inner-text").innerHTML += "<span class=\"query\" id=\"query-"+noOfQueries+"\" onclick=\"editQuery(this)\">User." + userField + "</span>";
 		}
-	} else if(queryType == "search") {
+	} else if(queryType == "search-single" || queryType == "search-multiple") {
 		if (document.getElementById("object-query-object-dropdown").value == "objectReset") {
 			failed = true;
 		} else if (document.getElementById("object-query-field-display-dropdown").value == "fieldReset") {
 			failed = true;
 		} else {
+			var type = document.getElementById("object-query-type-dropdown").value;
 			var object = document.getElementById("object-query-object-dropdown").value;
 			var displayField = document.getElementById("object-query-field-display-dropdown").value;
 			var queryField = document.getElementById("object-query-field-dropdown").value;
@@ -683,6 +884,7 @@ function addQuery() {
 					"field": displayField
 				},
 			  	"query": {
+			  		"type": type,
 			  		"object": object, 
 			  		"field": queryField,
 			  		"operator": operator,
@@ -690,9 +892,13 @@ function addQuery() {
 			  		"comparatorType": comparatorSelect
 			  	}
 			};
-			tempApplication['queries'].push(queryJson);
+			tempApplication['pages'][pageId]['queries'].push(queryJson);
+			var element = document.getElementsByClassName("selected-element")[0];
+			console.log("test");
+			console.log(element);
 			for (i in element.childNodes) {
 				if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+					console.log(element.childNodes[i]);
 					if (element.childNodes[i].classList.contains('element-text')) {
 						element.childNodes[i].innerHTML += "<span class=\"query\" id=\"query-"+noOfQueries+"\" onclick=\"editQuery(this)\">" + object + "." + displayField + "</span>";
 					}
@@ -711,30 +917,37 @@ function addQuery() {
 		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
 			"<select id=\"object-query-type-dropdown\">"+
 				"<option disabled selected value=\"reset\">Search Type</option>"+
-				"<option value=\"search\">Object Search</option>"+
+				"<option value=\"search-single\">Single Object Search</option>"+
+				"<option value=\"search-multiple\">Multiple Object Search</option>"+
 				"<option value=\"user\">Current User Fields</option>"+
 			"</select>"+
 		"</div>";
 		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
 		$('#object-query-type').change(selectQueryType);
 		$('#query-builder').hide();
+		saveJsonLocal(tempApplication);
 	}
 }
 
 function editQuery(query) {
-	console.log("editing query");
 	queryId = query.id.match(/\d+/g);
 	queryId = queryId[0];
-	var queryJson = tempApplication.queries[queryId];
+	var pageId = document.getElementById("page-identifier").value;
+	var queryJson
+	for (i in tempApplication.pages[pageId].queries) {
+		if (tempApplication.pages[pageId].queries[i].id == queryId) {
+			queryJson = tempApplication.pages[pageId].queries[i];
+		}
+	}
 	$('#query-builder').show();
-	if (queryJson.display.object == "User" && queryJson.query.object == "User" && queryJson.query.field == "primary_key" && queryJson.query.operator == "equal" && queryJson.query.comparator == "userId") {
+	if (queryJson.query.type == "User") {
 		//then show the user object queries
-		document.getElementById("object-query-type-dropdown").value = "user";
+		document.getElementById("object-query-type-dropdown").value = queryJson.query.type;
 		selectQueryType();
 		document.getElementById("object-query-user-dropdown").value = queryJson.display.field;
 	} else {
 		//show the search object queries
-		document.getElementById("object-query-type-dropdown").value = "search";
+		document.getElementById("object-query-type-dropdown").value = queryJson.query.type;
 		selectQueryType();
 		document.getElementById("object-query-object-dropdown").value = queryJson.display.object;
 		selectObjectType();
@@ -752,6 +965,8 @@ function editQuery(query) {
 }
 
 function completeEditQuery(queryId) {
+	undoChangeStack.push(JSON.stringify(tempApplication));
+	var pageId = document.getElementById("page-identifier").value;
 	var textbox = document.getElementById("element-inner-text");
 	var query = document.getElementById("query-"+queryId);
 	var failed = false;
@@ -768,13 +983,14 @@ function completeEditQuery(queryId) {
 					"field": userField
 				},
 				"query": {
+					"type": "user",
 					"object": "User",
 					"field": "primary_key",
 					"operator": "equal",
 					"comparator": "userId"
 				}
 			};
-			tempApplication.queries[queryId] = queryJson;
+			tempApplication.pages[pageId].queries[queryId] = queryJson;
 			query.innerHTML = "User." + userField;
 		}
 	} else if(queryType == "search") {
@@ -783,6 +999,7 @@ function completeEditQuery(queryId) {
 		} else if (document.getElementById("object-query-field-display-dropdown").value == "fieldReset") {
 			failed = true;
 		} else {
+			var type = document.getElementById("object-query-type-dropdown").value;
 			var object = document.getElementById("object-query-object-dropdown").value;
 			var displayField = document.getElementById("object-query-field-display-dropdown").value;
 			var queryField = document.getElementById("object-query-field-dropdown").value;
@@ -796,6 +1013,7 @@ function completeEditQuery(queryId) {
 					"field": displayField
 				},
 			  	"query": {
+			  		"type": type,
 			  		"object": object, 
 			  		"field": queryField,
 			  		"operator": operator,
@@ -803,7 +1021,7 @@ function completeEditQuery(queryId) {
 			  		"comparatorType": comparatorSelect
 			  	}
 			};
-			tempApplication.queries[queryId] = queryJson;
+			tempApplication.pages[pageId].queries[queryId] = queryJson;
 			query.innerHTML = object + "." + displayField;
 			document.getElementById("object-query-object-container").outerHTML = "";
 			document.getElementById("object-query-field-container").outerHTML = "";
@@ -815,7 +1033,8 @@ function completeEditQuery(queryId) {
 		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
 			"<select id=\"object-query-type-dropdown\">"+
 				"<option disabled selected value=\"reset\">Search Type</option>"+
-				"<option value=\"search\">Object Search</option>"+
+				"<option value=\"search-single\">Single Object Search</option>"+
+				"<option value=\"search-multiple\">Multiple Object Search</option>"+
 				"<option value=\"user\">Current User Fields</option>"+
 			"</select>"+
 		"</div>";
@@ -823,10 +1042,12 @@ function completeEditQuery(queryId) {
 		document.getElementById("edit-object-query-btn").outerHTML = "<button class=\"button nobottommargin\" id=\"add-object-query-btn\" onclick=\"addQuery()\">Add Object Query</button>";
 		$('#object-query-type').change(selectQueryType);
 		$('#query-builder').hide();
+		saveJsonLocal(tempApplication);
 	}
 }
 
 function selectElement(id) {
+	var pageId = document.getElementById("page-identifier").value;
 	$('#page-menu-options').hide();
 	$('#element-menu-button').show();
 	document.getElementById("element-editor").style.display = 'none';
@@ -844,7 +1065,7 @@ function selectElement(id) {
 	    $('.mover').remove();
 	    $('.delete').remove();
 	    $('.refresh').remove();
-	    $('.editText').remove();
+	    $('.link').remove();
 	}
 	var fieldDeletes = document.getElementsByClassName("form-field-delete");
 	for (var i=0; i<fieldDeletes.length; i++) {
@@ -908,6 +1129,10 @@ function selectElement(id) {
     resizerbottomright.className = 'resizer resizerbottomright';
     resizerbottomright.id = id + 'resizer';
     element.appendChild(resizerbottomright);
+    var link = document.createElement('div');
+    link.className = 'link';
+    link.id = id + 'link';
+    link.innerHTML = "<i class='icon-link' id='link-icon'></i>";
     var mover = document.createElement('div');
     mover.className = 'mover';
     mover.id = id + 'mover';
@@ -922,6 +1147,7 @@ function selectElement(id) {
     mover.addEventListener('mousedown', initMoveDrag, false);
     deleteButton.addEventListener('mousedown', deleteElement, false);
     refresh.addEventListener('mousedown', refreshForm, false);
+    link.addEventListener('mousedown', linkelement, false);
     document.getElementById('element-padding-top').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-right').addEventListener('keyup', updatePadding, false);
     document.getElementById('element-padding-bottom').addEventListener('keyup', updatePadding, false);
@@ -941,6 +1167,8 @@ function selectElement(id) {
 	    		}
     		}
     	}
+    } else {
+    	element.appendChild(link);
     }
     
     window.onclick = function(event) {
@@ -963,7 +1191,7 @@ function selectElement(id) {
 		    $('.mover').remove();
 		    $('.delete').remove();
 		    $('.refresh').remove();
-		    $('.editText').remove();
+		    $('.link').remove();
 		    $('#element-menu-button').hide();
 		    var fieldDeletes = document.getElementsByClassName("form-field-delete");
 			for (var i=0; i<fieldDeletes.length; i++) {
@@ -979,6 +1207,22 @@ function selectElement(id) {
 			}
 	    }
 	}
+    
+    function linkelement() {
+    	document.getElementById("elementLinkModal").style.display = 'block';
+    	$('.close').click(function(){
+        	$('#elementLinkModal').hide()
+        });
+    	$('#set-link-btn').click(function(){
+    		selected = document.getElementById("page-link-select")
+    		link = {
+        			"id": id, 
+        			"page": selected.options[selected.selectedIndex].value
+        	}
+    		tempApplication.pages[pageId].links.push(link);
+        	$('#elementLinkModal').hide()
+    	});
+    }
     
     function showAllPages(e) {
     	undoChangeStack.push(JSON.stringify(tempApplication));
@@ -1020,6 +1264,11 @@ function selectElement(id) {
     
     function deleteElement(e) {
     	undoChangeStack.push(JSON.stringify(tempApplication));
+    	for (i in tempApplication.pages[pageId].forms) {
+    		if (tempApplication.pages[pageId].forms[i].id == element.id) {
+    			tempApplication.pages[pageId].forms.splice(i, 1);
+    		}
+    	}
     	document.getElementById(id).outerHTML = "";
     	saveJsonLocal(tempApplication);
     	document.getElementById("element-editor").style.display = 'none';
@@ -1029,20 +1278,35 @@ function selectElement(id) {
     	undoChangeStack.push(JSON.stringify(tempApplication));
     	var form = document.getElementById(id);
     	var formElements = "";
+    	var formJson;
+    	for (i in tempApplication.pages[pageId].forms) {
+    		if (tempApplication.pages[pageId].forms[i].id == element.id) {
+    			formJson = tempApplication.pages[pageId].forms[i];
+    		}
+    	}
+    	var formFields = [];
     	var fieldNo = 0;
-    	var formobject = form.id.match(/[0-9a-z]*/g);
-    	for (i in tempApplication.objects[formobject[4]].attributes) {
-    		if (tempApplication.objects[formobject[4]].attributes[i].type == "Text"){
+    	var formobject = formJson.object;
+    	for (i in tempApplication.objects[formobject].attributes) {
+    		if (tempApplication.objects[object].attributes[i].type != "primaryKey" && tempApplication.objects[object].attributes[i].type != "Connection"){
+	    		formFields.push(
+	    				{
+	    					"type": tempApplication.objects[formobject].attributes[i].type,
+	    					"label": tempApplication.objects[formobject].attributes[i].name
+	    				}
+	    		);
+    		}
+    		if (tempApplication.objects[formobject].attributes[i].type == "Text"){
     			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:inline-block\"></i>";
-    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject[4]].attributes[i].name + "</label><input type=\"text\" class=\"form-control user-form\"/>";
+    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject].attributes[i].name + "</label><input type=\"text\" class=\"form-control user-form\"/>";
     			fieldNo += 1;
-    		} else if (tempApplication.objects[formobject[4]].attributes[i].type == "Number"){
+    		} else if (tempApplication.objects[formobject].attributes[i].type == "Number"){
     			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:inline-block\"></i>";
-    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject[4]].attributes[i].name + "</label><input type=\"number\" class=\"form-control user-form\"/>";
+    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject].attributes[i].name + "</label><input type=\"number\" class=\"form-control user-form\"/>";
     			fieldNo += 1;
-    		} else if (tempApplication.objects[formobject[4]].attributes[i].type == "Reference"){
+    		} else if (tempApplication.objects[formobject].attributes[i].type == "Reference"){
     			formElements += "<i class=\"icon-line-cross form-field-delete\" id=\"field"+ fieldNo +"\" style=\"display:inline-block\"></i>";
-    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject[4]].attributes[i].name + "</label><select class=\"form-control user-form\"/></select>";
+    			formElements += "<label> &nbsp;" + tempApplication.objects[formobject].attributes[i].name + "</label><select class=\"form-control user-form\"/></select>";
     			fieldNo += 1;
     		}
     	}
@@ -1052,7 +1316,13 @@ function selectElement(id) {
     	element.appendChild(deleteButton);
     	element.appendChild(resizerbottomright);
     	element.appendChild(refresh);
-    	element.appendChild(editText);
+    	
+    	for (i in tempApplication.pages[pageId].forms) {
+    		if (tempApplication.pages[pageId].forms[i].id == element.id) {
+    			tempApplication.pages[pageId].forms[i].fields = formFields;
+    		}
+    	}
+    	
     	saveJsonLocal(tempApplication);
     }
     
@@ -1066,86 +1336,130 @@ function selectElement(id) {
     function deleteFormField(fieldNo) {
     	undoChangeStack.push(JSON.stringify(tempApplication));
     	element.childNodes[fieldNo*3].classList.remove("form-field-delete");
+    	var fieldName = element.childNodes[fieldNo*3+1].innerHTML;
     	element.childNodes[fieldNo*3].style.display = "none";
     	element.childNodes[fieldNo*3+1].style.display = "none";
     	element.childNodes[fieldNo*3+2].style.display = "none";
+    	
+    	for (i in tempApplication.pages[pageId].forms) {
+    		if (tempApplication.pages[pageId].forms[i].id == element.id) {
+    			for (j in tempApplication.pages[pageId].forms[i].fields) {
+    				if (tempApplication.pages[pageId].forms[i].fields[j].label == fieldName) {
+    					tempApplication.pages[pageId].forms[i].fields.splice(j, 1);
+    				}
+    			}
+    		}
+    	}
+    	
     	saveJsonLocal(tempApplication);
     }
     
     $('#start-query-btn').click(function(){
     	document.getElementById("query-builder").style.display = 'block';
-    	if (document.getElementById("edit-object-query-btn") != null) {
-    		document.getElementById("object-query-type-container").outerHTML = "";
+		document.getElementById("object-query-type-container").outerHTML = "";
+		if (tempApplication.pages[pageId].permissions == "public") {
+    		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+	    		"<select id=\"object-query-type-dropdown\">"+
+					"<option disabled selected value=\"reset\">Search Type</option>"+
+					"<option value=\"search-single\">Single Object Search</option>"+
+					"<option value=\"search-multiple\">Multiple Object Search</option>"+
+				"</select>"+
+			"</div>";
+    	} else {
     		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
     			"<select id=\"object-query-type-dropdown\">"+
     				"<option disabled selected value=\"reset\">Search Type</option>"+
-    				"<option value=\"search\">Object Search</option>"+
+    				"<option value=\"search-single\">Single Object Search</option>"+
+    				"<option value=\"search-multiple\">Multiple Object Search</option>"+
     				"<option value=\"user\">Current User Fields</option>"+
     			"</select>"+
     		"</div>";
-    		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
-    		document.getElementById("edit-object-query-btn").outerHTML = "<button class=\"button nobottommargin\" id=\"add-object-query-btn\" onclick=\"addQuery()\">Add Object Query</button>";
-    		$('#object-query-type').change(selectQueryType);
     	}
+		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
+		if (document.getElementById("edit-object-query-btn") != null) {
+			document.getElementById("edit-object-query-btn").outerHTML = "<button class=\"button nobottommargin\" id=\"add-object-query-btn\" onclick=\"addQuery()\">Add Object Query</button>";
+		}
+		$('#object-query-type').change(selectQueryType);
     });
     
     $('#cancel-object-query-btn').click(function(){
     	document.getElementById("query-builder").style.display = 'none';
     	document.getElementById("object-query-type-container").outerHTML = "";
-		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
-			"<select id=\"object-query-type-dropdown\">"+
-				"<option disabled selected value=\"reset\">Search Type</option>"+
-				"<option value=\"search\">Object Search</option>"+
-				"<option value=\"user\">Current User Fields</option>"+
-			"</select>"+
-		"</div>";
+    	if (tempApplication.pages[pageId].permissions == "public") {
+    		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+				"<select id=\"object-query-type-dropdown\">"+
+					"<option disabled selected value=\"reset\">Search Type</option>"+
+					"<option value=\"search-single\">Single Object Search</option>"+
+					"<option value=\"search-multiple\">Multiple Object Search</option>"+
+				"</select>"+
+			"</div>";
+    	} else {
+			document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+				"<select id=\"object-query-type-dropdown\">"+
+					"<option disabled selected value=\"reset\">Search Type</option>"+
+					"<option value=\"search-single\">Single Object Search</option>"+
+					"<option value=\"search-multiple\">Multiple Object Search</option>"+
+					"<option value=\"user\">Current User Fields</option>"+
+				"</select>"+
+			"</div>";
+    	}
 		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
 		$('#object-query-type').change(selectQueryType);
     });
     
     $('#element-text-bold-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	if (window.getComputedStyle(document.getElementById('element-text-bold-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
     		document.getElementById('element-text-bold-btn').style.backgroundColor = "rgb(134, 133, 133)";
     	} else {
     		document.getElementById('element-text-bold-btn').style.backgroundColor = "rgb(64, 63, 63)";
     	}
     	document.execCommand('bold', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-italic-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	if (window.getComputedStyle(document.getElementById('element-text-italic-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
     		document.getElementById('element-text-italic-btn').style.backgroundColor = "rgb(134, 133, 133)";
     	} else {
     		document.getElementById('element-text-italic-btn').style.backgroundColor = "rgb(64, 63, 63)";
     	}
     	document.execCommand('italic', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-underline-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	if (window.getComputedStyle(document.getElementById('element-text-underline-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
     		document.getElementById('element-text-underline-btn').style.backgroundColor = "rgb(134, 133, 133)";
     	} else {
     		document.getElementById('element-text-underline-btn').style.backgroundColor = "rgb(64, 63, 63)";
     	}
     	document.execCommand('underline', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-ul-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	if (window.getComputedStyle(document.getElementById('element-text-ul-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
     		document.getElementById('element-text-ul-btn').style.backgroundColor = "rgb(134, 133, 133)";
     	} else {
     		document.getElementById('element-text-ul-btn').style.backgroundColor = "rgb(64, 63, 63)";
     	}
     	document.execCommand('insertUnorderedList', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-ol-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	if (window.getComputedStyle(document.getElementById('element-text-ol-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
     		document.getElementById('element-text-ol-btn').style.backgroundColor = "rgb(134, 133, 133)";
     	} else {
     		document.getElementById('element-text-ol-btn').style.backgroundColor = "rgb(64, 63, 63)";
     	}
     	document.execCommand('insertOrderedList', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-link-btn').click(function() {
@@ -1153,16 +1467,21 @@ function selectElement(id) {
     });
     
     $('#element-text-link-button').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	var linkAddress = document.getElementById("element-text-link-input").value;
     	document.getElementById("element-text-link-container").style.display = "none";
     	document.execCommand('createLink', false, linkAddress);
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-unlink-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	document.execCommand('unlink', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-align-left-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	if (window.getComputedStyle(document.getElementById('element-text-align-left-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
     		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(134, 133, 133)";
     		document.getElementById('element-text-align-centre-btn').style.backgroundColor = "rgb(64, 63, 63)";
@@ -1173,9 +1492,11 @@ function selectElement(id) {
     		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(64, 63, 63)";
     	}
     	document.execCommand('justifyLeft', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-align-centre-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	if (window.getComputedStyle(document.getElementById('element-text-align-centre-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
     		document.getElementById('element-text-align-centre-btn').style.backgroundColor = "rgb(134, 133, 133)";
     		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(64, 63, 63)";
@@ -1186,9 +1507,11 @@ function selectElement(id) {
     		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(64, 63, 63)";
     	}
     	document.execCommand('justifyCenter', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-align-right-btn').click(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	if (window.getComputedStyle(document.getElementById('element-text-align-right-btn'), null).getPropertyValue('background-color') == "rgb(64, 63, 63)") {
     		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(134, 133, 133)";
     		document.getElementById('element-text-align-left-btn').style.backgroundColor = "rgb(64, 63, 63)";
@@ -1199,41 +1522,18 @@ function selectElement(id) {
     		document.getElementById('element-text-align-right-btn').style.backgroundColor = "rgb(64, 63, 63)";
     	}
     	document.execCommand('justifyRight', false, "");
+    	saveJsonLocal(tempApplication);
     });
     
     $('#element-text-font-size-dropdown').change(function() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	var size = document.getElementById("element-text-font-size-dropdown").value;
     	document.execCommand('fontSize', false, size);
+    	saveJsonLocal(tempApplication);
     });
     
-    function editTextInit() {
-    	$('#editTextModal').show();
-    	clearInterval(textRefresh);
-    	var elementText = document.getElementById("element-inner-text").innerHTML;
-    	
-    	document.getElementsByClassName("ql-editor")[0].innerHTML = elementText;
-    	
-    	document.getElementById("element-text-edit-btn").addEventListener('mousedown', finishEditText, false);
-    }
-    
-
-    function finishEditText() {
-    	undoChangeStack.push(JSON.stringify(tempApplication));
-    	var newText = document.getElementsByClassName("ql-editor")[0].innerHTML;
-    	for (i in element.childNodes) {
-    		if (typeof element.childNodes[i].outerHTML !== 'undefined'){
-    			if (element.childNodes[i].classList.contains('element-text')) {
-	    			element.childNodes[i].innerHTML = newText;
-    			}
-    		}
-    	}
-    	
-    	$('#editTextModal').hide()
-    	
-    	saveJsonLocal(tempApplication);
-    }
-    
     function copyTextToElement() {
+    	undoChangeStack.push(JSON.stringify(tempApplication));
     	var text = document.getElementById("element-inner-text");
     	for (i in element.childNodes) {
     		if (typeof element.childNodes[i].outerHTML !== 'undefined'){
@@ -1242,6 +1542,7 @@ function selectElement(id) {
     			}
     		}
     	}
+    	saveJsonLocal(tempApplication);
     }
     
     for (i in element.childNodes) {

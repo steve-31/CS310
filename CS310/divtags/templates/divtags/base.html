@@ -39,7 +39,39 @@
 	============================================= -->
 	<div id="wrapper" class="clearfix">
 	
-	{% if title == "Project" %}
+	{% if title == "Preview Application" %}
+	
+	<header id="header" class="sticky-header">
+
+			<div id="header-wrap">
+
+				<div class="container clearfix">
+
+					<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
+
+					<!-- Logo
+					============================================= -->
+					<div id="logo">
+						<a href="{% url 'divtags:home' %}" class="retina-logo"><img src="{% static 'divtags/img/logo.png' %}" alt="<div>"></a>
+					</div><!-- #logo end -->
+
+					<!-- Primary Navigation
+					============================================= -->
+					<nav id="primary-menu">
+
+						<ul class="one-page-menu">
+							<li><a href="{% url 'divtags:project' project_id %}"><i class="icon-caret-left"></i>&nbsp;Back to Edit Application</a></li>
+						</ul>
+
+					</nav><!-- #primary-menu end -->
+
+				</div>	
+
+			</div>
+
+		</header><!-- #project header end -->
+	
+	{% elif title == "Project" %}
 
 		<!-- Project Header
 		============================================= -->
@@ -78,7 +110,7 @@
 							
 							
 							<li><a id="save-button" href="#" class="fixedText">Save</a></li>
-							<li><a id="deploy-button" href="#" class="fixedText header-deploy-link">Deploy</a></li>
+							<li><a id="deploy-button" href="{% url 'divtags:project_preview' project.id %}" class="fixedText header-deploy-link">Preview</a></li>
 							<li id="settings-button"><a class="inactiveLink"><div><i class="icon-settings2"></i></div></a></li>
 						</ul>
 
@@ -157,6 +189,8 @@
 {% block content %}
 {% endblock %}
 		</section><!-- #content end -->
+		
+		{% if not title == "Preview Application" %}
 		
 		<!-- Footer
 		============================================= -->
@@ -238,6 +272,8 @@
 			</div><!-- #copyrights end -->
 
 		</footer><!-- #footer end -->
+		
+		{% endif %}
 
 	</div><!-- #wrapper end -->
 
