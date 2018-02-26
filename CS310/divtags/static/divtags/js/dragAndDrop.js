@@ -291,23 +291,61 @@ $('#add-multi-query-btn').click(function(){
 	for (i in displayFields){
 		displayFieldsJson.push({"name": displayFields[i]})
 	}
+	var multiQueryJson;
+	if (document.getElementById("multi-query-comparator-select-dropdown").value == "query") {
+		multiQueryJson = {
+				"id": noOfElements,
+				"display": {
+					"object": document.getElementById("multi-query-object-dropdown").value,
+					"fields": displayFieldsJson
+				},
+				"query": {
+					"object": document.getElementById("multi-query-object-dropdown").value,
+					"field": document.getElementById("multi-query-field-dropdown").value,
+					"operator": document.getElementById("multi-query-operator-dropdown").value,
+					"comparatorType": document.getElementById("multi-query-comparator-select-dropdown").value,
+					"comparator": {
+						"display": {
+							"object": document.getElementById("nested-multi-query-object-dropdown").value,
+							"field": document.getElementById("nested-multi-query-object-field-dropdown").value
+						},
+						"query": {
+							"object": document.getElementById("nested-multi-query-object-dropdown").value,
+							"field": document.getElementById("nested-multi-query-field-dropdown").value,
+							"operator": document.getElementById("nested-multi-query-operator-dropdown").value,
+							"comparatorType": document.getElementById("nested-multi-query-comparator-select-dropdown").value,
+							"comparator": document.getElementById("nested-multi-query-comparator-dropdown").value
+						},
+					}
+				},
+				"limit": document.getElementById("query-limit").value,
+				"orderfield": document.getElementById("query-order-by-field").value,
+				"orderby": document.getElementById("query-order-by").value,
+				"link": document.getElementById("query-link-page").value,
+				"headings": document.getElementById("query-display-headings").value
+		};
+	} else {
+		multiQueryJson = {
+				"id": noOfElements,
+				"display": {
+					"object": document.getElementById("multi-query-object-dropdown").value,
+					"fields": displayFieldsJson
+				},
+				"query": {
+					"object": document.getElementById("multi-query-object-dropdown").value,
+					"field": document.getElementById("multi-query-field-dropdown").value,
+					"operator": document.getElementById("multi-query-operator-dropdown").value,
+					"comparatorType": document.getElementById("multi-query-comparator-select-dropdown").value,
+					"comparator": document.getElementById("multi-query-comparator-dropdown").value
+				},
+				"limit": document.getElementById("query-limit").value,
+				"orderfield": document.getElementById("query-order-by-field").value,
+				"orderby": document.getElementById("query-order-by").value,
+				"link": document.getElementById("query-link-page").value,
+				"headings": document.getElementById("query-display-headings").value
+		};
+	}
 	
-	var multiQueryJson = {
-			"id": noOfElements,
-			"display": {
-				"object": document.getElementById("multi-query-object-dropdown").value,
-				"fields": displayFieldsJson
-			},
-			"query": {
-				"object": document.getElementById("multi-query-object-dropdown").value,
-				"field": document.getElementById("multi-query-field-dropdown").value,
-				"operator": document.getElementById("multi-query-operator-dropdown").value,
-				"comparator": document.getElementById("multi-query-comparator-dropdown").value
-			},
-			"limit": document.getElementById("query-limit").value,
-			"order": document.getElementById("query-order-by").value,
-			"headings": document.getElementById("query-display-headings").value
-	};
 	tempApplication['pages'][pageId]['multiqueries'].push(multiQueryJson);
 	var container = document.getElementById("outer-container");
 	
@@ -319,7 +357,6 @@ $('#add-multi-query-btn').click(function(){
 		}
 		queryTable += "</tr>";
 	}
-	console.log(parseInt(multiQueryJson.limit)==0);
 	if (parseInt(multiQueryJson.limit) != 0) {
 		for (var i=0; i<parseInt(multiQueryJson.limit); i++){
 			queryTable += "<tr>";
@@ -350,9 +387,19 @@ $('#add-multi-query-btn').click(function(){
 });
 
 $('#object-query-add-constraint-btn').click(function(){
+	var pageId = document.getElementById("page-identifier").value;
+	var selectedObjectName = document.getElementById("multi-query-object-dropdown").value;
+	var fieldList = "<option disabled selected value=\"fieldReset\">Field</option>";
+	for (i in tempApplication.objects) {
+		if (selectedObjectName == tempApplication.objects[i].name) {
+			for (j in tempApplication.objects[i].attributes){
+				fieldList += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+			}
+		}
+	}
 	var newconstraint = '<div class="row object-query-container" id="object-query-field-container">' +
 		'<div class="col_one_third object-query-block object-query-even" id="object-query-field">'+
-			'<select id="multi-query-field-dropdown"></select>' +
+			'<select id="multi-query-field-dropdown">'+fieldList+'</select>' +
 		'</div>'+
 		'<div class="col_one_third object-query-block object-query-even" id="object-query-operator">'+
 			'<select id="multi-query-operator-dropdown">'+
@@ -363,15 +410,16 @@ $('#object-query-add-constraint-btn').click(function(){
 				'<option value="gt">&gt;</option>'+
 				'<option value="lte">&lt;=</option>'+
 				'<option value="gte">&gt;=</option>'+
+				'<option value="in">in</option>'+
 			'</select>'+
 		'</div>'+
 		'<div class="col_one_third col_last object-query-block object-query-even" id="object-query-comparator-select">'+
 			'<select id="multi-query-comparator-select-dropdown">'+
 				'<option disabled="" selected="" value="comparatorReset">Comparator</option>'+
-				'<option value="userId">Current User</option>'+
+				'<option class="user-option" value="userId">Current User</option>'+
 				'<option value="value">Value</option>'+
 				'<option value="query">Nested Search</option>'+
-				'<option disabled="" value="pageObject">Page\'s object</option>'+
+				'<option class="page-option" value="page">Page\'s object</option>'+
 			'</select>'+
 		'</div>'+
 	'</div>'+
@@ -382,10 +430,24 @@ $('#object-query-add-constraint-btn').click(function(){
 	
 	document.getElementById('multi-query-options-container').insertAdjacentHTML('beforebegin', newconstraint);
 	
+	if (tempApplication.pages[pageId].permissions == "public") {
+		var userOptions = document.getElementsByClassName("user-option");
+		for (i in userOptions) {
+			userOptions[i].disabled = true;
+		}
+	}
+	if (tempApplication.pages[pageId].pageObject == "none") {
+		var pageOptions = document.getElementsByClassName("page-option");
+		for (i in pageOptions) {
+			pageOptions[i].disabled = true;
+		}
+	}
+	
 	$('#multi-query-comparator-select-dropdown').change(function() {
 		var container = document.getElementById("multi-query-comparator");
 		document.getElementById("multi-query-comparator").style.display = "block";
 		var comparatorSelection = document.getElementById("multi-query-comparator-select-dropdown").value;
+		
 		if (comparatorSelection == "userId") {
 			var userFields = "";
 			for (i in tempApplication.objects) {
@@ -396,8 +458,143 @@ $('#object-query-add-constraint-btn').click(function(){
 				}
 			}
 			container.innerHTML = "<select id=\"multi-query-comparator-dropdown\"><option disabled selected>Current User</option>" + userFields +"</select>";
+			
+		} else if(comparatorSelection == "page") {
+			var pageFields = "";
+			for (i in tempApplication.objects) {
+				if (tempApplication.objects[i].name == tempApplication.pages[pageId].pageObject) {
+					for (j in tempApplication.objects[i].attributes) {
+						pageFields += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+					}
+				}
+			}
+			container.innerHTML = "<select id=\"multi-query-comparator-dropdown\"><option disabled selected>Current Page</option>" + pageFields +"</select>";
+			
 		} else if(comparatorSelection == "value") {
 			container.innerHTML = "<input type=\"text\" id=\"multi-query-comparator-dropdown\">";
+			
+		} else if(comparatorSelection == "query") {
+			var objectList = "<option disabled selected value=\"objectReset\">Object</option>";
+			for (i in tempApplication.objects) {
+				objectList += "<option value=\""+ tempApplication.objects[i].name + "\">"+ tempApplication.objects[i].name +"</option>";
+			}
+			var nestedQuery = '<div class="row object-query-container" id="multi-object-select-container">'+
+				'<div class="col_half object-query-block object-query-even" id="multi-query-object">'+
+					'<select id="nested-multi-query-object-dropdown">'+objectList+'</select>'+
+				'</div>'+
+				'<div class="col_half col_last object-query-block object-query-even" id="multi-query-object-field">'+
+					'<select id="nested-multi-query-object-field-dropdown"></select>'+
+				'</div>'+
+			'</div>'+
+			'<div class="row object-query-container" id="multi-query-add-constraint-container">'+
+				'<button class="button button-green" id="nested-multi-query-add-constraint-btn"><i class="icon-line-plus"></i> Add Constraint</button>'+
+			'</div>';
+			
+			container.innerHTML = nestedQuery;
+			
+			$('#nested-multi-query-object-dropdown').change(function() {
+				var selectedObjectName = document.getElementById("nested-multi-query-object-dropdown").value;
+				var fieldList = "<option disabled selected value=\"fieldReset\">Field</option>";
+				for (i in tempApplication.objects) {
+					if (selectedObjectName == tempApplication.objects[i].name) {
+						for (j in tempApplication.objects[i].attributes){
+							fieldList += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+						}
+					}
+				}
+				document.getElementById("nested-multi-query-object-field-dropdown").innerHTML = fieldList;
+//				document.getElementById("nested-multi-query-field-dropdown").innerHTML = fieldList;
+			})
+			
+			$('#nested-multi-query-add-constraint-btn').click(function(){
+				var selectedObjectName = document.getElementById("nested-multi-query-object-dropdown").value;
+				var fieldList = "<option disabled selected value=\"fieldReset\">Field</option>";
+				for (i in tempApplication.objects) {
+					if (selectedObjectName == tempApplication.objects[i].name) {
+						for (j in tempApplication.objects[i].attributes){
+							fieldList += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+						}
+					}
+				}
+				var newconstraint = '<div class="row object-query-container" id="object-query-field-container">' +
+					'<div class="col_one_third object-query-block object-query-even" id="object-query-field">'+
+						'<select id="nested-multi-query-field-dropdown">'+fieldList+'</select>' +
+					'</div>'+
+					'<div class="col_one_third object-query-block object-query-even" id="object-query-operator">'+
+						'<select id="nested-multi-query-operator-dropdown">'+
+							'<option disabled="" selected="" value="operatorReset">Operator</option>'+
+							'<option value="equal">=</option>'+
+							'<option value="not-equal">!=</option>'+
+							'<option value="lt">&lt;</option>'+
+							'<option value="gt">&gt;</option>'+
+							'<option value="lte">&lt;=</option>'+
+							'<option value="gte">&gt;=</option>'+
+							'<option value="in">in</option>'+
+						'</select>'+
+					'</div>'+
+					'<div class="col_one_third col_last object-query-block object-query-even" id="object-query-comparator-select">'+
+						'<select id="nested-multi-query-comparator-select-dropdown">'+
+							'<option disabled="" selected="" value="comparatorReset">Comparator</option>'+
+							'<option class="user-option" value="userId">Current User</option>'+
+							'<option value="value">Value</option>'+
+							'<option value="query">Nested Search</option>'+
+							'<option class="page-option" value="page">Page\'s object</option>'+
+						'</select>'+
+					'</div>'+
+				'</div>'+
+				'<div class="row object-query-container" id="object-query-field-container">'+
+					'<div class="col_full object-query-block object-query-even" id="nested-multi-query-comparator" style="display:none;">'+
+					'</div>'+
+				'</div>';
+				
+				document.getElementById('multi-query-comparator').insertAdjacentHTML('beforeend', newconstraint);
+				
+				if (tempApplication.pages[pageId].permissions == "public") {
+					var userOptions = document.getElementsByClassName("user-option");
+					for (i in userOptions) {
+						userOptions[i].disabled = true;
+					}
+				}
+				if (tempApplication.pages[pageId].pageObject == "none") {
+					var pageOptions = document.getElementsByClassName("page-option");
+					for (i in pageOptions) {
+						pageOptions[i].disabled = true;
+					}
+				}
+				
+				$('#nested-multi-query-comparator-select-dropdown').change(function() {
+					var container = document.getElementById("nested-multi-query-comparator");
+					document.getElementById("nested-multi-query-comparator").style.display = "block";
+					var comparatorSelection = document.getElementById("nested-multi-query-comparator-select-dropdown").value;
+					
+					if (comparatorSelection == "userId") {
+						var userFields = "";
+						for (i in tempApplication.objects) {
+							if (tempApplication.objects[i].name == "User") {
+								for (j in tempApplication.objects[i].attributes) {
+									userFields += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+								}
+							}
+						}
+						container.innerHTML = "<select id=\"nested-multi-query-comparator-dropdown\"><option disabled selected>Current User</option>" + userFields +"</select>";
+					
+					} else if(comparatorSelection == "page") {
+						var pageFields = "";
+						for (i in tempApplication.objects) {
+							if (tempApplication.objects[i].name == tempApplication.pages[pageId].pageObject) {
+								for (j in tempApplication.objects[i].attributes) {
+									pageFields += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+								}
+							}
+						}
+						container.innerHTML = "<select id=\"nested-multi-query-comparator-dropdown\"><option disabled selected>Current Page</option>" + pageFields +"</select>";
+						
+					} else if(comparatorSelection == "value") {
+						container.innerHTML = "<input type=\"text\" id=\"nested-multi-query-comparator-dropdown\">";
+						
+					}
+				});
+			});
 		}
 		
 	});
@@ -417,9 +614,21 @@ $('#multi-query-object-dropdown').change(function() {
 			}
 		}
 	}
+	var pageObjectList = "<option disabled selected value=\"none\">None</option>";
+	var pagesObjects = 0;
+	for (i in tempApplication.pages) {
+		if (tempApplication.pages[i].pageObject == selectedObjectName) {
+			pageObjectList += "<option value=\""+tempApplication.pages[i].name+"\">"+tempApplication.pages[i].name+"</option>";
+			pagesObjects += 1;
+		}
+	}
+	if (pagesObjects !== 0) {
+		document.getElementById("query-link-page").disabled = false;
+	}
+	document.getElementById("query-link-page").innerHTML = pageObjectList;
 	document.getElementById("multi-query-object-field-dropdown").innerHTML = fieldList;
-	document.getElementById("multi-query-field-dropdown").innerHTML = fieldList;
-	document.getElementById("query-order-by").innerHTML = fieldList;
+//	document.getElementById("multi-query-field-dropdown").innerHTML = fieldList;
+	document.getElementById("query-order-by-field").innerHTML = fieldList;
 });
 
 function saveJsonLocal(jsonInput) {
@@ -615,6 +824,14 @@ function insertElements(jsonInput, id) {
 	} else {
 		$('#permissions-toggle').bootstrapToggle('off');
 	}
+	if (tempApplication.pages[id].pageObject == "none") {
+		$('#page-object-toggle').bootstrapToggle('off');
+		document.getElementById('page-object-dropdown').disabled = true;
+	} else {
+		$('#page-object-toggle').bootstrapToggle('on');
+		document.getElementById('page-object-dropdown').disabled = false;
+		document.getElementById('page-object-dropdown').value = tempApplication.pages[id].pageObject;
+	}
 	if (tempApplication.pages[id].homepage == "yes") {
 		document.getElementById('homepage-toggle').innerHTML = "Homepage Set";
 		document.getElementById('homepage-toggle').disabled = true;
@@ -724,6 +941,28 @@ function selectQueryType() {
 		}
 		container.innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-user\">" +
 				"<select id=\"object-query-user-dropdown\">"+ userFields +"</select></div>";
+	} else if (selection == "page") {
+		if (document.getElementById("object-query-object-container") != null) {
+			document.getElementById("object-query-object-container").outerHTML = "";
+		}
+		if (document.getElementById("object-query-field-container") != null) {
+			document.getElementById("object-query-field-container").outerHTML = "";
+		}
+		if (document.getElementById("object-query-comparator-container") != null) {
+			document.getElementById("object-query-comparator-container").outerHTML = "";
+		}
+		var pageFields = "<option disabled selected value=\"pageReset\">Page Fields</option>";
+		var pageId = document.getElementById("page-identifier").value;
+		var pageObject = tempApplication.pages[pageId].pageObject;
+		for (i in tempApplication.objects) {
+			if (tempApplication.objects[i].name == pageObject) {
+				for (j in tempApplication.objects[i].attributes) {
+					userFields += "<option value=\""+ tempApplication.objects[i].attributes[j].name + "\">" + tempApplication.objects[i].attributes[j].name + "</option>";
+				}
+			}
+		}
+		container.innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-page\">" +
+				"<select id=\"object-query-page-dropdown\">"+ userFields +"</select></div>";
 	} else {
 		container.innerHTML = "<div class=\"col_half object-query-block object-query-even\" id=\"object-query-object\"></div>" +
 			"<div class=\"col_half col_last object-query-block object-query-even\" id=\"object-query-field-display\">Field</div>"
@@ -864,6 +1103,36 @@ function addQuery() {
 			}
 			//document.getElementById("element-inner-text").innerHTML += "<span class=\"query\" id=\"query-"+noOfQueries+"\" onclick=\"editQuery(this)\">User." + userField + "</span>";
 		}
+	} else if (queryType == "page") {
+		if (document.getElementById("object-query-page-dropdown").value == "pageReset") {
+			failed = true;
+		} else {
+			var pageField = document.getElementById("object-query-page-dropdown").value;
+			var pageObject = tempApplication.pages[pageId].pageObject;
+			var queryJson = {
+				"id": noOfQueries,
+				"display": {
+					"object": pageObject,
+					"field": pageField
+				},
+				"query": {
+					"type": "page",
+					"object": pageObject,
+					"field": "primary_key",
+					"operator": "equal",
+					"comparator": "pageId"
+				}
+			};
+			tempApplication['pages'][pageId]['queries'].push(queryJson);
+			var element = document.getElementsByClassName("selected-element")[0];
+			for (i in element.childNodes) {
+				if (typeof element.childNodes[i].outerHTML !== 'undefined'){
+					if (element.childNodes[i].classList.contains('element-text')) {
+						element.childNodes[i].innerHTML += "<span class=\"query\" id=\"query-"+noOfQueries+"\" onclick=\"editQuery(this)\">"+pageObject+"." + pageField + "</span>";
+					}
+				}
+			}
+		}
 	} else if(queryType == "search-single" || queryType == "search-multiple") {
 		if (document.getElementById("object-query-object-dropdown").value == "objectReset") {
 			failed = true;
@@ -918,8 +1187,8 @@ function addQuery() {
 			"<select id=\"object-query-type-dropdown\">"+
 				"<option disabled selected value=\"reset\">Search Type</option>"+
 				"<option value=\"search-single\">Single Object Search</option>"+
-				"<option value=\"search-multiple\">Multiple Object Search</option>"+
-				"<option value=\"user\">Current User Fields</option>"+
+				"<option class=\"user-option\" value=\"user\">Current User Fields</option>"+
+				"<option class=\"page-option\" value=\"page\">Current Page Fields</option>"+
 			"</select>"+
 		"</div>";
 		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
@@ -1034,8 +1303,8 @@ function completeEditQuery(queryId) {
 			"<select id=\"object-query-type-dropdown\">"+
 				"<option disabled selected value=\"reset\">Search Type</option>"+
 				"<option value=\"search-single\">Single Object Search</option>"+
-				"<option value=\"search-multiple\">Multiple Object Search</option>"+
-				"<option value=\"user\">Current User Fields</option>"+
+				"<option class=\"user-option\" value=\"user\">Current User Fields</option>"+
+				"<option class=\"page-option\" value=\"page\">Current Page Fields</option>"+
 			"</select>"+
 		"</div>";
 		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
@@ -1200,7 +1469,6 @@ function selectElement(id) {
 			for (i in element.childNodes) {
 				if (typeof element.childNodes[i].outerHTML !== 'undefined'){
 					if (element.childNodes[i].classList.contains('element-text')) {
-						console.log(element.childNodes[i]);
 						element.childNodes[i].contentEditable = "false";
 					}
 				}
@@ -1357,24 +1625,26 @@ function selectElement(id) {
     $('#start-query-btn').click(function(){
     	document.getElementById("query-builder").style.display = 'block';
 		document.getElementById("object-query-type-container").outerHTML = "";
+		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+			"<select id=\"object-query-type-dropdown\">"+
+				"<option disabled selected value=\"reset\">Search Type</option>"+
+				"<option value=\"search-single\">Single Object Search</option>"+
+				"<option class=\"user-option\" value=\"user\">Current User Fields</option>"+
+				"<option class=\"page-option\" value=\"page\">Current Page Fields</option>"+
+			"</select>"+
+		"</div>";
 		if (tempApplication.pages[pageId].permissions == "public") {
-    		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
-	    		"<select id=\"object-query-type-dropdown\">"+
-					"<option disabled selected value=\"reset\">Search Type</option>"+
-					"<option value=\"search-single\">Single Object Search</option>"+
-					"<option value=\"search-multiple\">Multiple Object Search</option>"+
-				"</select>"+
-			"</div>";
-    	} else {
-    		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
-    			"<select id=\"object-query-type-dropdown\">"+
-    				"<option disabled selected value=\"reset\">Search Type</option>"+
-    				"<option value=\"search-single\">Single Object Search</option>"+
-    				"<option value=\"search-multiple\">Multiple Object Search</option>"+
-    				"<option value=\"user\">Current User Fields</option>"+
-    			"</select>"+
-    		"</div>";
-    	}
+			var userOptions = document.getElementsByClassName("user-option");
+			for (i in userOptions) {
+				userOptions[i].disabled = true;
+			}
+		}
+		if (tempApplication.pages[pageId].pageObject == "none") {
+			var pageOptions = document.getElementsByClassName("page-option");
+			for (i in pageOptions) {
+				pageOptions[i].disabled = true;
+			}
+		}
 		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
 		if (document.getElementById("edit-object-query-btn") != null) {
 			document.getElementById("edit-object-query-btn").outerHTML = "<button class=\"button nobottommargin\" id=\"add-object-query-btn\" onclick=\"addQuery()\">Add Object Query</button>";
@@ -1385,24 +1655,26 @@ function selectElement(id) {
     $('#cancel-object-query-btn').click(function(){
     	document.getElementById("query-builder").style.display = 'none';
     	document.getElementById("object-query-type-container").outerHTML = "";
-    	if (tempApplication.pages[pageId].permissions == "public") {
-    		document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
-				"<select id=\"object-query-type-dropdown\">"+
-					"<option disabled selected value=\"reset\">Search Type</option>"+
-					"<option value=\"search-single\">Single Object Search</option>"+
-					"<option value=\"search-multiple\">Multiple Object Search</option>"+
-				"</select>"+
-			"</div>";
-    	} else {
-			document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
-				"<select id=\"object-query-type-dropdown\">"+
-					"<option disabled selected value=\"reset\">Search Type</option>"+
-					"<option value=\"search-single\">Single Object Search</option>"+
-					"<option value=\"search-multiple\">Multiple Object Search</option>"+
-					"<option value=\"user\">Current User Fields</option>"+
-				"</select>"+
-			"</div>";
-    	}
+    	document.getElementById("object-query-type-select-container").innerHTML = "<div class=\"col_full object-query-block object-query-even\" id=\"object-query-type\">" +
+			"<select id=\"object-query-type-dropdown\">"+
+				"<option disabled selected value=\"reset\">Search Type</option>"+
+				"<option value=\"search-single\">Single Object Search</option>"+
+				"<option class=\"user-option\" value=\"user\">Current User Fields</option>"+
+				"<option class=\"page-option\" value=\"page\">Current Page Fields</option>"+
+			"</select>"+
+		"</div>";
+		if (tempApplication.pages[pageId].permissions == "public") {
+			var userOptions = document.getElementsByClassName("user-option");
+			for (i in userOptions) {
+				userOptions[i].disabled = true;
+			}
+		}
+		if (tempApplication.pages[pageId].pageObject == "none") {
+			var pageOptions = document.getElementsByClassName("page-option");
+			for (i in pageOptions) {
+				pageOptions[i].disabled = true;
+			}
+		}
 		document.getElementById("object-query-type-select-container").insertAdjacentHTML("afterend", "<div class=\"row object-query-container\" id=\"object-query-type-container\"></div>");
 		$('#object-query-type').change(selectQueryType);
     });

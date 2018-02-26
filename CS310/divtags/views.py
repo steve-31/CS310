@@ -10,6 +10,8 @@ from operator import attrgetter
 import os
 import json
 import subprocess
+import shutil
+from django.utils.encoding import smart_str
 from django.core.serializers import serialize
 from create_app import createApp
 
@@ -507,7 +509,165 @@ def newproject(request):
         projname = request.POST.get('projname')
         projdesc = request.POST.get('projdesc')
         projowner = request.user
-        jsonfile = {"name": projname, "headerTextColour": "#000000", "headerBackgroundColour": "#ffffff","objects": [{"attributes": [{"type": "primaryKey", "name": "primary_key", "details": ""}, {"type": "Text", "name": "username", "details": ""}, {"type": "Text", "name": "first_name", "details": ""}, {"type": "Text", "name": "last_name", "details": ""}, {"type": "Text", "name": "email", "details": ""}, {"type": "Text", "name": "password", "details": ""}, {"type": "Date", "name": "last_login", "details": ""}], "name": "User", "desc": "User's required for project"}], "pages": [{"name": "AllPages", "elements":[]}, {"name": "Home", "elements": [], "forms": [], "queries": [], "permissions": "public", "background":"#ffffff", "homepage":"yes", "showinheader":"yes", "showallpages":"yes"}, {"elements": [{"content": "<form class=\"element\" id=\"21 add 2\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 180px; width: 610px; height: 370px; left: 20px;\"><i class=\"icon-line-cross form-field-delete\" id=\"field0\" style=\"display: none;\"></i><label> &nbsp;username</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field1\" style=\"display: none;\"></i><label> &nbsp;first_name</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field2\" style=\"display: none;\"></i><label> &nbsp;last_name</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field3\" style=\"display: none;\"></i><label> &nbsp;email</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field4\" style=\"display: none;\"></i><label> &nbsp;password</label><input type=\"text\" class=\"form-control user-form\"><button disabled=\"\" class=\"btn btn-default\">Submit</button></form>"}, {"content": "<h1 class=\"element\" id=\"22\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 90px; left: 20px;\">This is a Heading</h1>"}], "showallpages": "no", "name": "Register", "showinheader": "yes", "background": "#ffffff", "homepage": "no", "permissions": "public"}, {"elements": [{"content": "<form class=\"element\" id=\"9 verify 2\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 180px; left: 30px; width: 530px; height: 210px;\"><i class=\"icon-line-cross form-field-delete\" id=\"field0\" style=\"display: none;\"></i><label> &nbsp;username</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross\" id=\"field1\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;first_name</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross\" id=\"field2\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;last_name</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross\" id=\"field3\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;email</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross form-field-delete\" id=\"field4\" style=\"display: none;\"></i><label> &nbsp;password</label><input type=\"text\" class=\"form-control user-form\"><button disabled=\"\" class=\"btn btn-default\">Submit</button></form>"}, {"content": "<h1 class=\"element\" id=\"10\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 90px; left: 20px;\">This is a Heading</h1>"}], "showallpages": "yes", "name": "Login", "showinheader": "yes", "background": "#ffffff", "homepage": "no", "permissions": "public"}]}
+        jsonfile = {
+            "name": projname, 
+            "headerTextColour": "#000000", 
+            "headerBackgroundColour": "#ffffff",
+            "objects": [
+                {
+                    "attributes": [
+                        {
+                            "type": "primaryKey", 
+                             "name": "primary_key", 
+                             "details": ""
+                        }, 
+                        {
+                            "type": "Text", 
+                            "name": "username", 
+                            "details": ""
+                        }, 
+                        {
+                            "type": "Text", 
+                             "name": "first_name", 
+                             "details": ""
+                        }, 
+                        {
+                            "type": "Text", 
+                            "name": "last_name", 
+                            "details": ""
+                        }, 
+                        {
+                            "type": "Text", 
+                            "name": "email", 
+                            "details": ""
+                        }, 
+                        {
+                            "type": "Text", 
+                            "name": "password", 
+                            "details": ""
+                        }, 
+                        {
+                            "type": "Date", 
+                            "name": "last_login", 
+                            "details": ""
+                        }
+                    ], 
+                    "name": "User", 
+                    "desc": "User's required for project"
+                }
+            ], 
+            "pages": [
+                {
+                    "name": "AllPages", 
+                    "elements":[]
+                }, 
+                {
+                    "name": "Home", 
+                    "elements": [], 
+                    "forms": [], 
+                    "queries": [], 
+                    "multiqueries": [],
+                    "links": [],
+                    "permissions": "public", 
+                    "background":"#ffffff", 
+                    "homepage":"yes", 
+                    "showinheader":"yes", 
+                    "showallpages":"yes"
+                }, 
+                {
+                    "elements": [
+                        {
+                            "content": "<form class=\"element\" id=\"21\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 180px; width: 610px; height: 370px; left: 20px;\"><i class=\"icon-line-cross form-field-delete\" id=\"field0\" style=\"display: none;\"></i><label> &nbsp;username</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field1\" style=\"display: none;\"></i><label> &nbsp;first_name</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field2\" style=\"display: none;\"></i><label> &nbsp;last_name</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field3\" style=\"display: none;\"></i><label> &nbsp;email</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross form-field-delete\" id=\"field4\" style=\"display: none;\"></i><label> &nbsp;password</label><input type=\"text\" class=\"form-control user-form\"><button disabled=\"\" class=\"btn btn-default\">Submit</button></form>"
+                        }, 
+                        {
+                            "content": "<h1 class=\"element\" id=\"22\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 90px; left: 20px;\">This is a Heading</h1>"
+                        }
+                    ], 
+                    "showallpages": "no", 
+                    "name": "Register", 
+                    "forms": [
+                        {
+                            "fields": [
+                                {
+                                    "type": "primaryKey", 
+                                    "label": "primary_key"
+                                }, 
+                                {
+                                    "type": "Text", 
+                                    "label": "username"
+                                }, 
+                                {
+                                    "type": "Text", 
+                                    "label": "first_name"
+                                }, 
+                                {
+                                    "type": "Text", 
+                                    "label": "last_name"
+                                }, 
+                                {
+                                    "type": "Text", 
+                                    "label": "email"
+                                }, 
+                                {
+                                    "type": "Text", 
+                                    "label": "password"
+                                }
+                            ], 
+                            "object": "User", 
+                            "type": "add", 
+                            "id": 21
+                        }
+                    ], 
+                    "queries": [], 
+                    "multiqueries": [],
+                    "links": [],
+                    "showinheader": "yes", 
+                    "background": "#ffffff", 
+                    "homepage": "no", 
+                    "permissions": "public"
+                }, 
+                {
+                    "elements": [
+                        {
+                            "content": "<form class=\"element\" id=\"9\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 180px; left: 30px; width: 530px; height: 210px;\"><i class=\"icon-line-cross form-field-delete\" id=\"field0\" style=\"display: none;\"></i><label> &nbsp;username</label><input type=\"text\" class=\"form-control user-form\"><i class=\"icon-line-cross\" id=\"field1\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;first_name</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross\" id=\"field2\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;last_name</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross\" id=\"field3\" style=\"display: none;\"></i><label style=\"display: none;\"> &nbsp;email</label><input type=\"text\" class=\"form-control user-form\" style=\"display: none;\"><i class=\"icon-line-cross form-field-delete\" id=\"field4\" style=\"display: none;\"></i><label> &nbsp;password</label><input type=\"text\" class=\"form-control user-form\"><button disabled=\"\" class=\"btn btn-default\">Submit</button></form>"
+                        }, 
+                        {
+                            "content": "<h1 class=\"element\" id=\"10\" onclick=\"selectElement(this.id)\" style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 90px; left: 20px;\">This is a Heading</h1>"
+                        }
+                    ], 
+                    "showallpages": "yes", 
+                    "name": "Login", 
+                    "forms": [
+                        {
+                            "fields": [
+                                {
+                                    "type": "primaryKey", 
+                                    "label": "primary_key"
+                                }, 
+                                {
+                                    "type": "Text", 
+                                    "label": "username"
+                                }, 
+                                {
+                                    "type": "Text", 
+                                    "label": "password"
+                                }
+                            ], 
+                            "object": "User", 
+                            "type": "verify", 
+                            "id": 9
+                        }
+                    ], 
+                    "queries": [], 
+                    "multiqueries": [],
+                    "links": [],
+                    "showinheader": "yes", 
+                    "background": "#ffffff", 
+                    "homepage": "no", 
+                    "permissions": "public"
+                }
+            ]
+        }
         newproject = Project(name=projname, desc=projdesc, owner=projowner, lastedited=datetime.now(), ispublished=False, currversionno=0, curriterationno=1, file=jsonfile)
         newproject.save()
         
@@ -546,6 +706,14 @@ def previewApplication(request, pid):
     logo_name = logo_url[len(logo_url)-1]
     
     subprocess.Popen("copy \"img\\ProjectLogos\\"+logo_name+"\" \"..\\..\\sample\\app\\static\\img\\logo.PNG\"", cwd="CS310/media", shell=True)
+    
+    shutil.make_archive(project.name, 'zip', './sample')
+    
+    
+#     response = HttpResponse(content_type='application/force-download') # mimetype is replaced by content_type for django 1.7
+#     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(project.name)
+#     response['X-Sendfile'] = smart_str('./')
+#     return response
     #os.execle('./sample','sampleApp.py', python)
     #os.environ["FLASK_APP"] = "sampleApp.py"
     #subprocess.Popen("flask run", cwd="sample", shell=True)

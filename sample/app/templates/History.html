@@ -16,10 +16,8 @@
 				<ul id="user-menu-pages-list">
 				{% if session['username'] %}
 					<li><a href="{{ url_for('Home') }}">Home</a></li>
-					<li><a href="{{ url_for('Groups') }}">Groups</a></li>
 					<li><a href="{{ url_for('Bills') }}">Bills</a></li>
 					<li><a href="{{ url_for('History') }}">History</a></li>
-					<li><a href="{{ url_for('Settings') }}">Settings</a></li>
 					<li><a href="{{ url_for('logout') }}">Logout</a></li>
 				{% else %}
 					<li><a href="{{ url_for('Register') }}">Register</a></li>
@@ -29,6 +27,7 @@
 			</nav>
 		</div>
 		<div class='element-container'>
+<h1 class="element" id="43" onclick="selectElement(this.id)" style="color: rgb(155, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 100px;"><div class="element-text" contenteditable="true">View Your Past Bills</div></h1>
 		</div>
 		<script type="text/javascript" src="{{ url_for('static', filename='js/load.js') }}"></script>
 	</body>

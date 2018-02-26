@@ -16,10 +16,8 @@
 				<ul id="user-menu-pages-list">
 				{% if session['username'] %}
 					<li><a href="{{ url_for('Home') }}">Home</a></li>
-					<li><a href="{{ url_for('Groups') }}">Groups</a></li>
 					<li><a href="{{ url_for('Bills') }}">Bills</a></li>
 					<li><a href="{{ url_for('History') }}">History</a></li>
-					<li><a href="{{ url_for('Settings') }}">Settings</a></li>
 					<li><a href="{{ url_for('logout') }}">Logout</a></li>
 				{% else %}
 					<li><a href="{{ url_for('Register') }}">Register</a></li>
@@ -35,39 +33,41 @@
 <a href="{{ url_for('Bills') }}"><h1 class="element" id="25" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 190px; left: 390px;"><div class="element-text" contenteditable="false"><span style="font-weight: normal;">Outstanding Payments</span></div></h1></a>
 <a href="{{ url_for('Bills') }}"><h1 class="element" id="25" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 190px; left: 390px;"><div class="element-text" contenteditable="false"><span style="font-weight: normal;">Outstanding Payments</span></div></h1></a>
 <a href="{{ url_for('Bills') }}"><h1 class="element" id="26" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 480px; left: 390px;"><div class="element-text" contenteditable="true"><span style="font-weight: normal;">Money Owed to Me</span></div></h1></a>
-<div class="element" id="29" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 290px; left: 10px; width: 240px; height: 380px;">
+<div class="element" id="39" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 290px; left: 10px; width: 250px; height: 380px;">
 	<table class="table">
-		{% for row in multiquery_29 %}
+		{% for row in multiquery_39 %}
 		<tr>
-			<td>{{ row.Name }}</td>
+			<td><a href="{{ url_for('Group', Groupid=row._id) }}">{{ row.Name }}</a></td>
 		</tr>
 		{% endfor %}
 	</table>
 </div>
-<div class="element" id="30" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 250px; left: 390px; width: 720px; height: 230px;">
+<div class="element" id="35" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 250px; left: 390px; width: 750px; height: 230px;">
 	<table class="table">
 		<tr>
 			<th>desc</th>
 			<th>amount</th>
 			<th>group</th>
+			<th>owner</th>
 		</tr>
-		{% for row in multiquery_30 %}
+		{% for row in multiquery_35 %}
 		<tr>
 			<td>{{ row.desc }}</td>
 			<td>{{ row.amount }}</td>
 			<td>{{ row.group }}</td>
+			<td>{{ row.owner }}</td>
 		</tr>
 		{% endfor %}
 	</table>
 </div>
-<div class="element" id="31" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 540px; left: 390px; width: 720px; height: 230px;">
+<div class="element" id="36" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 540px; left: 390px; width: 750px; height: 230px;">
 	<table class="table">
 		<tr>
 			<th>desc</th>
 			<th>amount</th>
 			<th>group</th>
 		</tr>
-		{% for row in multiquery_31 %}
+		{% for row in multiquery_36 %}
 		<tr>
 			<td>{{ row.desc }}</td>
 			<td>{{ row.amount }}</td>

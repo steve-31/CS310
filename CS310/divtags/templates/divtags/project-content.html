@@ -38,6 +38,12 @@
 		<input id="page-header-toggle" type="checkbox" data-toggle="toggle" data-offstyle="danger" data-onstyle="success" data-on="Yes" data-off="No" data-width="50px">
 	</label>
 	
+	<h6>Page for an Object</h6>
+	<label class="checkbox-inline">
+		<input id="page-object-toggle" type="checkbox" data-toggle="toggle" data-offstyle="danger" data-onstyle="success" data-on="Yes" data-off="No" data-width="50px">
+	</label>
+	<select id="page-object-dropdown" disabled="disabled" class="form-control" style="display: inline;"></select>
+	
 	<h6>Page Background Colour</h6>
 	<input class="form-control" id="page-background-colour" type="color" value="#ff0000" style="width:150px"/>
 	
@@ -63,8 +69,8 @@
 				<select id="object-query-type-dropdown">
 					<option disabled selected value="typeReset">Search Type</option>
 					<option value="search-single">Single Object Search</option>
-					<option value="search-multiple">Multiple Object Search</option>
-					<option id="user-option" value="user">Current User Fields</option>
+					<option class="user-option" value="user">Current User Fields</option>
+					<option class="page-option" value="page">Current Page Fields</option>
 				</select>
 			</div>
 		</div>
@@ -126,10 +132,11 @@
 				Limit (0 for no limit): <input class="form-control" type="number" id="query-limit" value="0">
 			</div>
 			<div class="col_one_fourth">
-				Order By: <select id="query-order-by" class="form-control"></select>
+				Order By: <select id="query-order-by-field" class="form-control"></select>
+				Ascending/Descending: <select id="query-order-by" class="form-control"><option value="None">None</option><option value="Asc">Ascending</option><option value="Desc">Descending</option></select>
 			</div>
 			<div class="col_one_fourth">
-				Ascending/Descending: <select id="query-order-by" class="form-control"><option value="None">None</option><option value="Asc">Ascending</option><option value="Desc">Descending</option></select>
+				Link to page: <select disabled id="query-link-page" class="form-control"><option disabled selected value="none">None</option></select>
 			</div>
 			<div class="col_one_fourth col_last">
 				Display Headings: <select id="query-display-headings" class="form-control"><option value="yes">Yes</option><option value="no">No</option></select>

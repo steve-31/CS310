@@ -71,7 +71,7 @@ $('document').ready(function(){
     
     function addPage(event) {
     	event.preventDefault();
-    	newpage = {"name": "NewPage", "elements": [], "queries": [], "links": [], "multiqueries": [], "forms": [], "background": "#ffffff", "permissions": "public", "homepage":"no", "showinheader":"yes", "showallpages":"yes"};
+    	newpage = {"name": "NewPage", "elements": [], "queries": [], "links": [], "pageObject": "none", "multiqueries": [], "forms": [], "background": "#ffffff", "permissions": "public", "homepage":"no", "showinheader":"yes", "showallpages":"yes"};
     	tempApplication['pages'].push(newpage);
     	document.getElementById("project-page-list").innerHTML = "<li id=\"project-page-add\"><a href=\"#\" onclick=\"addPage(event)\" class=\"fixedText\"><i class=\"icon-plus\"></i>&nbsp;Add new page</a></li>";
     	insertPages(tempApplication);
@@ -140,6 +140,28 @@ $('document').ready(function(){
     	}
     	addToHeader();
     }
+    
+    $('#page-object-toggle').change(function() {showPageObject();});
+    function showPageObject() {
+    	var pageid = document.getElementById("page-identifier").value;
+    	if (document.getElementById('page-object-toggle').checked) {
+    		document.getElementById('page-object-dropdown').disabled = false;
+    		var objectList = "<option disabled selected value=\"objectReset\">Object</option>";
+        	for (i in tempApplication.objects) {
+        		objectList += "<option value=\""+ tempApplication.objects[i].name + "\">"+ tempApplication.objects[i].name +"</option>";
+        	}
+        	document.getElementById('page-object-dropdown').innerHTML = objectList;
+    	} else {
+    		document.getElementById('page-object-dropdown').disabled = true;
+    		tempApplication.pages[pageid].pageObject = "none";
+    	}
+    }
+    
+    $('#page-object-dropdown').change(function(){
+    	var pageobject = document.getElementById('page-object-dropdown').value;
+    	var pageid = document.getElementById("page-identifier").value;
+    	tempApplication.pages[pageid].pageObject = pageobject;
+    });
     
     $('#page-header-toggle').change(function() {changeShowInHeader();});
     function changeShowInHeader() {

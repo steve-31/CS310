@@ -9,7 +9,9 @@ def createApp(appJson):
     
     f = open('./sample/app/__init__.py', 'w+')
     f.write('from flask import Flask, render_template, url_for, request, session, redirect\n')
-    f.write('from flask_pymongo import PyMongo\n')
+    f.write('from flask_pymongo import PyMongo, pymongo\n')
+    f.write('from bson.objectid import ObjectId\n')
+    f.write('from operator import itemgetter\n')
     f.write('import bcrypt\n\n')
     f.write('app = Flask(__name__)\n\n')
     f.write('app.config[\'MONGO_DBNAME\'] = \'SampleProject\'\n')
@@ -30,6 +32,7 @@ def createApp(appJson):
                 f.write('\t\tlogin_user = User.find_one({\'username\' : request.form[\'username\']})\n\n')
                 f.write('\t\tif login_user:\n')
                 f.write('\t\t\tif bcrypt.hashpw(request.form[\'password\'].encode(\'utf-8\'), login_user[\'password\'].encode(\'utf-8\')) == login_user[\'password\'].encode(\'utf-8\'):\n')
+                f.write('\t\t\t\tsession[\'userid\'] = login_user[\'_id\']\n')
                 f.write('\t\t\t\tsession[\'username\'] = login_user[\'username\']\n')
                 f.write('\t\t\t\tsession[\'first_name\'] = login_user[\'first_name\']\n')
                 f.write('\t\t\t\tsession[\'last_name\'] = login_user[\'last_name\']\n')
@@ -52,10 +55,12 @@ def createApp(appJson):
                 f.write('\t\tif not existing_user:\n')
                 f.write('\t\t\thashpass = bcrypt.hashpw(request.form[\'password\'].encode(\'utf-8\'), bcrypt.gensalt())\n')
                 f.write('\t\t\tUser.insert({\'username\': request.form[\'username\'], \'password\': hashpass, \'first_name\': request.form[\'first_name\'], \'last_name\': request.form[\'last_name\'], \'email\': request.form[\'email\']})\n')
-                f.write('\t\t\tsession[\'username\'] = request.form[\'username\']\n')
-                f.write('\t\t\tsession[\'first_name\'] = request.form[\'first_name\']\n')
-                f.write('\t\t\tsession[\'last_name\'] = request.form[\'last_name\']\n')
-                f.write('\t\t\tsession[\'email\'] = request.form[\'email\']\n')
+                f.write('\t\t\tlogin_user = User.find_one({\'username\': request.form[\'username\']})\n')
+                f.write('\t\t\tsession[\'userid\'] = login_user[\'_id\']\n')
+                f.write('\t\t\tsession[\'username\'] = login_user[\'username\']\n')
+                f.write('\t\t\tsession[\'first_name\'] = login_user[\'first_name\']\n')
+                f.write('\t\t\tsession[\'last_name\'] = login_user[\'last_name\']\n')
+                f.write('\t\t\tsession[\'email\'] = login_user[\'email\']\n')
                 membersHome = ""
                 for page2 in appJson['pages']:
                     if not page2['name'] == "AllPages":
@@ -67,14 +72,25 @@ def createApp(appJson):
                 f.write('\treturn render_template(\'register.html\', title=\'Register\')\n\n')
                 
             else:
-                if page['forms']:
-                    f.write('@app.route(\'/'+ page['name'] +'\', methods=[\'POST\', \'GET\'])\n')
+                context = ""
+                f.write('@app.route(\'/'+ page['name'])
+                if not page['pageObject'] == "none":
+                    f.write('/<'+page['pageObject']+'id>\'')
                 else:
-                    f.write('@app.route(\'/'+ page['name'] +'\')\n')
-                f.write('def '+ page['name'] +'():\n')
+                    f.write('\'')
+                if page['forms']:
+                    f.write(', methods=[\'POST\', \'GET\']')
+                f.write(')\n')
+                f.write('def '+ page['name'] +'(')
+                if not page['pageObject'] == "none":
+                    f.write(page['pageObject']+'id')
+                f.write('):\n')
                 if page['permissions'] == "members":
                     f.write('\tif not session.get(\'username\'):\n')
                     f.write('\t\treturn redirect(url_for(\'Login\'))\n')
+                if not page['pageObject'] == "none":
+                    f.write('\t'+page['pageObject']+' = mongo.db.'+page['pageObject']+'\n')
+                    f.write('\tpage_'+page['pageObject']+' = '+page['pageObject']+'.find_one({\'_id\': ObjectId('+page['pageObject']+'id)})\n')
                 if page['forms']:
                     f.write('\tif request.method == \'POST\':\n')
                     for form in page['forms']:
@@ -103,6 +119,11 @@ def createApp(appJson):
                                         f.write('\''+ field['label'] +'\': '+ field['label'] +'_calculated')
                                     else:
                                         f.write(', \''+ field['label'] +'\': '+ field['label'] +'_calculated')
+                                elif field['type'] == "Number":
+                                    if index == 0:
+                                        f.write('\''+ field['label'] +'\': float(request.form[\''+ field['label'] +'\'])')
+                                    else:
+                                        f.write(', \''+ field['label'] +'\': float(request.form[\''+ field['label'] +'\'])')
                                 else:
                                     if index == 0:
                                         f.write('\''+ field['label'] +'\': request.form[\''+ field['label'] +'\']')
@@ -117,6 +138,11 @@ def createApp(appJson):
                                         f.write('\''+ field['label'] +'\': '+ field['label'] +'_calculated')
                                     else:
                                         f.write(', \''+ field['label'] +'\': '+ field['label'] +'_calculated')
+                                elif field['type'] == "Number":
+                                    if index == 0:
+                                        f.write('\''+ field['label'] +'\': float(request.form[\''+ field['label'] +'\'])')
+                                    else:
+                                        f.write(', \''+ field['label'] +'\': float(request.form[\''+ field['label'] +'\'])')
                                 else:
                                     if index == 0:
                                         f.write('\''+ field['label'] +'\': request.form[\''+ field['label'] +'\']')
@@ -127,10 +153,11 @@ def createApp(appJson):
                             pass
                         elif form['type'] == "update":
                             pass
-                context = ""
                 for query in page['queries']:
                     if query['query']['comparator'] == "userId":
                         f.write("\tquery_"+ str(query['id']) +" = session['"+ query['display']['field'] +"']\n")
+                    elif query['query']['comparator'] == "pageId":
+                        f.write("\tquery_"+ str(query['id']) +" = page_"+ query['display']['object'] +"['"+ query['display']['field'] +"']\n")
                     else:
                         f.write('\t'+ query['query']['object'] +' = mongo.db.'+ query['query']['object'] +'\n')
                         if query['query']['type'] == "search-single":
@@ -143,12 +170,117 @@ def createApp(appJson):
                             f.write("session["+query['query']['comparator'] +"]})\n")
                     context += ", query_"+ str(query['id']) +"=query_"+ str(query['id'])
                 for multiquery in page['multiqueries']:
-                    f.write('\t'+multiquery['query']['object']+' = mongo.db.'+multiquery['query']['object']+'\n')
-                    f.write('\tmultiquery_'+str(multiquery['id'])+' = '+multiquery['query']['object']+'.find({\''+multiquery['query']['field']+'\': ')
-                    if multiquery['query']['comparatorType'] == "value":
-                        f.write('"'+query['query']['comparator'] +'"})\n')
-                    elif multiquery['query']['comparatorType'] == "userId":
-                        f.write("session["+query['query']['comparator'] +"]})\n")
+                    if multiquery['query']['comparatorType'] == "query":
+                        f.write('\t'+multiquery['query']['comparator']['query']['object']+' = mongo.db.'+multiquery['query']['comparator']['query']['object']+'\n')
+                        f.write('\tnestedquery_'+str(multiquery['id'])+' = '+ multiquery['query']['comparator']['query']['object']+'.find({')
+                        if multiquery['query']['comparator']['query']['field'] == "primary_key":
+                            f.write('\'_id\': ObjectId('+multiquery['query']['comparator']['query']['comparator']+')})\n')
+                        else:
+                            f.write('\''+multiquery['query']['comparator']['query']['field']+'\': ')
+                            if multiquery['query']['comparator']['query']['comparatorType'] == "value":
+                                f.write('"'+multiquery['query']['comparator']['query']['comparator'] +'"})\n')
+                            elif multiquery['query']['comparator']['query']['comparatorType'] == "userId":
+                                if multiquery['query']['comparator']['query']['comparator'] == "primary_key":
+                                    f.write("session[\'userid\']})\n")
+                                else:
+                                    f.write("session["+query['query']['comparator'] +"]})\n")
+                            elif multiquery['query']['comparator']['query']['comparatorType'] == "page":
+                                if multiquery['query']['comparator']['query']['comparator'] == "primary_key":
+                                    f.write("str(page_"+ page['pageObject']+"[\'_id\'])})\n")
+                                else:
+                                    f.write("str(page_"+ page['pageObject']+"[\'"+ multiquery['query']['comparator']['query']['comparator']+"\'])})\n")
+                        f.write('\tnested = []\n')
+                        f.write('\tfor n in nestedquery_'+str(multiquery['id'])+':\n')
+                        f.write('\t\tnested.append(n[\''+multiquery['query']['comparator']['display']['field']+'\'])\n')
+                        f.write('\t'+multiquery['query']['object']+' = mongo.db.'+multiquery['query']['object']+'\n')
+                        f.write('\tmultiquery_test_'+str(multiquery['id'])+' = []\n')
+                        f.write('\tfor n in nested:\n')
+                        f.write('\t\tfind = '+multiquery['query']['object']+'.find({')
+                        if multiquery['query']['field'] == "primary_key":
+                            f.write('\'_id\': ObjectId(n)})\n')
+                        else:
+                            f.write('\''+multiquery['query']['field']+'\': n})\n')
+                        f.write('\t\tfor f in find:\n')
+                        f.write('\t\t\tmultiquery_test_'+str(multiquery['id'])+'.append(f)\n')
+                        f.write('\tmultiquery_'+str(multiquery['id'])+' = []\n')
+                        f.write('\tfor mq in multiquery_test_'+str(multiquery['id'])+':\n')
+                        for object in appJson['objects']:
+                            if object['name'] == multiquery['query']['object']:
+                                for multiqueryfield in multiquery['display']['fields']:
+                                    for objectfield in object['attributes']:
+                                        if multiqueryfield['name'] == objectfield['name']:
+                                            if objectfield['type'] == "Reference":
+                                                f.write('\t\t'+objectfield['details']+' = mongo.db.'+objectfield['details']+'\n')
+                                                f.write('\t\tfind_referenced_'+multiqueryfield['name']+' = '+objectfield['details']+'.find_one({\'_id\': ObjectId(str(mq[\''+multiqueryfield['name']+'\']))})\n')
+                                                found_field_name = False
+                                                for object2 in appJson['objects']:
+                                                    if object2['name'] == objectfield['details']:
+                                                        for objectfield2 in object2['attributes']:
+                                                            if objectfield2['name'] == "name" or objectfield2['name'] == "Name" or objectfield2['name'] == "username":
+                                                                f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ objectfield2['name'] +'\']\n')
+                                                                found_field_name = True
+                                                                break
+                                                            if objectfield2['name'] == "desc" or objectfield2['name'] == "Desc" or objectfield2['name'] == "description" or objectfield2['name'] == "Description":
+                                                                f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ objectfield2['name'] +'\']\n')
+                                                                found_field_name = True
+                                                                break
+                                                        if not found_field_name:
+                                                            f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ object['name'] +'\'] + \' \' + find_referenced_group[\'_id\']\n')
+                        f.write('\t\tmultiquery_'+str(multiquery['id'])+'.append(mq)\n')
+                        if not multiquery['orderby'] == "None":
+                            f.write('\tmultiquery_'+str(multiquery['id'])+' = sorted(multiquery_'+str(multiquery['id'])+', key=itemgetter(\''+multiquery['orderfield']+'\'))\n')
+                            if multiquery['orderby'] == "Desc":
+                                f.write('\tmultiquery_'+str(multiquery['id'])+'.reverse()\n')
+                        if not int(multiquery['limit']) == 0:
+                            f.write('\tmultiquery_'+str(multiquery['id'])+' = multiquery_'+str(multiquery['id'])+'[0:'+multiquery['limit']+']\n')
+                    else:
+                        f.write('\t'+multiquery['query']['object']+' = mongo.db.'+multiquery['query']['object']+'\n')
+                        f.write('\tmultiquery_test_'+str(multiquery['id'])+' = '+multiquery['query']['object']+'.find({\''+multiquery['query']['field']+'\': ')
+                        if multiquery['query']['comparatorType'] == "value":
+                            f.write('"'+multiquery['query']['comparator'] +'"})')
+                        elif multiquery['query']['comparatorType'] == "userId":
+                            if multiquery['query']['comparator'] == "primary_key":
+                                f.write("session['userid']})")
+                            else:
+                                f.write("session["+multiquery['query']['comparator'] +"]})")
+                        elif multiquery['query']['comparatorType'] == "page":
+                            if multiquery['query']['comparator'] == "primary_key":
+                                f.write("str(page_"+page['pageObject']+"['_id'])})")
+                            else:
+                                f.write("str(page_"+page['pageObject']+"["+multiquery['query']['comparator'] +"])})")
+                        if not multiquery['orderby'] == "None":
+                            f.write('.sort(\''+multiquery['orderfield']+'\', pymongo.')
+                            if multiquery['orderby'] == "Asc":
+                                f.write('ASCENDING)')
+                            else:
+                                f.write('DESCENDING)')
+                        if not multiquery['limit'] == 0:
+                            f.write('.limit('+multiquery['limit']+')')
+                        f.write('\n')
+                        f.write('\tmultiquery_'+str(multiquery['id'])+' = []\n')
+                        f.write('\tfor mq in multiquery_test_'+str(multiquery['id'])+':\n')
+                        for object in appJson['objects']:
+                            if object['name'] == multiquery['query']['object']:
+                                for multiqueryfield in multiquery['display']['fields']:
+                                    for objectfield in object['attributes']:
+                                        if multiqueryfield['name'] == objectfield['name']:
+                                            if objectfield['type'] == "Reference":
+                                                f.write('\t\tfind_referenced_'+multiqueryfield['name']+' = '+objectfield['details']+'.find_one({\'_id\': ObjectId(str(mq[\''+multiqueryfield['name']+'\']))})\n')
+                                                found_field_name = False
+                                                for object2 in appJson['objects']:
+                                                    if object2['name'] == objectfield['details']:
+                                                        for objectfield2 in object2['attributes']:
+                                                            if objectfield2['name'] == "name" or objectfield2['name'] == "Name" or objectfield2['name'] == "username":
+                                                                f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ objectfield2['name'] +'\']\n')
+                                                                found_field_name = True
+                                                                break
+                                                            if objectfield2['name'] == "desc" or objectfield2['name'] == "Desc" or objectfield2['name'] == "description" or objectfield2['name'] == "Description":
+                                                                f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ objectfield2['name'] +'\']\n')
+                                                                found_field_name = True
+                                                                break
+                                                        if not found_field_name:
+                                                            f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ object['name'] +'\'] + \' \' + find_referenced_group[\'_id\']\n')
+                        f.write('\t\tmultiquery_'+str(multiquery['id'])+'.append(mq)\n')
                     context += ", multiquery_"+ str(multiquery['id']) +"=multiquery_"+ str(multiquery['id'])
                 for form in page['forms']:
                     for field in form['fields']:
@@ -289,13 +421,12 @@ def createHTMLPage(appJson, page):
             text_to_insert = ""
             if queryjson['query']['type'] == "search-single":
                 text_to_insert = "{{ query_" + queryid + "."+ queryjson['display']['field'] +" }}"
-            elif queryjson['query']['type'] == "search-multiple":
-                text_to_insert = "{% for query in query_" + queryid + " %}{{ query."+ queryjson['display']['field'] +" }}{% endfor %}"
+            elif queryjson['query']['type'] == "page":
+                text_to_insert = "{{ query_" + queryid + " }}"
             elif queryjson['query']['type'] == "user":
                 text_to_insert = "{{ query_" + queryid + " }}"
             h.write(re.sub(r'<span.*</span>', text_to_insert, element['content'])+ '\n')
         elif re.search(r'<table', element['content']):
-            print element['content']
             tablediv = re.search(r'(?P<divtable><div class=".*" id="(?P<tableid>[0-9]+)" onclick=".*" style=".*;">)', element['content'])
             div = tablediv.group('divtable')
             h.write(div+'\n')
@@ -313,6 +444,9 @@ def createHTMLPage(appJson, page):
             h.write('\t\t{% for row in multiquery_'+str(multi_query_json['id'])+' %}\n')
             h.write('\t\t<tr>\n')
             for table_field in multi_query_json['display']['fields']:
+                if not multi_query_json['link'] == "none":
+                    h.write('\t\t\t<td><a href="{{ url_for(\''+multi_query_json['link']+'\', '+multi_query_json['display']['object']+'id=row._id) }}">{{ row.'+table_field['name']+' }}</a></td>\n')
+                else:
                     h.write('\t\t\t<td>{{ row.'+table_field['name']+' }}</td>\n')
             h.write('\t\t</tr>\n')
             h.write('\t\t{% endfor %}\n')

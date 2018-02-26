@@ -16,10 +16,8 @@
 				<ul id="user-menu-pages-list">
 				{% if session['username'] %}
 					<li><a href="{{ url_for('Home') }}">Home</a></li>
-					<li><a href="{{ url_for('Groups') }}">Groups</a></li>
 					<li><a href="{{ url_for('Bills') }}">Bills</a></li>
 					<li><a href="{{ url_for('History') }}">History</a></li>
-					<li><a href="{{ url_for('Settings') }}">Settings</a></li>
 					<li><a href="{{ url_for('logout') }}">Logout</a></li>
 				{% else %}
 					<li><a href="{{ url_for('Register') }}">Register</a></li>
@@ -29,35 +27,25 @@
 			</nav>
 		</div>
 		<div class='element-container'>
-<h1 class="element" id="23" onclick="selectElement(this.id)" style="color: rgb(155, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 100px;"><div class="element-text" contenteditable="true">View Your Bills</div></h1>
-<div class="element" id="24" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 180px; left: 20px; width: 300px; height: 40px;"><p class="element-text" contenteditable="true"><font size="4">Create a new Bill:</font></p></div>
-<form class="element" id="25" method=POST action="{{ url_for('Bills') }}" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 230px; left: 20px;">
-	<div class="form-group">
-		<label for="desc-field">desc</label>
-		<input type="text" class="form-control" name="desc">
-	</div>
-	<div class="form-group">
-		<label for="amount-field">amount</label>
-		<input type="number" class="form-control" name="amount">
-	</div>
-	<div class="form-group">
-		<label for="group-field">group</label>
-		<select class="form-control" name="group">
-		{% for option in group_options %}
-			<option value="{{ option._id }}">{{ option.Name }}</option>
+<h1 class="element" id="23" onclick="selectElement(this.id)" style="color: rgb(155, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 100px;"><div class="element-text" contenteditable="true">View Your Current Bills</div></h1>
+<div class="element" id="21" onclick="selectElement(this.id)" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 170px; left: 10px; width: 1090px; height: 410px;">
+	<table class="table">
+		<tr>
+			<th>desc</th>
+			<th>amount</th>
+			<th>group</th>
+			<th>owner</th>
+		</tr>
+		{% for row in multiquery_21 %}
+		<tr>
+			<td>{{ row.desc }}</td>
+			<td>{{ row.amount }}</td>
+			<td>{{ row.group }}</td>
+			<td>{{ row.owner }}</td>
+		</tr>
 		{% endfor %}
-		</select>
-	</div>
-	<div class="form-group">
-		<label for="owner-field">owner</label>
-		<select class="form-control" name="owner">
-		{% for option in owner_options %}
-			<option value="{{ option._id }}">{{ option.username }}</option>
-		{% endfor %}
-		</select>
-	</div>
-	<button type="submit" class="btn btn-block" style="text-transform:uppercase;">add Bill</button>
-</form>
+	</table>
+</div>
 		</div>
 		<script type="text/javascript" src="{{ url_for('static', filename='js/load.js') }}"></script>
 	</body>
