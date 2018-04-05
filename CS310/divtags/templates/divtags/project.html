@@ -1,0 +1,458 @@
+{% extends "./base.html" %}
+{% load static %}
+{% load jsonify %}
+{% block content %}
+
+<div id="text-editor"></div>
+
+<div id="toolbar" class="toolbar-left">
+	<nav class="vertical-top" style="margin-top: 60px;">
+		<ul>
+			<li id="undo-change" style="display: none;"><a onclick="undoChange()"><i class="icon-line2-action-undo"></i><span>Undo</span></a></li>
+			<li id="redo-change" style="display: none;"><a onclick="redoChange()"><i class="icon-line2-action-redo"></i><span>Redo</span></a></li>
+			<li id="back-to-edit" style="display:none;"><a><i class="icon-caret-left"></i><span>Back to Edit</span></a></li>
+			<li id="components-button"><a><i class="icon-code side-panel-trigger"></i><span>Components</span></a></li>
+			<li id="object-button"><a><i class="icon-table"></i><span>Manage Objects</span></a></li>
+			<!-- <li id="workflow-button"><a><i class="icon-sitemap"></i><span>Workflow Editor</span></a></li> --->
+			<li id="history-button"><a><i class="icon-book2"></i><span>Application History</span></a></li>
+			<li id="settings-side-button"><a><i class="icon-settings2"></i><span>Project Settings</span></a></li>
+		</ul>
+	</nav>
+</div>
+
+<div class="body-overlay"></div>
+
+	<div id="side-panel" class="dark">
+
+		<div id="side-panel-trigger-close" class="side-panel-trigger"><a href="#"><i class="icon-line-cross"></i></a></div>
+
+		<div class="side-panel-wrap">
+
+			<div class="widget clearfix">
+
+				<h4>Components</h4>
+
+				<nav class="nav-tree nobottommargin">
+					<ul>
+						<li><a href="#" onclick="addContainer(event);"><i class="icon-line-box"></i>&nbsp;Container</a></li>
+						<li><a href="#" onclick="addHeading(event);"><i class="">h</i>&nbsp;Heading</a></li>
+						<li><a href="#" onclick="addParagraph(event);"><i class="lowercase">t </i>&nbsp;Paragraph</a></li>
+						<li><a href="#" onclick="addMultiQuery(event);"><i class="">?</i>&nbsp;Multiple Result Query</a></li>
+						<li>
+							<a href="#"><i class="icon-photo"></i>&nbsp;Image</a>
+							<ul>
+								<li>
+									<form action="{% url 'divtags:imageUpload' project.id %}" method="post" id="image-upload-form" enctype="multipart/form-data"> {% csrf_token %}
+										<input id="project-image-input" name="project-image" type="file" class="file file-loading" accept="image/*">
+										<button type="submit" class="btn btn-primary" id='image-upload-btn'>Upload</button>
+									</form>
+								</li>
+							</ul>
+						</li>
+						<li>
+							<a href="#"><i class="icon-checkbox-checked"></i>&nbsp;Form</a>
+							<ul>
+								<li><a href="#">Add new object</a>
+									<ul id="form-objects-list-add"></ul>
+								</li>
+								<li><a href="#">Update existing object</a>
+									<ul id="form-objects-list-update"></ul>
+								</li>
+								<li><a href="#">Verify existing object</a>
+									<ul id="form-objects-list-verify"></ul>
+								</li>
+							</ul>
+							
+						</li>
+						<!-- <li><a href="#" onclick="addMenu(event);"><i class="icon-reorder"></i>&nbsp;Menu</a></li> -->
+					</ul>
+				</nav>
+
+			</div>
+
+		</div>
+
+	</div>
+
+	<div class="container project-tab" id="settings-tab" style="margin-left:60px;padding:0;width:100%;">
+		<div class="project-settings container">
+			{% include "./project-settings.html" %}
+		</div>
+	</div>
+	
+	<div class="container project-tab project-active-tab" id="content-tab" style="margin:0;padding:0;width:100%;">
+		<div class="project-content container" id="project-content" style="width:100%;padding: 0 0 0 60px;margin:0;">
+			{% include "./project-content.html" %}
+		</div>
+	</div>
+	
+	<div class="container project-tab" id="object-tab">
+		<div class="project-settings container">
+			{% include "./project-object.html" %}
+		</div>
+	</div>
+	
+	<div class="container project-tab" id="workflow-tab">
+		<div class="project-settings container">
+			{% include "./project-workflow.html" %}
+		</div>
+	</div>
+	
+	<div class="container project-tab" id="history-tab">
+		<div class="project-settings container">
+			{% include "./project-history.html" %}
+		</div>
+	</div>
+
+	
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+	var Application = {{ project.file|jsonify }};
+</script>
+<script type="text/javascript" src="{% static 'divtags/js/projectMenus.js' %}"></script>
+<script type="text/javascript" src="{% static 'divtags/js/dragAndDrop.js' %}"></script>
+<script type="text/javascript" src="{% static 'divtags/js/objects.js' %}"></script>
+<script type="text/javascript" src="{% static 'divtags/js/ajaxSetup.js' %}"></script>
+
+<script type="text/javascript">
+function uploadImage() {
+	var data = new FormData($('#image-upload-form').get(0));
+	
+	$.ajax({
+		url: "{% url 'divtags:imageUpload' project.id %}",
+		type: "POST",
+		data: data,
+		cache: false,
+		processData: false,
+		contentType: false,
+		success: function(json) {
+			undoChangeStack.push(JSON.stringify(tempApplication));
+			
+			var container = document.getElementById("outer-container");
+			console.log(json.image);
+			noOfElements += 1;
+			var divElement = "<div class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\"><img src=\""+ json.image +"\"></img></div>";
+			container.innerHTML += divElement;
+			
+			saveJsonLocal(tempApplication);
+		}
+	});
+}
+
+$(function() {
+    $('#image-upload-form').submit(function() {
+    	event.preventDefault();
+    	uploadImage();
+    });
+});
+
+function uploadLogo() {
+	var data = new FormData($('#logo-upload-form').get(0));
+
+	$.ajax({
+	    url: "{% url 'divtags:logoUpload' project.id %}",
+	    type: "POST",
+	    data: data,
+	    cache: false,
+	    processData: false,
+	    contentType: false,
+	    success: function(json) {
+	    	document.getElementById("current-logo-div").innerHTML = "<span><i class=\"icon-line-cross\" id=\"remove-logo-button\"></i></span><img src=\""+ json.logo +"\" alt=\""+ json.name +" Logo\" style=\"height:60px;\">";
+	    	document.getElementById("user-logo").innerHTML = "<img src=\""+ json.logo +"\" alt=\""+ json.name +" Logo\" style=\"height:60px;\">";
+	    }
+	});
+}
+
+$(function() {
+    $('#logo-upload-form').submit(function() {
+    	event.preventDefault();
+    	uploadLogo();
+    });
+});
+
+function removeLogo(event) {
+	event.preventDefault();
+	
+	$.ajax({
+		url: "{% url 'divtags:logoRemove' project.id %}",
+		type: "POST",
+		data: {},
+		success: function(json) {
+			document.getElementById("current-logo-div").innerHTML = "<p>You currently have no logo uploaded for this project.</p>";
+			document.getElementById("user-logo").innerHTML = "<span style=\"line-height:60px;\">"+ json.name +"</span>";
+		}
+	});
+}
+
+$(function() {
+    $('#remove-logo-button').click(removeLogo);
+});
+
+function change_title(event) {
+	event.preventDefault();
+	var newTitle = document.getElementById("new-project-title").value;
+	$.ajax({
+		url: "{% url 'divtags:changeprojecttitle' project.id %}",
+		type: "POST",
+		data: {"newtitle": newTitle},
+		success: function(json) {
+			tempApplication.name = newTitle;
+			document.getElementById("project-title").innerHTML = newTitle;
+			document.getElementById("project-title-desc").innerHTML = newTitle;
+			document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
+			document.getElementById("new-project-title").value = "";
+			document.getElementById("projectTitleModal").style.display = "none";
+			var dropdown = document.getElementById("projects-list-dropdown");
+			for (i in dropdown.childNodes) {
+				if (typeof dropdown.childNodes[i].outerHTML !== 'undefined'){
+					if (dropdown.childNodes[i].childNodes[0].getAttribute("href") == "{% url 'divtags:project' project.id %}") {
+						dropdown.childNodes[i].childNodes[0].innerHTML = newTitle;
+					}
+				}
+			}
+		}
+	})
+}
+
+function change_desc(event) {
+	event.preventDefault();
+	var newDesc = document.getElementById("new-project-desc").value;
+	$.ajax({
+		url: "{% url 'divtags:changeprojectdesc' project.id %}",
+		type: "POST",
+		data: {"newdesc": newDesc},
+		success: function(json) {
+			document.getElementById("project-desc").innerHTML = newDesc;
+			document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
+			document.getElementById("new-project-desc").value = "";
+			document.getElementById("projectDescModal").style.display = "none";
+		}
+	})
+}
+
+function change_owner(event) {
+	event.preventDefault();
+	var newOwner = document.getElementById("owner-select").value;
+	$.ajax({
+		url : "{% url 'divtags:changeprojectowner' project.id %}",
+		type: "POST",
+		data: { "newowner": newOwner },
+		success: function(json) {
+			if (json.ownerid != {{ request.user.id }}) {
+				document.getElementById("owner-specific-content").outerHTML = "";
+				document.getElementById("projectTitleButton").outerHTML = "";
+				document.getElementById("projectDescButton").outerHTML = "";
+				document.getElementById("project-owner-label").outerHTML = "";
+				document.getElementById("display-project-owner").innerHTML = "<i class=\"icon-user\"></i> "+json.ownerusername;
+				document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
+			}
+		}
+	})
+}
+
+function change_contributors(event) {
+	event.preventDefault();
+	var contributors = $("#contributer-select").val();
+	var newcontributors = [];
+	for (i in contributors) {
+		newcontributors.push(contributors[i]);
+	}
+	newcontributors = JSON.stringify(newcontributors);
+	$.ajax({
+		url: "{% url 'divtags:changeprojectcontributors' project.id %}",
+		type: "POST",
+		data: { "contributors" : newcontributors },
+		success: function(json) {
+			document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
+			var topContribs = document.getElementById("display-project-contributors");
+			topContribs.innerHTML = "<i class=\"icon-line2-users\"></i> ";
+			for (i in json.usernames) {
+				if (i < json.usernames.length-1) {
+					topContribs.innerHTML += json.usernames[i] + ", ";
+				} else {
+					topContribs.innerHTML += json.usernames[i];
+				}
+				
+			}
+		}
+	})
+}
+
+function delete_object(element) {
+	var objectname = element.parentElement.parentElement.childNodes[0].innerHTML;
+	$.ajax({
+		url : "{% url 'divtags:object_delete' project.id %}",
+		type : "POST",
+		data : { "object": objectname },
+		
+		success : function() {
+			for (i in currentObjects) {
+				if (currentObjects[i] == objectname) {
+					currentObjects.splice(i, 1);
+					break;
+				}
+			}
+			element.parentElement.parentElement.outerHTML = "";
+		},
+	})
+}
+
+$("#save-object-button").on('click', function(event) {
+	event.preventDefault();
+	var errors = 0;
+	var objname = document.getElementById("obj_name").value;
+	if (objname == "") {
+		document.getElementById("object-name-errors").innerHTML = "Please enter a name for this object";
+		errors = 1;
+	}
+	
+	for (i in currentObjects) {
+		if (currentObjects[i] == objname) {
+			document.getElementById("object-name-errors").innerHTML = "You already have an object with this name, please choose a different name";
+			errors = 1;
+		}
+	}
+	if (errors == 0) {
+		document.getElementById("object-name-errors").innerHTML = "";
+		create_object_save();
+	}
+});
+function create_object_save() {
+	var objname = document.getElementById("obj_name").value;
+	var objdesc = document.getElementById("obj_desc").value;
+	var objattributes = [];
+	var attribtable = document.getElementById("attributes-table");
+	for (var i = 0; i<attribtable.rows.length; i++) {
+		var row = attribtable.rows[i]
+		var newAttrib = { "name": row.cells[0].innerHTML, "type": row.cells[1].innerHTML, "details": row.cells[2].innerHTML };
+		objattributes.push(newAttrib);
+	}
+	var newObjectJson = { "name": objname, "desc": objdesc, "attributes": objattributes};
+	var newObject = JSON.stringify(newObjectJson);
+	var connections = { "connections": currentConnections }
+	connections = JSON.stringify(connections);
+	$.ajax({
+		url : "{% url 'divtags:object_save' project.id %}",
+		type : "POST",
+		data : { "object": newObject, "connections": connections },
+		
+		success : function(json) {
+			tempApplication['objects'] = JSON.parse(json.objects);
+			saveObject(newObjectJson);
+			insertObjects(tempApplication);
+		},
+	})
+}
+
+function create_object_edit() {
+	event.preventDefault();
+	var errors = 0;
+	var objname = document.getElementById("obj_name").value;
+	if (objname == "") {
+		document.getElementById("object-name-errors").innerHTML = "Please enter a name for this object";
+		errors = 1;
+	}
+	for (i in currentObjects) {
+		if (currentObjects[i] == objname) {
+			document.getElementById("object-name-errors").innerHTML = "You already have an object with this name, please choose a different name";
+			errors = 1;
+		}
+	}
+	if (errors == 0) {
+		document.getElementById("object-name-errors").innerHTML = "";
+		var objname = document.getElementById("obj_name").value;
+		var objdesc = document.getElementById("obj_desc").value;
+		var objattributes = [];
+		var attribtable = document.getElementById("attributes-table");
+		for (var i = 0; i<attribtable.rows.length; i++) {
+			var row = attribtable.rows[i]
+			var newAttrib = { "name": row.cells[0].innerHTML, "type": row.cells[1].innerHTML, "details": row.cells[2].innerHTML };
+			objattributes.push(newAttrib);
+		}
+		var newObjectJson = { "name": objname, "desc": objdesc, "attributes": objattributes};
+		var newObject = JSON.stringify(newObjectJson);
+		var connections = { "connections": currentConnections }
+		connections = JSON.stringify(connections);
+		$.ajax({
+			url : "{% url 'divtags:object_edit' project.id %}",
+			type : "POST",
+			data : { "object": newObject, "connections": connections },
+			
+			success : function(json) {
+				tempApplication['objects'] = JSON.parse(json.objects);
+				undoViewEditObject(newObjectJson);
+				console.log(tempApplication);
+				insertObjects(tempApplication);
+			},
+		});
+	}
+}
+
+
+$("#save-button").on('click', function(event) {
+	event.preventDefault();
+	document.getElementById("save-button").innerHTML = "<i class='icon-line-check'></i> Saving...";
+    create_save();
+});
+function create_save() {
+    var oldFile = JSON.stringify(Application);
+    var file = JSON.stringify(tempApplication);
+    $.ajax({
+	    url : "{% url 'divtags:project_save' project.id %}", // the endpoint
+	    type : "POST", // http method
+	    data : { "file": file }, // data sent with the post request
+	
+	    // handle a successful response
+	    success : function(json) {
+	    	save();
+	        if (json.experimentalNo == 0){
+	        	$('#current-version-table').html("<tr><td>"+json.versionNo+"."+json.iterationNo+"</td><td>"+json.datetime+"</td><td><a href=\"/project/deploy/link/"+json.versionid+"\" >Deploy</a></td></tr>");
+	        	$('#version-table').prepend("<tr><td></td><td>" + json.versionNo + "." + json.iterationNo + "</td><td>" + json.datetime + "</td><td><a href=\"/project/"+json.versionid+"/restore/0\" >Restore</a></td><td><a href=\"/project/deploy/link/"+json.versionid+"\" >Deploy</a></td><td><a href=\"/project/"+json.versionid+"/branch\" >Branch</a></td><td></td></tr>");
+	        } else {
+	        	$('#current-version-table').html("<tr><td>"+json.versionNo+"."+json.iterationNo+"."+"</td><td>"+json.datetime+"</td><td><a href=\"/project/deploy/link/"+json.versionid+"\" >Deploy</a></td></tr>");
+	        	$('#version-table').prepend("<tr><td></td><td>" + json.versionNo + "." + json.iterationNo + "." + json.experimentalNo + "</td><td>" + json.datetime + "</td><td><a href=\"/project/"+json.versionid+"/restore/1\" >Restore</a></td><td></td><td><a href=\"/project/merge/"+json.experimentalid+"\" >Merge to " + json.versionNo + "." + json.iterationNo + "</a></td><td></td></tr>");
+	        }
+	    },
+	    error : function(xhr,errmsg,err) {
+	    	console.log("FAIL");
+            $('#json-result').html("it didnt work"); // add the error to the dom
+            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+        }
+	});
+}
+
+/* $("#deploy-button").on('click', function(event) {
+	event.preventDefault();
+    if ({% if project.currexperimentalno == None %}true{% else %}false{% endif %}){
+	    if (confirm("Are you sure you wish to deploy this version {{project.currversionno}}.{{project.curriterationno}}{% if not project.currexperimentalno == None %}.{{project.currexperimentalno}}{% endif %}?")) {
+	    	create_deploy();
+	    }
+    } else {
+    	alert("You may not deploy this version, please merge experimental branch into parent branch before deploying");
+    }
+}); */
+function create_deploy() {
+    vno = {{ project.currversionno }};
+    itno = {{ project.curriterationno }};
+    $.ajax({
+	    url : "{% url 'divtags:project_deploy' project.id %}", // the endpoint
+	    type : "POST", // http method
+	    data : { "vno": vno, "itno": itno }, // data sent with the post request
+	
+	    // handle a successful response
+	    success : function(json) {
+	        $('#deployed-version-table').html("<table class=\"table table-hover text-left\"><thead><tr><th>Version Number</th><th>Restore</th></tr></thead><tbody><tr><td>" + json.versionNumber + "." + json.iterationNumber + "</td><td><a href=\"/project/"+json.id+"/restore/0\">Restore</a></td></tr></tbody></table>");
+	    },
+	    error : function(xhr,errmsg,err) {
+	    	console.log("FAIL");
+            $('#json-result').html("it didnt work"); // add the error to the dom
+            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+        }
+	});
+}
+
+</script>
+
+{% endblock %}

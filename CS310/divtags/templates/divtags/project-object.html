@@ -1,0 +1,93 @@
+{% load static %}
+
+<h1>Manage Your Objects</h1>
+
+<h3 id="create-object-heading">Create A New Object</h3>
+
+<form action="#">
+	<div class="form-group">
+		<label for="obj_name">Name: </label><span id="object-name-errors"></span>
+		<input type="text" class="form-control" id="obj_name" placeholder="Object Name" name="obj_name">
+    </div>
+    <div class="form-group">
+		<label for="obj_desc">Description: </label>
+		<input type="text" class="form-control" id="obj_desc" placeholder="Object Description" name="obj_desc">
+    </div>
+    <div class="form-group">
+		<label for="attribute-name">Attributes: </label>
+		<div class="new-attribute" id="new-attribute1">
+			<br>
+			<input type="text" class="form-control object-attributes-name" id="attribute-name" placeholder="Attribute Name" name="obj_attrib_name1"><span id="attribute-name-errors"></span>
+			<select onchange="inputDetails()" class="form-control object-attributes" id="attribute-type">
+				<option value="" disabled selected>Please select an attribute type</option>
+				<option value="Text">Text</option>
+				<option value="Number">Number</option>
+				<option value="Date">Date</option>
+				<option value="Calculated">Calculated</option>
+				<option value="Reference">Reference</option>
+			</select>
+			<button class="add-attribute-btn" onclick="addAttribute(event);"><i class="icon-plus"></i></button>
+			<div id="attribute-details-div" class="row" style="padding:0 15px 0 15px;">
+				<input id="attribute-details" type="hidden" value="">
+			</div>
+		</div>
+    
+    	<table class="table table-hover text-left">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Type</th>
+					<th>Details</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="attributes-table">
+				<tr>
+					<td>primary_key</td>
+					<td>primaryKey</td>
+					<td></td>
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div class="form-group">
+		<label>Connections: </label>
+		<div class="tooltip">What's this?
+			<span class="tooltiptext">When you reference another object we will create a link between these objects both ways, because we're nice like that. :)</span>
+		</div>
+		<div class="row">
+			<div class="col-sm-9">
+				<table class="table table-hover text-left">
+					<thead>
+						<tr>
+							<th>This Object</th>
+							<th>This Field</th>
+							<th>Target Object</th>
+						</tr>
+						</thead>
+					<tbody id="connections-table">
+					</tbody>
+				</table>
+			</div>
+		</div>
+    </div>
+    
+    <button id="save-object-button" class="btn btn-default">Save</button>
+</form>
+
+<h3>Existing Objects</h3>
+
+<table class="table table-hover text-left">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Description</th>
+			<th>Attributes</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody id="objects-table">
+	</tbody>
+</table>

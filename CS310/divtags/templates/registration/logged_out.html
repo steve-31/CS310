@@ -1,0 +1,11 @@
+{% extends "../divtags/base.html" %}
+{% load static %}
+{% load admin_urls %}
+{% block content %}
+	<div class="container text-center">
+		<h1 class="forum-title">Logged Out</h1>
+		<h3>You are now logged out</h3>
+		<a href="{% url 'wifhome:home' &}">Go back to site</a>
+		<a href="{% url 'login' &}">Log in</a>
+	</div>
+{% endblock %}

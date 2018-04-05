@@ -1,0 +1,103 @@
+{% extends "./base.html" %}
+{% block content %}
+<div class="container">
+	<h1>{{ title }}</h1>
+	<h2><i class="icon-user i-plain"></i> {{ request.user.first_name }} {{ request.user.last_name }} ({{ request.user.username }}){% if request.user.is_staff %}<span class="label label-success nocolor" style="float:right;">Admin User</span>{% endif %}</h2>
+	
+	<div class="tabs tabs-bb clearfix ui-tabs ui-widget ui-widget-content ui-corner-all">
+
+		<ul class="tab-nav clearfix ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all" role="tablist">
+			<li class="ui-state-default ui-corner-top ui-tabs-active ui-state-active" role="tab" tabindex="0" aria-controls="home-tab" aria-labelledby="ui-id-17" aria-selected="true" aria-expanded="true"><a href="#home-tab" class="ui-tabs-anchor" role="presentation" tabindex="-1" id="ui-id-17"><i class="icon-home2 norightmargin"></i></a></li>
+			<li class="ui-state-default ui-corner-top" role="tab" tabindex="-1" aria-controls="myprojects-tab" aria-labelledby="ui-id-18" aria-selected="false" aria-expanded="false"><a href="#myprojects-tab" class="ui-tabs-anchor" role="presentation" tabindex="-1" id="ui-id-18">My Projects</a></li>
+			<li class="ui-state-default ui-corner-top" role="tab" tabindex="-1" aria-controls="settings-tab" aria-labelledby="ui-id-20" aria-selected="false" aria-expanded="false"><a href="#settings-tab" class="ui-tabs-anchor" role="presentation" tabindex="-1" id="ui-id-20"><i class="icon-settings2 norightmargin"></i></a></li>
+		</ul>
+
+		<div class="tab-container">
+
+			<div class="tab-content clearfix ui-tabs-panel ui-widget-content ui-corner-bottom" id="home-tab" aria-labelledby="ui-id-17" role="tabpanel" aria-hidden="false">
+				<h3>Home</h3>
+				<div class="container">
+					<strong>Name:</strong> {{ request.user.first_name }} {{ request.user.last_name }}<br><br>
+					<strong>Email:</strong> {{ request.user.email }}<br><br>
+					<strong>Number of Projects:</strong> {{ myprojects.count }}<br><br>
+					<strong>Number of Published Projects:</strong> {{ publishedprojects }}
+				</div>
+			</div>
+			<div class="tab-content clearfix ui-tabs-panel ui-widget-content ui-corner-bottom" id="myprojects-tab" aria-labelledby="ui-id-18" role="tabpanel" aria-hidden="true" style="display: none;">
+				<h3>My Projects</h3>
+				<div class="container row">
+					<table class="table table-hover text-left">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Description</th>
+								<th>Owner</th>
+								<th>Contributers</th>
+								<th>Last Edited</th>
+								<th>Published</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for project in myprojects %}
+								<tr>
+									<td><a href="{% url 'divtags:project' project.id %}" >{{ project.name }}</a></td>
+									<td><a href="{% url 'divtags:project' project.id %}" >{{ project.desc }}</a></td>
+									<td><a href="{% url 'divtags:project' project.id %}" >{{ project.owner.first_name }} {{ project.owner.last_name }} ({{ project.owner.username }})</a></td>
+									<td>{% for contributor in project.contributors.all %}<a href="{% url 'divtags:project' project.id %}" >{{ contributor.first_name }} {{ contributor.last_name }} ({{ contributor.username }})<br></a>{% endfor %}</td>
+									<td><a href="{% url 'divtags:project' project.id %}" >{{ project.lastedited }}</a></td>
+									<td><a href="{% url 'divtags:project' project.id %}" >{% if project.ispublished %}<i class="icon-line-circle-check"></i>{% else %}<i class="icon-line-circle-cross"></i>{% endif %}</a></td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="tab-content clearfix ui-tabs-panel ui-widget-content ui-corner-bottom" id="settings-tab" aria-labelledby="ui-id-20" role="tabpanel" aria-hidden="true" style="display: none;">
+				<h3>Settings</h3>
+				<div class="container row">
+					<div class="col-sm-6">
+						<h4>Change Email Address</h4>
+						<form>
+							<p>
+								<strong>Current email address:&nbsp;</strong>
+								<input type="text" name="oldemail" value="{{ request.user.email }}" disabled style="width:250px;"/>
+							</p>
+							<p>
+								<strong>New email address:&nbsp;</strong> 
+								<input type="text" name="newemail" style="width:250px;"/>
+							</p>
+							<button type="submit" class="button button-3d button-teal nobottommargin">Change Email</button>
+						</form>
+					</div>
+					<div class="col-sm-6">
+						<h4>Change password</h4>
+						<form>
+							<p>
+								<strong>Current password:&nbsp;</strong>
+								<input type="text" name="oldpassword"/>
+							</p>
+							<p>
+								<strong>New password:&nbsp;</strong> 
+								<input type="text" name="newpassword"/>
+							</p>
+							<p>
+								<strong>Confirm password:&nbsp;</strong> 
+								<input type="text" name="confpassword"/>
+							</p>
+							<button type="submit" class="button button-3d button-teal nobottommargin">Change Password</button>
+						</form>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+	
+	
+	
+	<div class="clear bottommargin"></div>
+	
+	
+</div>
+{% endblock %}

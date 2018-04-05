@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'divtags.apps.DivtagsConfig',
+    'jsonify',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +64,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'divtags.context_processors.userno_processor',
+                'divtags.context_processors.projectno_processor',
+                'divtags.context_processors.myprojects_processor',
             ],
         },
     },
@@ -75,8 +80,12 @@ WSGI_APPLICATION = 'CS310.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'divtags',
+        'USER': 'postgres',
+        'PASSWORD': 'Tottenh@m1',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -118,3 +127,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+LOGIN_REDIRECT_URL = 'divtags:home'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # During development only

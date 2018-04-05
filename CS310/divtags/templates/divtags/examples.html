@@ -1,0 +1,23 @@
+{% extends "./base.html" %}
+{% load static %}
+{% block content %}
+<div class="content-wrap">
+
+	<div class="container clearfix">
+		<div class="fslider" data-pagi="false" data-animation="fade">
+			<div class="flexslider">
+				<div class="slider-wrap">
+					<div class="slide"><a href="#"><img src="{% static 'divtags/img/examples/1.png' %}" alt="Example 1"></a></div>
+					<div class="slide"><a href="#"><img src="{% static 'divtags/img/examples/2.png' %}" alt="Example 2"></a></div>
+					<div class="slide"><a href="#"><img src="{% static 'divtags/img/examples/3.png' %}" alt="Example 3"></a></div>
+					<div class="slide"><a href="#"><img src="{% static 'divtags/img/examples/4.png' %}" alt="Example 4"></a></div>
+				</div>
+			</div>
+		</div>
+
+		
+		<div class="clear"></div>
+		
+	</div>
+</div>
+{% endblock %}

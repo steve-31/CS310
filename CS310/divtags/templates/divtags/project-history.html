@@ -1,0 +1,85 @@
+{% load static %}
+
+<h1>Application History</h1>
+
+<h3>Current Version</h3>
+<table class="table table-hover text-left" id="current-version-table">
+	<thead>
+		<tr>
+			<th>Version Number</th>
+			<th>Date &amp; Time</th>
+			<th>Deploy This Version?</th>
+		</tr>
+	</thead>
+	<tbody id="current-version-table">
+			<tr>
+				<td>{{ project.currversionno }}.{{ project.curriterationno }}{% if not project.currexperimentalno == None %}.{{ project.currexperimentalno }}{% endif %}</td>
+				<td>{{ project.lastedited }}</td>
+				<td><a href="{% url 'divtags:project_deploy_link' currentversion.id %}" >Deploy</a></td>
+			</tr>
+	</tbody>
+</table>
+
+<h3>Last Deployed Version</h3>
+<div  id="deployed-version-table">
+{% if deployedversion %}
+	<table class="table table-hover text-left">
+		<thead>
+			<tr>
+				<th>Version Number</th>
+				<th>Date &amp; Time</th>
+				<th>Restore To This Version?</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{ deployedversion.versionno }}.{{ deployedversion.iterationno }}</td>
+				<td>{{ project.pubdate }}</td>
+				<td><a href="{% url 'divtags:project_restore' deployedversion.id 0 %}">Restore</a></td>
+			</tr>
+		</tbody>
+	</table>
+{% else %}
+	<p>This application is yet to be published, select a version to publish from the list below</p>
+{% endif %}
+</div>
+
+<h3>Full Version List</h3>
+<table class="table table-hover text-left">
+	<thead>
+		<tr>
+			<th></th>
+			<th>Version Number</th>
+			<th>Date &amp; Time</th>
+			<th>Restore To This Version?</th>
+			<th>Deploy This Version?</th>
+			<th>Branch From This Version?</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody id="version-table">
+		{% for version in projectversions %}
+			<tr>
+				<td id="reveal-button-{{version.id}}" onclick="revealExperimentals({{ version.id }})">{% if version.experimentals.all %}<i id="reveal-arrow-{{version.id}}" class="icon-caret-right" ></i>{% endif %}</td>
+				<td>{{ version.versionno }}.{{ version.iterationno }}</td>
+				<td>{{ version.datetime }}</td>
+				<td><a href="{% url 'divtags:project_restore' version.id 0 %}" >Restore</a></td>
+				<td><a href="{% url 'divtags:project_deploy_link' version.id %}" >Deploy</a></td>
+				<td><a href="{% url 'divtags:project_branch' version.id %}" >Branch</a></td>
+				<td>{% if version.versionno == project.currversionno and version.iterationno == project.curriterationno %}{% else %}<a href="{% url 'divtags:project_version_delete' version.id 0 %}"><i class="icon-trashcan"></i></a>{% endif %}</td>
+			</tr>
+			{% for experimental in version.experimentals.all %}
+				<tr class="experimental-version-{{version.id}}" style="display:none;">
+					<td></td>
+					<td>{{ version.versionno }}.{{ version.iterationno }}.{{ experimental.experimentalno }}</td>
+					<td>{{ experimental.datetime }}</td>
+					<td><a href="{% url 'divtags:project_restore' experimental.id 1 %}" >Restore</a></td>
+					<td></td>
+					<td><a href="{% url 'divtags:project_merge' experimental.id %}" >Merge to {{ version.versionno }}.{{ version.iterationno }}</a></td>
+					<td>{% if version.versionno == project.currversionno and version.iterationno == project.curriterationno and experimental.experimentalno == project.currexperimentalno %}{% else %}<a href="{% url 'divtags:project_version_delete' experimental.id 1 %}"><i class="icon-trashcan"></i></a>{% endif %}</td>
+				</tr>
+			{% endfor %}
+		{% endfor %}
+	</tbody>
+</table>
+
