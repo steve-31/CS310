@@ -37,20 +37,31 @@
 						<li><a href="#" onclick="addContainer(event);"><i class="icon-line-box"></i>&nbsp;Container</a></li>
 						<li><a href="#" onclick="addHeading(event);"><i class="">h</i>&nbsp;Heading</a></li>
 						<li><a href="#" onclick="addParagraph(event);"><i class="lowercase">t </i>&nbsp;Paragraph</a></li>
-						<li><a href="#"><i class="icon-photo"></i>&nbsp;Image</a></li>
+						<li><a href="#" onclick="addMultiQuery(event);"><i class="">?</i>&nbsp;Multiple Result Query</a></li>
+						<li>
+							<a href="#"><i class="icon-photo"></i>&nbsp;Image</a>
+							<ul>
+								<li>
+									<form action="{% url 'divtags:imageUpload' project.id %}" method="post" id="image-upload-form" enctype="multipart/form-data"> {% csrf_token %}
+										<input id="project-image-input" name="project-image" type="file" class="file file-loading" accept="image/*">
+										<button type="submit" class="btn btn-primary" id='image-upload-btn'>Upload</button>
+									</form>
+								</li>
+							</ul>
+						</li>
 						<li>
 							<a href="#"><i class="icon-checkbox-checked"></i>&nbsp;Form</a>
-								<ul>
-									<li><a href="#">Add new object</a>
-										<ul id="form-objects-list-add"></ul>
-									</li>
-									<li><a href="#">Update existing object</a>
-										<ul id="form-objects-list-update"></ul>
-									</li>
-									<li><a href="#">Verify existing object</a>
-										<ul id="form-objects-list-verify"></ul>
-									</li>
-								</ul>
+							<ul>
+								<li><a href="#">Add new object</a>
+									<ul id="form-objects-list-add"></ul>
+								</li>
+								<li><a href="#">Update existing object</a>
+									<ul id="form-objects-list-update"></ul>
+								</li>
+								<li><a href="#">Verify existing object</a>
+									<ul id="form-objects-list-verify"></ul>
+								</li>
+							</ul>
 							
 						</li>
 						<!-- <li><a href="#" onclick="addMenu(event);"><i class="icon-reorder"></i>&nbsp;Menu</a></li> -->
@@ -106,6 +117,37 @@
 <script type="text/javascript" src="{% static 'divtags/js/ajaxSetup.js' %}"></script>
 
 <script type="text/javascript">
+function uploadImage() {
+	var data = new FormData($('#image-upload-form').get(0));
+	
+	$.ajax({
+		url: "{% url 'divtags:imageUpload' project.id %}",
+		type: "POST",
+		data: data,
+		cache: false,
+		processData: false,
+		contentType: false,
+		success: function(json) {
+			undoChangeStack.push(JSON.stringify(tempApplication));
+			
+			var container = document.getElementById("outer-container");
+			console.log(json.image);
+			noOfElements += 1;
+			var divElement = "<div class=\"element\" id=\"" + noOfElements + "\" onclick=\"selectElement(this.id)\" style=\"color:#000000; background-color:rgba(0,0,0,0); padding-top:0px; padding-right:0px; padding-bottom:0px; padding-left:0px; top:100px;\"><img src=\""+ json.image +"\"></img></div>";
+			container.innerHTML += divElement;
+			
+			saveJsonLocal(tempApplication);
+		}
+	});
+}
+
+$(function() {
+    $('#image-upload-form').submit(function() {
+    	event.preventDefault();
+    	uploadImage();
+    });
+});
+
 function uploadLogo() {
 	var data = new FormData($('#logo-upload-form').get(0));
 
@@ -156,6 +198,7 @@ function change_title(event) {
 		type: "POST",
 		data: {"newtitle": newTitle},
 		success: function(json) {
+			tempApplication.name = newTitle;
 			document.getElementById("project-title").innerHTML = newTitle;
 			document.getElementById("project-title-desc").innerHTML = newTitle;
 			document.getElementById("display-project-last-edit").innerHTML = "<i class=\"icon-stopwatch\"></i> "+json.datetime;
@@ -380,7 +423,7 @@ function create_save() {
 	});
 }
 
-$("#deploy-button").on('click', function(event) {
+/* $("#deploy-button").on('click', function(event) {
 	event.preventDefault();
     if ({% if project.currexperimentalno == None %}true{% else %}false{% endif %}){
 	    if (confirm("Are you sure you wish to deploy this version {{project.currversionno}}.{{project.curriterationno}}{% if not project.currexperimentalno == None %}.{{project.currexperimentalno}}{% endif %}?")) {
@@ -389,7 +432,7 @@ $("#deploy-button").on('click', function(event) {
     } else {
     	alert("You may not deploy this version, please merge experimental branch into parent branch before deploying");
     }
-});
+}); */
 function create_deploy() {
     vno = {{ project.currversionno }};
     itno = {{ project.curriterationno }};

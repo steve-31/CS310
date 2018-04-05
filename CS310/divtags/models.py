@@ -8,6 +8,9 @@ from django.contrib.postgres.fields import JSONField
 
 # Create your models here.
 
+class ProjectImage(models.Model):
+    image = models.ImageField(upload_to="img/ProjectImages", null=True)
+
 class Project(models.Model):
     name = models.CharField(max_length=30)
     desc = models.CharField(max_length=300)
@@ -23,6 +26,7 @@ class Project(models.Model):
     pubdate = models.DateTimeField(null=True)
     file = JSONField()
     logo = models.ImageField(upload_to="img/ProjectLogos", null=True)
+    images = models.ManyToManyField(ProjectImage)
     
 class ProjectAttributeType(models.Model):
     name = models.CharField(max_length=50)

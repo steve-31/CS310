@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
+		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.css') }}">
+		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/base-style.css') }}">
+		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+		<title>{{ title }}</title>
+	</head>
+	<body>
+		<div class="user-header" id="user-header">
+			<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
+			<div id="user-logo"><a href="/">{% if url_for('static', filename='img/logo.PNG') %}<img id="project-logo" src="{{ url_for('static', filename='img/logo.PNG') }}">{% else %}<span style="line-height:60px;font-size:30px;">Demo</span>{% endif %}</a></div>
+			<nav id="user-menu">
+				<ul id="user-menu-pages-list">
+				{% if session['username'] %}
+					<li><a href="{{ url_for('Home') }}">Home</a></li>
+					<li><a href="{{ url_for('Bills') }}">Bills</a></li>
+					<li><a href="{{ url_for('History') }}">History</a></li>
+					<li><a href="{{ url_for('logout') }}">Logout</a></li>
+				{% else %}
+					<li><a href="{{ url_for('Register') }}">Register</a></li>
+					<li><a href="{{ url_for('Login') }}">Login</a></li>
+				{% endif %}
+				</ul>
+			</nav>
+		</div>
+		<div class='element-container'>
+<h1 class="element" id="26" onclick="selectElement(this.id)" style="color: rgb(155, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 100px;"><div class="element-text" contenteditable="false">Edit Group</div></h1>
+<form class="element" id="27" method=POST action="{{ url_for('EditGroup') }}" style="color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 180px; left: 20px; width: 310px; height: 200px;">
+	<div class="form-group">
+		<label for="Group-field">Group</label>
+		<select class="form-control" name="Group">
+		{% for option in Group_options %}
+			<option value="{{ option._id }}">{{ option.Name }}</option>
+		{% endfor %}
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="User-field">User</label>
+		<select class="form-control" name="User">
+		{% for option in User_options %}
+			<option value="{{ option._id }}">{{ option.username }}</option>
+		{% endfor %}
+		</select>
+	</div>
+	<button type="submit" class="btn btn-block" style="text-transform:uppercase;">add Group_users</button>
+</form>
+		</div>
+		<script type="text/javascript" src="{{ url_for('static', filename='js/load.js') }}"></script>
+	</body>
+</html>

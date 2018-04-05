@@ -71,7 +71,7 @@ $('document').ready(function(){
     
     function addPage(event) {
     	event.preventDefault();
-    	newpage = {"name": "NewPage", "elements": [], "background": "#ffffff", "permissions": "public", "homepage":"no", "showinheader":"yes", "showallpages":"yes"};
+    	newpage = {"name": "NewPage", "elements": [], "queries": [], "links": [], "pageObject": "none", "multiqueries": [], "forms": [], "background": "#ffffff", "permissions": "public", "homepage":"no", "showinheader":"yes", "showallpages":"yes"};
     	tempApplication['pages'].push(newpage);
     	document.getElementById("project-page-list").innerHTML = "<li id=\"project-page-add\"><a href=\"#\" onclick=\"addPage(event)\" class=\"fixedText\"><i class=\"icon-plus\"></i>&nbsp;Add new page</a></li>";
     	insertPages(tempApplication);
@@ -96,6 +96,13 @@ $('document').ready(function(){
     	document.getElementById("page-dropdown").innerHTML = "Page: &nbsp; " + newPageName + " &nbsp;&nbsp;&nbsp; <i class=\"icon-caret-down\" style=\"float:right;\"></i>";
     	document.getElementById("page-"+pageId).innerHTML = newPageName;
     	addToHeader();
+    	var linklist = document.getElementById("page-link-select");
+    	linklist.innerHTML = "";
+    	for (i in tempApplication.pages) {
+    		if (tempApplication.pages[i].name != "AllPages") {
+    			linklist.innerHTML += "<option value=\""+tempApplication.pages[i].name+"\">"+tempApplication.pages[i].name+"</option>"
+    		}
+    	}
     }
     
     function deletePage(event) {
@@ -141,6 +148,28 @@ $('document').ready(function(){
     	addToHeader();
     }
     
+    $('#page-object-toggle').change(function() {showPageObject();});
+    function showPageObject() {
+    	var pageid = document.getElementById("page-identifier").value;
+    	if (document.getElementById('page-object-toggle').checked) {
+    		document.getElementById('page-object-dropdown').disabled = false;
+    		var objectList = "<option disabled selected value=\"objectReset\">Object</option>";
+        	for (i in tempApplication.objects) {
+        		objectList += "<option value=\""+ tempApplication.objects[i].name + "\">"+ tempApplication.objects[i].name +"</option>";
+        	}
+        	document.getElementById('page-object-dropdown').innerHTML = objectList;
+    	} else {
+    		document.getElementById('page-object-dropdown').disabled = true;
+    		tempApplication.pages[pageid].pageObject = "none";
+    	}
+    }
+    
+    $('#page-object-dropdown').change(function(){
+    	var pageobject = document.getElementById('page-object-dropdown').value;
+    	var pageid = document.getElementById("page-identifier").value;
+    	tempApplication.pages[pageid].pageObject = pageobject;
+    });
+    
     $('#page-header-toggle').change(function() {changeShowInHeader();});
     function changeShowInHeader() {
     	var pageid = document.getElementById("page-identifier").value;
@@ -156,7 +185,9 @@ $('document').ready(function(){
     function changeHomepage() {
     	var pageid = document.getElementById("page-identifier").value;
 		for (i in tempApplication.pages) {
-			tempApplication.pages[i].homepage = "no";
+			if (tempApplication.pages[i].permissions == tempApplication.pages[pageid].permissions) {
+				tempApplication.pages[i].homepage = "no";
+			}
 		}
 		tempApplication.pages[pageid].homepage = "yes";
 		document.getElementById('homepage-toggle').innerHTML = "Homepage Set";

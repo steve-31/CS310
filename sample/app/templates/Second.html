@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
+		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.css') }}">
+		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/base-style.css') }}">
+		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+		<title>{{ title }}</title>
+	</head>
+	<body>
+		<div class="user-header" id="user-header">
+			<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
+			<div id="user-logo"><a href="/"><span style="line-height:60px;font-size:30px;">Demo</span></a></div>
+			<nav id="user-menu">
+				<ul id="user-menu-pages-list">
+				{% if session['username'] %}
+					<li><a href="{{ url_for('Second') }}">Second</a></li>
+					<li><a href="{{ url_for('logout') }}">Logout</a></li>
+				{% else %}
+					<li><a href="{{ url_for('Home') }}">Home</a></li>
+					<li><a href="{{ url_for('Register') }}">Register</a></li>
+					<li><a href="{{ url_for('Login') }}">Login</a></li>
+				{% endif %}
+				</ul>
+			</nav>
+		</div>
+		<div class='element-container'>
+<h1 class="element" id="6" onclick="selectElement(this.id)" style="color: rgb(155, 0, 0); background-color: rgba(0, 0, 0, 0); padding: 0px; top: 100px;"><div class="element-text" contenteditable="true">Welcome&nbsp;{{ query_0 }}</div></h1>
+		</div>
+	</body>
+</html>
