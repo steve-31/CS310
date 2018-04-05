@@ -118,6 +118,10 @@
 	position: absolute;
 }
 
+.element:hover {
+	border: 1px dashed black;
+}
+
 .element-editor {
 	position: absolute;
 	top: 80px;

@@ -572,7 +572,8 @@ def newproject(request):
                     "background":"#ffffff", 
                     "homepage":"yes", 
                     "showinheader":"yes", 
-                    "showallpages":"yes"
+                    "showallpages":"yes", 
+                    "pageObject": "none"
                 }, 
                 {
                     "elements": [
@@ -624,7 +625,8 @@ def newproject(request):
                     "showinheader": "yes", 
                     "background": "#ffffff", 
                     "homepage": "no", 
-                    "permissions": "public"
+                    "permissions": "public",
+                    "pageObject": "none"
                 }, 
                 {
                     "elements": [
@@ -664,7 +666,8 @@ def newproject(request):
                     "showinheader": "yes", 
                     "background": "#ffffff", 
                     "homepage": "no", 
-                    "permissions": "public"
+                    "permissions": "public",
+                    "pageObject": "none"
                 }
             ]
         }
@@ -692,22 +695,22 @@ def previewApplication(request, pid):
     
     ####  IF MONGODB IS NOT RUNNING THEN START THE MONDO DATABASE  ####
     
-    
-    createApp(application)          #creates flask app config file & html files
-    
-    ####  RUN FLASK APP  ####
     for image in project.images.all():
         image_url = image.image.url.split("/")
         image_name = image_url[len(image_url)-1]
         
         subprocess.Popen("copy \"img\\ProjectImages\\"+image_name+"\" \"..\\..\\sample\\app\\static\\img\"", cwd="CS310/media", shell=True)
+    if project.logo:
+        logo_url = project.logo.name.split("/")
+        logo_name = logo_url[len(logo_url)-1]
+        
+        subprocess.Popen("copy \"img\\ProjectLogos\\"+logo_name+"\" \"..\\..\\sample\\app\\static\\img\\logo.PNG\"", cwd="CS310/media", shell=True)
+        
+    createApp(application, project.logo)          #creates flask app config file & html files
     
-    logo_url = project.logo.name.split("/")
-    logo_name = logo_url[len(logo_url)-1]
+    ####  RUN FLASK APP  ####
     
-    subprocess.Popen("copy \"img\\ProjectLogos\\"+logo_name+"\" \"..\\..\\sample\\app\\static\\img\\logo.PNG\"", cwd="CS310/media", shell=True)
-    
-    shutil.make_archive(project.name, 'zip', './sample')
+#     shutil.make_archive(project.name, 'zip', './sample')
     
     
 #     response = HttpResponse(content_type='application/force-download') # mimetype is replaced by content_type for django 1.7

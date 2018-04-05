@@ -96,6 +96,13 @@ $('document').ready(function(){
     	document.getElementById("page-dropdown").innerHTML = "Page: &nbsp; " + newPageName + " &nbsp;&nbsp;&nbsp; <i class=\"icon-caret-down\" style=\"float:right;\"></i>";
     	document.getElementById("page-"+pageId).innerHTML = newPageName;
     	addToHeader();
+    	var linklist = document.getElementById("page-link-select");
+    	linklist.innerHTML = "";
+    	for (i in tempApplication.pages) {
+    		if (tempApplication.pages[i].name != "AllPages") {
+    			linklist.innerHTML += "<option value=\""+tempApplication.pages[i].name+"\">"+tempApplication.pages[i].name+"</option>"
+    		}
+    	}
     }
     
     function deletePage(event) {

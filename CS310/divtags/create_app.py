@@ -3,7 +3,7 @@ from flask_pymongo import PyMongo
 import json
 import re
 
-def createApp(appJson):
+def createApp(appJson, logo):
     g = open('./sample/sample.py', 'w+')
     g.write('from app import app')
     
@@ -32,7 +32,7 @@ def createApp(appJson):
                 f.write('\t\tlogin_user = User.find_one({\'username\' : request.form[\'username\']})\n\n')
                 f.write('\t\tif login_user:\n')
                 f.write('\t\t\tif bcrypt.hashpw(request.form[\'password\'].encode(\'utf-8\'), login_user[\'password\'].encode(\'utf-8\')) == login_user[\'password\'].encode(\'utf-8\'):\n')
-                f.write('\t\t\t\tsession[\'userid\'] = login_user[\'_id\']\n')
+                f.write('\t\t\t\tsession[\'userid\'] = str(login_user[\'_id\'])\n')
                 f.write('\t\t\t\tsession[\'username\'] = login_user[\'username\']\n')
                 f.write('\t\t\t\tsession[\'first_name\'] = login_user[\'first_name\']\n')
                 f.write('\t\t\t\tsession[\'last_name\'] = login_user[\'last_name\']\n')
@@ -56,7 +56,7 @@ def createApp(appJson):
                 f.write('\t\t\thashpass = bcrypt.hashpw(request.form[\'password\'].encode(\'utf-8\'), bcrypt.gensalt())\n')
                 f.write('\t\t\tUser.insert({\'username\': request.form[\'username\'], \'password\': hashpass, \'first_name\': request.form[\'first_name\'], \'last_name\': request.form[\'last_name\'], \'email\': request.form[\'email\']})\n')
                 f.write('\t\t\tlogin_user = User.find_one({\'username\': request.form[\'username\']})\n')
-                f.write('\t\t\tsession[\'userid\'] = login_user[\'_id\']\n')
+                f.write('\t\t\tsession[\'userid\'] = str(login_user[\'_id\'])\n')
                 f.write('\t\t\tsession[\'username\'] = login_user[\'username\']\n')
                 f.write('\t\t\tsession[\'first_name\'] = login_user[\'first_name\']\n')
                 f.write('\t\t\tsession[\'last_name\'] = login_user[\'last_name\']\n')
@@ -170,7 +170,44 @@ def createApp(appJson):
                             f.write("session["+query['query']['comparator'] +"]})\n")
                     context += ", query_"+ str(query['id']) +"=query_"+ str(query['id'])
                 for multiquery in page['multiqueries']:
-                    if multiquery['query']['comparatorType'] == "query":
+                    if not multiquery['query']:
+                        f.write('\t'+multiquery['display']['object']+' = mongo.db.'+multiquery['display']['object']+'\n')
+                        f.write('\tmultiquery_test_'+str(multiquery['id'])+' = '+multiquery['display']['object']+'.find({})')
+                        if not multiquery['orderby'] == "None":
+                            f.write('.sort(\''+multiquery['orderfield']+'\', pymongo.')
+                            if multiquery['orderby'] == "Asc":
+                                f.write('ASCENDING)')
+                            else:
+                                f.write('DESCENDING)')
+                        if not multiquery['limit'] == 0:
+                            f.write('.limit('+multiquery['limit']+')')
+                        f.write('\n')
+                        f.write('\tmultiquery_'+str(multiquery['id'])+' = []\n')
+                        f.write('\tfor mq in multiquery_test_'+str(multiquery['id'])+':\n')
+                        for object in appJson['objects']:
+                            if object['name'] == multiquery['display']['object']:
+                                for multiqueryfield in multiquery['display']['fields']:
+                                    for objectfield in object['attributes']:
+                                        if multiqueryfield['name'] == objectfield['name']:
+                                            if objectfield['type'] == "Reference":
+                                                f.write('\t\t'+objectfield['details']+' = mongo.db.'+objectfield['details']+'\n')
+                                                f.write('\t\tfind_referenced_'+multiqueryfield['name']+' = '+objectfield['details']+'.find_one({\'_id\': ObjectId(str(mq[\''+multiqueryfield['name']+'\']))})\n')
+                                                found_field_name = False
+                                                for object2 in appJson['objects']:
+                                                    if object2['name'] == objectfield['details']:
+                                                        for objectfield2 in object2['attributes']:
+                                                            if objectfield2['name'] == "name" or objectfield2['name'] == "Name" or objectfield2['name'] == "username":
+                                                                f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ objectfield2['name'] +'\']\n')
+                                                                found_field_name = True
+                                                                break
+                                                            if objectfield2['name'] == "desc" or objectfield2['name'] == "Desc" or objectfield2['name'] == "description" or objectfield2['name'] == "Description":
+                                                                f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ objectfield2['name'] +'\']\n')
+                                                                found_field_name = True
+                                                                break
+                                                        if not found_field_name:
+                                                            f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ object['name'] +'\'] + \' \' + find_referenced_group[\'_id\']\n')
+                        f.write('\t\tmultiquery_'+str(multiquery['id'])+'.append(mq)\n')
+                    elif multiquery['query']['comparatorType'] == "query":
                         f.write('\t'+multiquery['query']['comparator']['query']['object']+' = mongo.db.'+multiquery['query']['comparator']['query']['object']+'\n')
                         f.write('\tnestedquery_'+str(multiquery['id'])+' = '+ multiquery['query']['comparator']['query']['object']+'.find({')
                         if multiquery['query']['comparator']['query']['field'] == "primary_key":
@@ -265,6 +302,7 @@ def createApp(appJson):
                                     for objectfield in object['attributes']:
                                         if multiqueryfield['name'] == objectfield['name']:
                                             if objectfield['type'] == "Reference":
+                                                f.write('\t\t'+objectfield['details']+' = mongo.db.'+objectfield['details']+'\n')
                                                 f.write('\t\tfind_referenced_'+multiqueryfield['name']+' = '+objectfield['details']+'.find_one({\'_id\': ObjectId(str(mq[\''+multiqueryfield['name']+'\']))})\n')
                                                 found_field_name = False
                                                 for object2 in appJson['objects']:
@@ -290,11 +328,12 @@ def createApp(appJson):
                             context += ", "+ field['label'] +"_options="+ field['label'] +"_options"
                 f.write('\treturn render_template(\''+ page['name'] +'.html\', title=\''+ page['name'] +'\''+ context +')\n\n')
             
-            createHTMLPage(appJson, page)
+            createHTMLPage(appJson, page, logo)
     
     f.write('@app.route(\'/logout\')\n')
     f.write('def logout():\n')
     f.write('\tsession.pop(\'username\', None)\n')
+    f.write('\tsession.pop(\'userid\', None)\n')
     f.write('\tsession.pop(\'first_name\', None)\n')
     f.write('\tsession.pop(\'last_name\', None)\n')
     f.write('\tsession.pop(\'email\', None)\n')
@@ -312,7 +351,7 @@ def createApp(appJson):
         
 
 
-def createHTMLPage(appJson, page):
+def createHTMLPage(appJson, page, logo):
     homepage = None
     h = open('./sample/app/templates/'+ page['name'] +'.html', 'w+')
     c = open('./sample/app/static/css/style.css', 'w+')
@@ -325,7 +364,10 @@ def createHTMLPage(appJson, page):
         if not testhome['name'] == "AllPages": 
             if testhome['homepage'] == "yes":
                 homepage = testhome
-    h.write('\t\t\t<div id="user-logo"><a href="/">{% if url_for(\'static\', filename=\'img/logo.PNG\') %}<img id="project-logo" src="{{ url_for(\'static\', filename=\'img/logo.PNG\') }}">{% else %}<span style="line-height:60px;font-size:30px;">'+ appJson['name'] +'</span>{% endif %}</a></div>\n')
+    if logo:
+        h.write('\t\t\t<div id="user-logo"><a href="/"><img id="project-logo" src="{{ url_for(\'static\', filename=\'img/logo.PNG\') }}"></a></div>\n')
+    else:
+        h.write('\t\t\t<div id="user-logo"><a href="/"><span style="line-height:60px;font-size:30px;">'+ appJson['name'] +'</span></a></div>\n')
     h.write('\t\t\t<nav id="user-menu">\n')
     h.write('\t\t\t\t<ul id="user-menu-pages-list">\n')
     h.write('\t\t\t\t{% if session[\'username\'] %}\n')
@@ -376,6 +418,8 @@ def createHTMLPage(appJson, page):
                             h.write('\t\t<input type="text" class="form-control" name="'+ field['label'] +'">\n')
                     elif field['type'] == "Number":
                         h.write('\t\t<input type="number" class="form-control" name="'+ field['label'] +'">\n')
+                    elif field['type'] == "Date":
+                        h.write('\t\t<input type="date" class="form-control" name="'+ field['label'] +'">\n')
                     elif field['type'] == "Reference":
                         h.write('\t\t<select class="form-control" name="'+ field['label'] +'">\n')
                         h.write('\t\t{% for option in '+field['label']+'_options %}\n')

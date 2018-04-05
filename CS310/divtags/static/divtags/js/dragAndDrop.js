@@ -292,7 +292,21 @@ $('#add-multi-query-btn').click(function(){
 		displayFieldsJson.push({"name": displayFields[i]})
 	}
 	var multiQueryJson;
-	if (document.getElementById("multi-query-comparator-select-dropdown").value == "query") {
+	if (!document.getElementById("multi-query-field-dropdown")) {
+		multiQueryJson = {
+				"id": noOfElements,
+				"display": {
+					"object": document.getElementById("multi-query-object-dropdown").value,
+					"fields": displayFieldsJson
+				},
+				"query": false,
+				"limit": document.getElementById("query-limit").value,
+				"orderfield": document.getElementById("query-order-by-field").value,
+				"orderby": document.getElementById("query-order-by").value,
+				"link": document.getElementById("query-link-page").value,
+				"headings": document.getElementById("query-display-headings").value
+		};
+	} else if (document.getElementById("multi-query-comparator-select-dropdown").value == "query") {
 		multiQueryJson = {
 				"id": noOfElements,
 				"display": {
@@ -799,7 +813,7 @@ function insertPages(jsonInput) {
 			list.appendChild(newListItem);
 			
 			
-			linklist.innerHTML += "<option value=\""+jsonInput.pages[i].name+"\">"+jsonInput.pages[i].name+"</option>"
+			linklist.innerHTML += "<option value=\""+jsonInput.pages[i].name+"\">"+jsonInput.pages[i].name+"</option>";
 		}
 	}
 }
