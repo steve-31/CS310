@@ -400,7 +400,7 @@ $('#add-multi-query-btn').click(function(){
 	saveJsonLocal(tempApplication);
 });
 
-$('#object-query-add-constraint-btn').click(function(){
+$('#object-multi-query-add-constraint-btn').click(function(){
 	var pageId = document.getElementById("page-identifier").value;
 	var selectedObjectName = document.getElementById("multi-query-object-dropdown").value;
 	var fieldList = "<option disabled selected value=\"fieldReset\">Field</option>";

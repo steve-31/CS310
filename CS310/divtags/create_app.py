@@ -103,7 +103,7 @@ def createApp(appJson, logo):
                                 for element in details:
                                     if re.match(r'[0-9]+', element):
                                         f.write(' '+element)
-                                    elif re.match(r'[*+/\-mod]', element):
+                                    elif re.match(r'[*+\/\-mod]', element):
                                         if re.match(r'mod', element):
                                             f.write(' %')
                                         else:
@@ -170,7 +170,7 @@ def createApp(appJson, logo):
                             f.write("session["+query['query']['comparator'] +"]})\n")
                     context += ", query_"+ str(query['id']) +"=query_"+ str(query['id'])
                 for multiquery in page['multiqueries']:
-                    if not multiquery['query']:
+                    if not multiquery['query']:     #No constraints
                         f.write('\t'+multiquery['display']['object']+' = mongo.db.'+multiquery['display']['object']+'\n')
                         f.write('\tmultiquery_test_'+str(multiquery['id'])+' = '+multiquery['display']['object']+'.find({})')
                         if not multiquery['orderby'] == "None":
@@ -179,7 +179,7 @@ def createApp(appJson, logo):
                                 f.write('ASCENDING)')
                             else:
                                 f.write('DESCENDING)')
-                        if not multiquery['limit'] == 0:
+                        if not int(multiquery['limit']) == 0:
                             f.write('.limit('+multiquery['limit']+')')
                         f.write('\n')
                         f.write('\tmultiquery_'+str(multiquery['id'])+' = []\n')
@@ -207,7 +207,7 @@ def createApp(appJson, logo):
                                                         if not found_field_name:
                                                             f.write('\t\tmq[\''+multiqueryfield['name']+'\'] = find_referenced_'+multiqueryfield['name']+'[\''+ object['name'] +'\'] + \' \' + find_referenced_group[\'_id\']\n')
                         f.write('\t\tmultiquery_'+str(multiquery['id'])+'.append(mq)\n')
-                    elif multiquery['query']['comparatorType'] == "query":
+                    elif multiquery['query']['comparatorType'] == "query":          #Nested query
                         f.write('\t'+multiquery['query']['comparator']['query']['object']+' = mongo.db.'+multiquery['query']['comparator']['query']['object']+'\n')
                         f.write('\tnestedquery_'+str(multiquery['id'])+' = '+ multiquery['query']['comparator']['query']['object']+'.find({')
                         if multiquery['query']['comparator']['query']['field'] == "primary_key":
@@ -270,7 +270,7 @@ def createApp(appJson, logo):
                                 f.write('\tmultiquery_'+str(multiquery['id'])+'.reverse()\n')
                         if not int(multiquery['limit']) == 0:
                             f.write('\tmultiquery_'+str(multiquery['id'])+' = multiquery_'+str(multiquery['id'])+'[0:'+multiquery['limit']+']\n')
-                    else:
+                    else:           #General query not nested
                         f.write('\t'+multiquery['query']['object']+' = mongo.db.'+multiquery['query']['object']+'\n')
                         f.write('\tmultiquery_test_'+str(multiquery['id'])+' = '+multiquery['query']['object']+'.find({\''+multiquery['query']['field']+'\': ')
                         if multiquery['query']['comparatorType'] == "value":
